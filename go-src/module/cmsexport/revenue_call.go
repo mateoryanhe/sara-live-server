@@ -21,18 +21,18 @@ func exportLiveRevenueLogCSV(ctx context.Context, cmsUserId uint64, payload json
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibilityForUser(cmsUserId)
+	if vis.Empty {
 		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 			return 0, nil
 		}, onProgress)
 	}
 	receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
+	scope := liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
-			ReceiverIds:   receiverIds,
-			GuildIds:      guildIds,
-			FilterByGuild: restrict,
+			ReceiverIds:  receiverIds,
+			Visibility:   scope,
 			LiveRecordId:  parseUint64Filter(req.LiveRecordId),
 			Keyword:       req.Keyword,
 			RevenueType:   req.RevenueType,
@@ -55,19 +55,19 @@ func exportVideoCallLogCSV(ctx context.Context, cmsUserId uint64, payload json.R
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibilityForUser(cmsUserId)
+	if vis.Empty {
 		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 			return 0, nil
 		}, onProgress)
 	}
+	scope := liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 		total, rows := calldao.CallOrderCMSList(&calldao.CallOrderCMSListFilter{
-			CallerId:      parseUint64Filter(req.CallerId),
-			ReceiverIds:   receiverIds,
-			GuildIds:      guildIds,
-			FilterByGuild: restrict,
+			CallerId:     parseUint64Filter(req.CallerId),
+			ReceiverIds:  receiverIds,
+			Visibility:   scope,
 			Keyword:       req.Keyword,
 			CostFilter:    req.CostFilter,
 			Source:        req.Source,

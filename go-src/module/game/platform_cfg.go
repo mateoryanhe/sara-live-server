@@ -35,10 +35,11 @@ func SaveGamePlatformCfg(_ context.Context, req *gameplatformdto.SaveGamePlatfor
 
 	existing := cfgdao.GetGamePlatformCfgFromMemory()
 	row := &entity.GamePlatformCfg{
-		VendorUrl: vendorUrl,
-		Token:     token,
-		SecretKey: secretKey,
-		IconUrl:   strings.TrimRight(strings.TrimSpace(req.IconUrl), "/"),
+		VendorUrl:                  vendorUrl,
+		Token:                      token,
+		SecretKey:                  secretKey,
+		IconUrl:                    strings.TrimRight(strings.TrimSpace(req.IconUrl), "/"),
+		RequireRechargeForGameList: req.RequireRechargeForGameList,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -69,13 +70,14 @@ func toGamePlatformCfgItem(cfg *entity.GamePlatformCfg) *gameplatformdto.GamePla
 		return nil
 	}
 	return &gameplatformdto.GamePlatformCfgItem{
-		ID:        strconv.FormatUint(cfg.ID, 10),
-		VendorUrl: GetVendorUrl(cfg),
-		Token:     cfg.Token,
-		SecretKey: cfg.SecretKey,
-		IconUrl:   cfg.IconUrl,
-		CreatedAt: formatGamePlatformCfgTime(cfg.CreatedAt),
-		UpdatedAt: formatGamePlatformCfgTime(cfg.UpdatedAt),
+		ID:                         strconv.FormatUint(cfg.ID, 10),
+		VendorUrl:                  GetVendorUrl(cfg),
+		Token:                      cfg.Token,
+		SecretKey:                  cfg.SecretKey,
+		IconUrl:                    cfg.IconUrl,
+		RequireRechargeForGameList: cfg.RequireRechargeForGameList,
+		CreatedAt:                  formatGamePlatformCfgTime(cfg.CreatedAt),
+		UpdatedAt:                  formatGamePlatformCfgTime(cfg.UpdatedAt),
 	}
 }
 

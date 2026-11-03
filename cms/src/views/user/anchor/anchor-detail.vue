@@ -41,7 +41,20 @@
                 <div class="detail-section-title">{{ t('pages.anchorList.profileSection') }}</div>
                 <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                   <el-descriptions-item :label="t('common.phone')">{{ detail.anchor?.phone || '-' }}</el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.anchor?.guildId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.anchorList.guildName')">
+                    <el-button
+                        v-if="hasGuild(detail.anchor?.guildId) && canViewGuildDetail"
+                        link
+                        type="primary"
+                        @click="openGuildDetail(detail.anchor?.guildId)"
+                    >
+                      {{ formatGuildLinkLabel(detail.anchor?.guildName, detail.anchor?.guildId) }}
+                    </el-button>
+                    <span v-else-if="hasGuild(detail.anchor?.guildId)">
+                      {{ formatGuildLinkLabel(detail.anchor?.guildName, detail.anchor?.guildId) }}
+                    </span>
+                    <span v-else>-</span>
+                  </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.anchorList.loginIp')">{{ detail.anchor?.ip || '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.anchorList.registeredAt')">{{ formatDate(detail.anchor?.registeredAt) }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.anchorList.profileUpdatedAt')">{{ formatDate(detail.anchor?.createdAt) }}</el-descriptions-item>
@@ -95,7 +108,20 @@
                 <div class="detail-section-title">{{ t('pages.anchorList.liveRoomProfileSection') }}</div>
                 <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                   <el-descriptions-item :label="t('pages.anchorList.liveRoom')">{{ detail.liveRoom.id || '-' }}</el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.liveRoom.guildId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.anchorList.guildName')">
+                    <el-button
+                        v-if="hasGuild(detail.liveRoom.guildId) && canViewGuildDetail"
+                        link
+                        type="primary"
+                        @click="openGuildDetail(detail.liveRoom.guildId)"
+                    >
+                      {{ formatGuildLinkLabel(detail.anchor?.guildName, detail.liveRoom.guildId) }}
+                    </el-button>
+                    <span v-else-if="hasGuild(detail.liveRoom.guildId)">
+                      {{ formatGuildLinkLabel(detail.anchor?.guildName, detail.liveRoom.guildId) }}
+                    </span>
+                    <span v-else>-</span>
+                  </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.anchorList.roomTitle')">{{ detail.liveRoom.title || '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.anchorList.roomNotice')" :span="3">
                     <span class="long-text">{{ detail.liveRoom.notice || '-' }}</span>
@@ -285,6 +311,7 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 const {t} = useI18n()
 const {can} = usePagePermission('AnchorDetail')
 const canViewShortVideo = computed(() => can('shortVideo'))
+const canViewGuildDetail = computed(() => can('viewGuildDetail'))
 const route = useRoute()
 const router = useRouter()
 
@@ -346,6 +373,38 @@ const pageTitle = computed(() => {
 
 const detailLabelWidth = 170
 const avatarPlaceholder = computed(() => String(detail.value?.anchor?.nickname || '?').trim().slice(0, 1).toUpperCase())
+
+const hasGuild = (guildId: string | number | undefined) => {
+  if (guildId == null || guildId === '') {
+    return false
+  }
+  return Number(guildId) !== 0
+}
+
+const formatGuildLinkLabel = (guildName: string | undefined, guildId: string | number | undefined) => {
+  const name = (guildName || '').trim()
+  const id = guildId == null || guildId === '' ? '' : String(guildId)
+  if (name && id) {
+    return `${name} (${id})`
+  }
+  if (name) {
+    return name
+  }
+  if (id) {
+    return id
+  }
+  return '-'
+}
+
+const openGuildDetail = (guildId: string | number | undefined) => {
+  if (!hasGuild(guildId)) {
+    return
+  }
+  router.push({
+    name: 'GuildDetail',
+    query: {id: String(guildId)},
+  })
+}
 
 const anchorTypeLabel = (userType?: number) => {
   if (userType === USER_TYPE_SENIOR_ANCHOR) return t('pages.anchorList.anchorTypeSenior')

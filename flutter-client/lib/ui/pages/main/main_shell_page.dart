@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sara_live_app/app/app_scope.dart';
+import 'package:sara_live_app/core/bus/app_bus_event.dart';
 import 'package:sara_live_app/l10n/app_localizations.dart';
 import 'package:sara_live_app/l10n/locale_controller.dart';
 import 'package:sara_live_app/ui/pages/main/anchor_main_shell_tabs.dart';
@@ -135,7 +136,10 @@ class _MainShellPageState extends State<MainShellPage> {
         expand: false,
         child: NavigationBar(
           selectedIndex: index,
-          onDestinationSelected: (i) => setState(() => _index = i),
+          onDestinationSelected: (i) {
+            setState(() => _index = i);
+            widget.scope.appBus.publish(ShellTabFocusBusEvent(tabs[i].id));
+          },
           destinations: [for (final tab in tabs) tab.toDestination()],
         ),
       ),

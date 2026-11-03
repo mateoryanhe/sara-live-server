@@ -1,7 +1,7 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
-  pageDesc: '按 UTC 分钟聚合：进房(秀场/游戏/语聊)、离房(已有 Leave 事件)、送礼成功、公屏文字+付费弹幕、游戏下注、1v1 发起、充值下单。syndb 入库，保留约 3 天，每日 0 点清理过期桶。',
+  pageDesc: '按 UTC 分钟聚合：进房(秀场/游戏/语聊)、离房、送礼、聊天、游戏下注、1v1 发起(直播间/1v1房间/私信等全 source)、1v1 成功连线、1v1 成功消费、充值下单。syndb 入库，保留约 3 天。',
   chartTitle: '用户事件',
   chartTitleLast3Days: '用户事件（最近3天）',
   chartHint: '按 UTC 分钟聚合，服务端仅保留最近 3 天；点数按比例铺满 X 轴（点多会压缩，点少会拉开）。',
@@ -12,12 +12,14 @@ const zh = {
   gift: '送礼',
   chat: '聊天',
   bet: '游戏下注',
-  call1v1: '1v1发起',
+  call1v1: '1v1发起(全来源)',
+  call1v1ConnectSuccess: '1v1成功连线',
+  call1v1Consume: '1v1成功消费',
   rechargeOrder: '充值下单',
 }
 
 export const trackingMinuteLiveActivityMessages = definePageMessagesFromEn(zh, {
-  pageDesc: 'UTC minute buckets: join (showcase/game/voice), leave (existing leave events), paid gifts, chat+paid danmaku, game bets, 1v1 initiate, recharge orders. syndb, ~3d retention, daily cleanup.',
+  pageDesc: 'UTC minute buckets: join (showcase/game/voice), leave, gifts, chat+paid danmaku, game bets, 1v1 initiate, 1v1 connect success, 1v1 billing success, recharge orders. syndb, ~3d retention, daily cleanup.',
   chartTitle: 'User events',
   chartTitleLast3Days: 'User events (last 3 days)',
   chartHint: 'UTC minute buckets; server keeps the last 3 days. Points fill the X-axis (compress when dense).',
@@ -28,6 +30,8 @@ export const trackingMinuteLiveActivityMessages = definePageMessagesFromEn(zh, {
   gift: 'Gift',
   chat: 'Chat',
   bet: 'Game bet',
-  call1v1: '1v1 initiate',
+  call1v1: '1v1 initiate (all sources)',
+  call1v1ConnectSuccess: '1v1 connect success',
+  call1v1Consume: '1v1 billing success',
   rechargeOrder: 'Recharge order',
 })

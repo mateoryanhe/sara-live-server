@@ -5,10 +5,11 @@ import '../app/server_endpoint_store.dart';
 import '../core/bus/app_bus_event.dart';
 import '../core/http/api_exception.dart';
 import '../core/ws/push_cmd.dart';
+import '../core/ws/ws_client.dart';
 import '../ui/contracts/mine_ui.dart';
 
 /// 「我的」：资料、VIP 摘要、改昵称/头像、退出。
-/// 自行订阅 [AppBus]：VIP 推送 / WS 重连后静默刷新 UI。
+/// 自行订阅 [AppBus]（与 [UserRepository] 并列，同 cmd 各做各的 UI）。
 class MineViewModel {
   MineViewModel({
     required AppScope scope,
@@ -31,13 +32,75 @@ class MineViewModel {
   }
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent) return;
-    switch (event.cmd) {
-      case PushCmd.vipLevel:
-      case PushCmd.wsConnected:
-        unawaited(load(forceRefresh: true, silent: true));
-        break;
+    switch (event) {
+      case AppLifecycleBusEvent(:final kind):
+        if (kind == AppLifecycleKind.resumed) {
+          unawaited(_refreshWalletUiSilent());
+        }
+      case ShellTabFocusBusEvent(:final tabId):
+        if (tabId == 'mine') {
+          unawaited(_refreshWalletUiSilent());
+        }
+      case WsConnectionBusEvent(:final state):
+        if (state == WsConnectionState.connected) {
+          unawaited(_refreshUiAfterWsOnline());
+        }
+      case WsBusEvent(:final cmd, :final data):
+        switch (cmd) {
+          case PushCmd.vipLevel:
+            unawaited(load(forceRefresh: true, silent: true));
+          case PushCmd.diamond:
+          case PushCmd.gold:
+          case PushCmd.rechargeSuccess:
+            unawaited(
+              _renderProfileAfterWalletPush(
+                WsBusEvent(cmd: cmd, data: data),
+              ),
+            );
+          default:
+            break;
+        }
     }
+  }
+
+  Future<void> _refreshWalletUiSilent() async {
+    final userId = _userId;
+    if (userId == null || userId <= 0) return;
+    final profile =
+        await _scope.userRepository.refreshWalletFromServer(userId);
+    if (profile != null) {
+      _ui.renderProfile(profile);
+    }
+  }
+
+  Future<void> _refreshUiAfterWsOnline() async {
+    await _refreshWalletUiSilent();
+    final userId = _userId;
+    if (userId == null || userId <= 0) return;
+    try {
+      final vip = await _scope.vipRepository.getVipDetail(
+        userId: userId,
+        forceRefresh: true,
+      );
+      _ui.renderVipDetail(vip);
+    } catch (_) {}
+  }
+
+  Future<void> _renderProfileAfterWalletPush(WsBusEvent event) async {
+    final userId = _userId;
+    if (userId == null || userId <= 0) return;
+    try {
+      final profile = await _scope.userRepository.applyWalletBalancePush(
+        userId: userId,
+        cmd: event.cmd,
+        data: event.data,
+      );
+      if (profile != null) {
+        _ui.renderProfile(profile);
+        return;
+      }
+    } catch (_) {}
+    await load(forceRefresh: true, silent: true);
   }
 
   Future<void> load({bool forceRefresh = false, bool silent = false}) async {

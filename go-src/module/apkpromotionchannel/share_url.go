@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"strings"
 
-	"xr-game-server/core/cfg"
-	"xr-game-server/dto/officialsitedeploydto"
+	"xr-game-server/dto/channeldownloadlandingdeploydto"
+	"xr-game-server/module/channeldownloadlandingdeploy"
 )
 
 const (
@@ -14,33 +14,30 @@ const (
 	ApkChannelShortPathPattern = "/{channelCode}"
 	// ApkChannelLegacyShortPathPattern 旧版短链(兼容): /dl/apk/{channelCode}
 	ApkChannelLegacyShortPathPattern = "/dl/apk/{channelCode}"
+	// ApkChannelPublicDownloadPath 渠道落地页免登录上报: GET ?ch=渠道码 → 302 APK
+	ApkChannelPublicDownloadPath = "/apkPromotionChannel/download"
 )
 
-// ShareShortLinkBaseHost 短链域名(通常与官网同域,网关转发到 Go).
+// ChannelDownloadQueryParam 落地页渠道码 query 参数(优先 ch).
+const ChannelDownloadQueryParam = "ch"
+
+// ShareShortLinkBaseHost 推广短链域名(渠道下载落地页站点).
 func ShareShortLinkBaseHost() string {
-	return strings.TrimSpace(cfg.GetStaticSiteDomain(officialsitedeploydto.OfficialSiteStaticPrefix))
+	return channeldownloadlandingdeploy.ShareBaseHost()
 }
 
-// OfficialSiteShareBaseHost CMS 短链预览域名.
+// OfficialSiteShareBaseHost CMS 列表 shareBaseHost 字段(历史命名,实为落地页域名).
 func OfficialSiteShareBaseHost() string {
 	return ShareShortLinkBaseHost()
 }
 
-// BuildChannelShortURL 渠道最短短链: https://{官网域名}/{渠道码}
+// BuildChannelShortURL 推广短链: https://{落地页域名}/channel-download/?ch={渠道码}
 func BuildChannelShortURL(channelCode string) string {
 	code, ok := normalizeChannelCode(channelCode)
 	if !ok {
 		return ""
 	}
-	domain := ShareShortLinkBaseHost()
-	if domain == "" {
-		return ""
-	}
-	return (&url.URL{
-		Scheme: "https",
-		Host:   domain,
-		Path:   "/" + url.PathEscape(code),
-	}).String()
+	return channeldownloadlandingdeploy.BuildShareURL(code)
 }
 
 // ResolveChannelApkDownloadURL 短链 302 目标:只读内存缓存,不查库.
@@ -61,10 +58,21 @@ func ParseChannelCodeFromRequest(raw string) (string, bool) {
 	return normalizeChannelCode(decoded)
 }
 
+// ParseChannelCodeFromQuery 落地页 query: ch / channelCode / channel_code.
+func ParseChannelCodeFromQuery(ch, channelCode, channelCodeSnake string) (string, bool) {
+	for _, raw := range []string{ch, channelCode, channelCodeSnake} {
+		if code, ok := ParseChannelCodeFromRequest(raw); ok {
+			return code, true
+		}
+	}
+	return "", false
+}
+
 func FormatShortLinkPath(channelCode string) string {
 	code, ok := normalizeChannelCode(channelCode)
 	if !ok {
 		return ""
 	}
-	return fmt.Sprintf("/%s", url.PathEscape(code))
+	prefix := strings.TrimSuffix(channeldownloadlandingdeploydto.ChannelDownloadLandingStaticPrefix, "/")
+	return fmt.Sprintf("%s/?%s=%s", prefix, ChannelDownloadQueryParam, url.QueryEscape(code))
 }

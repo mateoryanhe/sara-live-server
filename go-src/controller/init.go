@@ -129,6 +129,7 @@ func Init() {
 	initMessageAppController()                       // 私信(App)
 	initUploadController()                           // CMS文件上传
 	initH5LiveDeployCMSController()                  // H5直播静态资源部署(CMS)
+	initChannelDownloadLandingDeployCMSController() // 渠道下载落地页静态资源部署(CMS)
 	initCoinMerchantDeployCMSController()            // 币商H5静态资源部署(CMS)
 	initCountryFlagDeployCMSController()             // 国旗资源部署(CMS)
 	initThirdPayDeployCMSController()                // 第三方支付静态资源部署(CMS)

@@ -14,8 +14,7 @@ import (
 type RevenueLogCMSListFilter struct {
 	ReceiverId    uint64
 	ReceiverIds   []uint64
-	GuildIds      []uint64
-	FilterByGuild bool
+	Visibility CMSAnchorRoomVisibilityScope
 	LiveRecordId  uint64
 	Keyword       string
 	RevenueType   uint8
@@ -49,7 +48,7 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 	if f == nil {
 		return 0, list
 	}
-	if f.FilterByGuild && len(f.GuildIds) == 0 {
+	if f.Visibility.IsEmptyScope() {
 		return 0, list
 	}
 	if f.PageIndex <= 0 {
@@ -60,7 +59,7 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 	}
 	ctx := gctx.New()
 	keyword := strings.TrimSpace(f.Keyword)
-	needAlias := keyword != "" || f.FilterByGuild
+	needAlias := keyword != "" || f.Visibility.Apply
 	colPrefix := ""
 	var m = g.Model(string(entity.TbLiveRevenueLog)).Ctx(ctx)
 	if needAlias {
@@ -72,10 +71,7 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 				LeftJoin(string(userentity.TbUserInfo)+" u_send", "u_send.id = rl."+string(entity.LiveRevenueLogSenderId)).
 				Where("(CAST(rl.id AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogLiveRecordId)+" AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogRoomId)+" AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogSenderId)+" AS CHAR) LIKE ? OR u_recv."+string(userentity.UserInfoNickname)+" LIKE ? OR u_send."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like, like, like, like)
 		}
-		if f.FilterByGuild {
-			m = m.InnerJoin(string(entity.TbLiveRoom)+" r", "r.id = rl."+string(entity.LiveRevenueLogRoomId)).
-				WhereIn("r."+string(entity.LiveRoomGuildId), f.GuildIds)
-		}
+		m = applyCMSAnchorRoomVisibility(m, "rl."+string(entity.LiveRevenueLogRoomId), f.Visibility)
 	}
 	if receiverIds := f.receiverIds(); len(receiverIds) > 0 {
 		m = m.Where(colPrefix+string(entity.LiveRevenueLogRoomId)+" IN (?)", receiverIds)

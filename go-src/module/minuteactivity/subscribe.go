@@ -39,11 +39,42 @@ func onShowcaseLeave(data any) {
 }
 
 func onCall1v1Initiate(data any) {
-	ev, ok := data.(*gameevent.Call1v1InitiateTrackingEventData)
-	if !ok || ev == nil || ev.CallerId == 0 || ev.AnchorId == 0 || ev.CallerId == ev.AnchorId {
+	scheduleCall1v1InitiateMetric(data)
+}
+
+func onCall1v1RoomCall(data any) {
+	scheduleCall1v1InitiateMetric(data)
+}
+
+func scheduleCall1v1InitiateMetric(data any) {
+	switch ev := data.(type) {
+	case *gameevent.Call1v1InitiateTrackingEventData:
+		if ev == nil || ev.CallerId == 0 || ev.AnchorId == 0 || ev.CallerId == ev.AnchorId {
+			return
+		}
+		schedule(metricCall1v1, ev.StatAt)
+	case *gameevent.Call1v1RoomTrackingEventData:
+		if ev == nil || ev.CallerId == 0 || ev.AnchorId == 0 || ev.CallerId == ev.AnchorId {
+			return
+		}
+		schedule(metricCall1v1, ev.StatAt)
+	}
+}
+
+func onCall1v1ConnectSuccess(data any) {
+	ev, ok := data.(*gameevent.Call1v1ConnectSuccessTrackingEventData)
+	if !ok || ev == nil || ev.CallerId == 0 || ev.ReceiverId == 0 || ev.CallerId == ev.ReceiverId {
 		return
 	}
-	schedule(metricCall1v1, ev.StatAt)
+	schedule(metricCall1v1ConnectSuccess, ev.StatAt)
+}
+
+func onCall1v1BillingSuccess(data any) {
+	ev, ok := data.(*gameevent.Call1v1BillingSuccessTrackingEventData)
+	if !ok || ev == nil || ev.OrderId == 0 {
+		return
+	}
+	schedule(metricCall1v1Consume, ev.StatAt)
 }
 
 func onGameBet(data any) {

@@ -151,6 +151,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'PlatformAnchorList:batchResetUnsettledIncome': '/account/batchResetPlatformAnchorUnsettledIncome',
 
     AnchorDetail: '/account/getAnchorDetail',
+    'AnchorDetail:viewGuildDetail': '/guild/getGuildDetail',
     'AnchorDetail:dailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',
     'AnchorDetail:exportDailyEffectiveLive': '/cmsExport/submitJob',
     'AnchorDetail:liveRecord': '/liveRecord/cmsLiveRecordList',
@@ -782,6 +783,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'H5LiveDeployManagement:view': '/h5LiveDeploy/getH5LiveDeployInfo',
     'H5LiveDeployManagement:save': '/h5LiveDeploy/saveH5LiveDeployCfg',
     'H5LiveDeployManagement:deploy': '/h5LiveDeploy/deployZip',
+    ChannelDownloadLandingDeployManagement: '/channelDownloadLandingDeploy/getChannelDownloadLandingDeployInfo',
+    'ChannelDownloadLandingDeployManagement:view': '/channelDownloadLandingDeploy/getChannelDownloadLandingDeployInfo',
+    'ChannelDownloadLandingDeployManagement:save': '/channelDownloadLandingDeploy/saveChannelDownloadLandingDeployCfg',
+    'ChannelDownloadLandingDeployManagement:deploy': '/channelDownloadLandingDeploy/deployZip',
 
     CoinMerchantDeployManagement: '/coinMerchantDeploy/getCoinMerchantDeployInfo',
     'CoinMerchantDeployManagement:view': '/coinMerchantDeploy/getCoinMerchantDeployInfo',

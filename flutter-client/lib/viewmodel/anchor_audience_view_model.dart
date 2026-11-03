@@ -4,6 +4,7 @@ import '../app/app_scope.dart';
 import '../core/bus/app_bus_event.dart';
 import '../core/http/api_exception.dart';
 import '../core/ws/push_cmd.dart';
+import '../core/ws/ws_client.dart';
 import '../data/live_room/live_room_models.dart';
 import '../ui/contracts/anchor_audience_ui.dart';
 
@@ -35,16 +36,22 @@ class AnchorAudienceViewModel {
   }
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent) return;
-    if (event.cmd == PushCmd.wsConnected ||
-        event.cmd == PushCmd.liveRoomAudienceListRefresh) {
-      final anchorId = _anchorId;
-      if (anchorId == null) return;
-      if (event.cmd == PushCmd.liveRoomAudienceListRefresh) {
-        final roomId = _roomIdFromPush(event.data);
+    switch (event) {
+      case WsConnectionBusEvent(:final state):
+        if (state == WsConnectionState.connected) {
+          unawaited(refresh(silent: true));
+        }
+      case WsBusEvent(:final cmd, :final data):
+        if (cmd != PushCmd.liveRoomAudienceListRefresh) {
+          return;
+        }
+        final anchorId = _anchorId;
+        if (anchorId == null) return;
+        final roomId = _roomIdFromPush(data);
         if (roomId != null && roomId != anchorId) return;
-      }
-      unawaited(refresh(silent: true));
+        unawaited(refresh(silent: true));
+      default:
+        break;
     }
   }
 

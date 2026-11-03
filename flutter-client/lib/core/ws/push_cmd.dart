@@ -11,6 +11,9 @@ abstract final class PushCmd {
   /// VIP 等级变更：`{vipLevel, levelName}`
   static const vipLevel = 12;
 
+  /// 充值到账（载荷含 `goldBalance` 余额）
+  static const rechargeSuccess = 40;
+
   /// 视频通话请求（推送给接听方）
   static const callRequest = 25;
   static const callRejected = 26;
@@ -23,6 +26,10 @@ abstract final class PushCmd {
   static const liveRoomAudienceListRefresh = 24;
   static const liveRoomStopLive = 23;
 
-  /// 本机：WS 已连接（含首次与重连），供缓存失效 / ViewModel HTTP 补偿。
+  /// 付费弹幕（公屏）
+  static const liveRoomPaidDanmaku = 22;
+
+  /// 本机：WS 已连接（**已废弃**，请订阅 [WsConnectionBusEvent] `connected`）。
+  @Deprecated('Subscribe to WsConnectionBusEvent(WsConnectionState.connected)')
   static const wsConnected = -100;
 }

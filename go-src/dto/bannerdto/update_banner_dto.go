@@ -11,6 +11,7 @@ type UpdateBannerReq struct {
 	Scene     uint8  `json:"scene" v:"required|in:1,2#展示场景不能为空|展示场景无效" dc:"展示场景(1首页,2直播间)"`
 	Direction uint8  `json:"direction" v:"required|in:1,2,3,4#展示位置不能为空|展示位置无效" dc:"展示位置(1首页顶部,2首页中部,3首页底部,4直播大厅)"`
 	Sort      int    `json:"sort" dc:"排序值(越大越靠前)"`
+	ExcludePackageNames string `json:"excludePackageNames" v:"max-length:1024#排除包名最长1024字符" dc:"排除App包名(逗号/换行分隔,命中则不展示)"`
 }
 
 type UpdateBannerRes struct {

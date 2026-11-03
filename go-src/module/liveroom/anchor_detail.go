@@ -22,6 +22,7 @@ func QueryAnchorDetail(_ context.Context, req *accountdto.GetAnchorDetailReq) (*
 	if anchor == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	fillAnchorListGuildNames([]*accountdto.AnchorListItem{anchor})
 	var oneToOneRoom *accountdto.AnchorOneToOneRoomDetailItem
 	if row := liveroomdao.GetOneToOneRoom(room.ID); row != nil {
 		oneToOneRoom = toAnchorOneToOneRoomDetailItem(row)

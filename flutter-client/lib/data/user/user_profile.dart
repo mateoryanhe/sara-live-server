@@ -47,13 +47,15 @@ class UserProfile {
   UserProfile copyWith({
     String? nickname,
     String? avatar,
+    double? gold,
+    double? diamond,
   }) {
     return UserProfile(
       userId: userId,
       nickname: nickname ?? this.nickname,
       avatar: avatar ?? this.avatar,
-      gold: gold,
-      diamond: diamond,
+      gold: gold ?? this.gold,
+      diamond: diamond ?? this.diamond,
       shareCode: shareCode,
       vipLevel: vipLevel,
       isAnchor: isAnchor,

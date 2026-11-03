@@ -76,17 +76,17 @@ func exportLiveDailyEffectiveLiveCSV(ctx context.Context, cmsUserId uint64, payl
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibilityForUser(cmsUserId)
+	if vis.Empty {
 		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 			return 0, nil
 		}, onProgress)
 	}
+	scope := liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
 			RoomIds:       liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-			GuildIds:      guildIds,
-			FilterByGuild: restrict,
+			Visibility:    scope,
 			LiveDateStart: req.LiveDateStart,
 			LiveDateEnd:   req.LiveDateEnd,
 			Keyword:       req.Keyword,
@@ -194,8 +194,7 @@ func exportLiveDailyEffectiveLiveByGuildZIP(ctx context.Context, cmsUserId uint6
 	grandTotal := 0
 	for _, guildId := range guildIds {
 		total, _ := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
-			GuildIds:      []uint64{guildId},
-			FilterByGuild: true,
+			Visibility: liveroomdao.CMSAnchorRoomVisibilityScope{Apply: true, GuildIds: []uint64{guildId}},
 			LiveDateStart: req.LiveDateStart,
 			LiveDateEnd:   req.LiveDateEnd,
 			Keyword:       req.Keyword,
@@ -274,8 +273,7 @@ func exportLiveDailyEffectiveLiveByGuildZIP(ctx context.Context, cmsUserId uint6
 			default:
 			}
 			total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
-				GuildIds:      []uint64{guildId},
-				FilterByGuild: true,
+				Visibility: liveroomdao.CMSAnchorRoomVisibilityScope{Apply: true, GuildIds: []uint64{guildId}},
 				LiveDateStart: req.LiveDateStart,
 				LiveDateEnd:   req.LiveDateEnd,
 				Keyword:       req.Keyword,
@@ -330,18 +328,18 @@ func exportLiveWeeklyUnsettledLiveCSV(ctx context.Context, cmsUserId uint64, pay
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibilityForUser(cmsUserId)
+	if vis.Empty {
 		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 			return 0, nil
 		}, onProgress)
 	}
 	weekStart, weekEnd := xrtime.WeekDateRange(time.Now())
+	scope := liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
 			RoomIds:       liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-			GuildIds:      guildIds,
-			FilterByGuild: restrict,
+			Visibility:    scope,
 			LiveDateStart: weekStart,
 			LiveDateEnd:   weekEnd,
 			Keyword:       req.Keyword,

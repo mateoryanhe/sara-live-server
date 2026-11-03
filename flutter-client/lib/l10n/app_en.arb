@@ -77,6 +77,8 @@
   "liveHotListTitle": "Live now",
   "liveHotListEmpty": "No live rooms right now",
   "liveBadgeOnAir": "LIVE",
+  "liveFollowAnchor": "Follow",
+  "liveFollowingAnchor": "Following",
   "liveOnlineCount": "{count} watching",
   "@liveOnlineCount": {
     "placeholders": {
@@ -84,6 +86,7 @@
     }
   },
   "liveChatHint": "Say something…",
+  "liveChatGiftAction": "Sent",
   "liveSendGift": "Send gift",
   "liveGiftListEmpty": "No gifts available",
   "liveAnchorEnded": "The host ended the live stream",

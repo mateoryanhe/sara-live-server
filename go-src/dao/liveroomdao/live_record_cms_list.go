@@ -14,8 +14,7 @@ import (
 // LiveRecordCMSListFilter CMS直播记录查询条件
 type LiveRecordCMSListFilter struct {
 	AnchorIds     []uint64
-	GuildIds      []uint64
-	FilterByGuild bool // true 时仅返回 GuildIds 对应工会(空则无数据)
+	Visibility CMSAnchorRoomVisibilityScope
 	LiveRecordId  uint64
 	Keyword       string
 	StartTime     int64
@@ -85,7 +84,7 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	if f == nil {
 		return 0, list
 	}
-	if f.FilterByGuild && len(f.GuildIds) == 0 {
+	if f.Visibility.IsEmptyScope() {
 		return 0, list
 	}
 	if f.PageIndex <= 0 {
@@ -96,7 +95,7 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	}
 	ctx := gctx.New()
 	keyword := strings.TrimSpace(f.Keyword)
-	needAlias := keyword != "" || f.FilterByGuild
+	needAlias := keyword != "" || f.Visibility.Apply
 	colPrefix := ""
 	var m = g.Model(string(entity.TbLiveRecord)).Ctx(ctx)
 	if needAlias {
@@ -107,10 +106,7 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 			m = m.LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = lr."+string(entity.LiveRecordAnchorId)).
 				Where("(CAST(lr.id AS CHAR) LIKE ? OR CAST(lr."+string(entity.LiveRecordAnchorId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
 		}
-		if f.FilterByGuild {
-			m = m.InnerJoin(string(entity.TbLiveRoom)+" r", "r.id = lr."+string(entity.LiveRecordAnchorId)).
-				WhereIn("r."+string(entity.LiveRoomGuildId), f.GuildIds)
-		}
+		m = applyCMSAnchorRoomVisibility(m, "lr."+string(entity.LiveRecordAnchorId), f.Visibility)
 	}
 	if anchorIds := f.anchorIds(); len(anchorIds) > 0 {
 		m = m.Where(colPrefix+string(entity.LiveRecordAnchorId)+" IN (?)", anchorIds)

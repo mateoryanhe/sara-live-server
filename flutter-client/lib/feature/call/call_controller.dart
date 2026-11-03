@@ -311,11 +311,16 @@ class CallController extends ChangeNotifier {
 
   void _startHeart() {
     _heartTimer?.cancel();
+    unawaited(_pulseCallHeart());
     _heartTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      final id = orderId;
-      if (id == null || phase != CallPhase.inCall) return;
-      unawaited(_api.callHeart(orderId: id).catchError((_) {}));
+      unawaited(_pulseCallHeart());
     });
+  }
+
+  Future<void> _pulseCallHeart() async {
+    final id = orderId;
+    if (id == null || phase != CallPhase.inCall) return;
+    await _api.callHeart(orderId: id).catchError((_) {});
   }
 
   void _stopConfirmLoop() {

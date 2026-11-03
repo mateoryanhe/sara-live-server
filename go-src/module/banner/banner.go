@@ -3,6 +3,7 @@ package banner
 import (
 	"context"
 	"strconv"
+	"strings"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/bannerdto"
@@ -20,9 +21,11 @@ func GetBannerList(_ context.Context, req *bannerdto.BannerListReq) (*httpserver
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
 
-func GetAppBannerList(_ context.Context, req *bannerdto.AppBannerListReq) (*bannerdto.AppBannerListRes, error) {
+func GetAppBannerList(ctx context.Context, req *bannerdto.AppBannerListReq) (*bannerdto.AppBannerListRes, error) {
 	scene := normalizeBannerScene(req.Scene)
-	return &bannerdto.AppBannerListRes{List: getAppBannerList(scene)}, nil
+	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
+	list := filterAppBannerListByPackage(getAppBannerList(scene), packageName)
+	return &bannerdto.AppBannerListRes{List: list}, nil
 }
 
 func normalizeBannerScene(scene uint8) uint8 {
@@ -48,13 +51,14 @@ func CreateBanner(_ context.Context, req *bannerdto.CreateBannerReq) (*bannerdto
 	}
 	scene := normalizeBannerScene(req.Scene)
 	row := &entity.HomeBanner{
-		Title:     req.Title,
-		Image:     req.Image,
-		Link:      req.Link,
-		Scene:     scene,
-		Direction: normalizeBannerDirection(scene, req.Direction),
-		Sort:      req.Sort,
-		Status:    entity.HomeBannerStatusOffShelf,
+		Title:               req.Title,
+		Image:               req.Image,
+		Link:                req.Link,
+		Scene:               scene,
+		Direction:           normalizeBannerDirection(scene, req.Direction),
+		Sort:                req.Sort,
+		Status:              entity.HomeBannerStatusOffShelf,
+		ExcludePackageNames: normalizeExcludePackageNames(req.ExcludePackageNames),
 	}
 	if err := cfgdao.CreateBanner(row); err != nil {
 		return nil, err
@@ -77,6 +81,7 @@ func UpdateBanner(_ context.Context, req *bannerdto.UpdateBannerReq) (*bannerdto
 	row.Scene = normalizeBannerScene(req.Scene)
 	row.Direction = normalizeBannerDirection(row.Scene, req.Direction)
 	row.Sort = req.Sort
+	row.ExcludePackageNames = normalizeExcludePackageNames(req.ExcludePackageNames)
 	if err := cfgdao.UpdateBanner(row); err != nil {
 		return nil, err
 	}

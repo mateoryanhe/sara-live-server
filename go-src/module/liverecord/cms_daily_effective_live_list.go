@@ -16,15 +16,14 @@ import (
 
 // GetCMSDailyEffectiveLiveList CMS分页查询每日流水
 func GetCMSDailyEffectiveLiveList(ctx context.Context, req *liverecorddto.CMSDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibility(ctx)
+	if vis.Empty {
 		return httpserver.NewCMSQueryResp(0, []*liverecorddto.CMSDailyEffectiveLiveItem{}), nil
 	}
 	roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds)
 	total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
 		RoomIds:       roomIds,
-		GuildIds:      guildIds,
-		FilterByGuild: restrict,
+		Visibility:    liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds),
 		LiveDateStart: req.LiveDateStart,
 		LiveDateEnd:   req.LiveDateEnd,
 		Keyword:       req.Keyword,

@@ -15,6 +15,7 @@ import 'package:sara_live_app/l10n/locale_picker.dart';
 import 'package:sara_live_app/ui/theme/app_themes.dart';
 import 'package:sara_live_app/ui/theme/theme_controller.dart';
 import 'package:sara_live_app/ui/theme/ui_style_picker.dart';
+import 'package:sara_live_app/ui/pages/mine/mine_wallet_vip_row.dart';
 import 'package:sara_live_app/ui/widgets/app_page_frame.dart';
 import 'package:sara_live_app/viewmodel/mine_view_model.dart';
 
@@ -313,13 +314,14 @@ class _MinePageState extends State<MinePage> implements MineUi {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: _WalletStrip(
+                    child: MineWalletVipRow(
                       l10n: l10n,
                       gold: _fmt(p.gold),
                       diamond: _fmt(p.diamond),
-                      follow: '${p.followCount}',
-                      fans: '${p.followerCount}',
+                      vipLevelFallback: p.vipLevel,
+                      vip: _vip,
                       hideGoldDiamond: p.isAnchor,
+                      onVipTap: () => context.push(AppRoutes.vip),
                     ),
                   ),
                 ),
@@ -343,19 +345,6 @@ class _MinePageState extends State<MinePage> implements MineUi {
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
-                          _InfoTile(
-                            icon: Icons.workspace_premium_outlined,
-                            title: l10n.vipTitle,
-                            value: _vip?.mineTitleValue ?? 'Lv.${p.vipLevel}',
-                            subtitle: _vip?.mineSummary,
-                            trailingIcon: Icons.chevron_right_rounded,
-                            onTap: () => context.push(AppRoutes.vip),
-                          ),
-                          Divider(
-                            height: 1,
-                            indent: 56,
-                            color: cs.onSurface.withValues(alpha: 0.06),
-                          ),
                           _InfoTile(
                             icon: Icons.qr_code_2_rounded,
                             title: l10n.inviteCodeTitle,
@@ -712,97 +701,6 @@ class _Chip extends StatelessWidget {
             const SizedBox(width: 6),
             Icon(trailing, size: 14, color: color.withValues(alpha: 0.85)),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _WalletStrip extends StatelessWidget {
-  const _WalletStrip({
-    required this.l10n,
-    required this.gold,
-    required this.diamond,
-    required this.follow,
-    required this.fans,
-    this.hideGoldDiamond = false,
-  });
-
-  final AppLocalizations l10n;
-  final String gold;
-  final String diamond;
-  final String follow;
-  final String fans;
-  final bool hideGoldDiamond;
-
-  @override
-  Widget build(BuildContext context) {
-    final metrics = <Widget>[
-      if (!hideGoldDiamond) ...[
-        _Metric(
-          label: l10n.walletGold,
-          value: gold,
-          icon: Icons.monetization_on_outlined,
-        ),
-        _Metric(
-          label: l10n.walletDiamond,
-          value: diamond,
-          icon: Icons.diamond_outlined,
-        ),
-      ],
-      _Metric(
-        label: l10n.walletFollow,
-        value: follow,
-        icon: Icons.person_add_alt_1_outlined,
-      ),
-      _Metric(
-        label: l10n.walletFans,
-        value: fans,
-        icon: Icons.groups_outlined,
-      ),
-    ];
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        child: Row(children: metrics),
-      ),
-    );
-  }
-}
-
-class _Metric extends StatelessWidget {
-  const _Metric({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, size: 18, color: cs.primary.withValues(alpha: 0.9)),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: cs.onSurface.withValues(alpha: 0.55),
-            ),
-          ),
         ],
       ),
     );

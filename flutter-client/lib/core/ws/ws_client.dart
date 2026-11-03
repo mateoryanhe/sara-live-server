@@ -7,8 +7,14 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../http/auth_token.dart';
 import 'push_message.dart';
 import 'ws_config.dart';
+import 'ws_logger.dart';
 
 enum WsConnectionState { disconnected, connecting, connected }
+
+typedef WsStateHandler = void Function(
+  WsConnectionState state, {
+  required bool manualDisconnect,
+});
 
 /// 对齐 Go `/ws`：query 鉴权；下行多为 JSON 数组的 Binary/Text 帧。
 class WsClient {
@@ -23,7 +29,7 @@ class WsClient {
   final WsConfig config;
   final AuthTokenProvider _tokenProvider;
   final PushHandler? onMessages;
-  final void Function(WsConnectionState state)? onState;
+  final WsStateHandler? onState;
   final void Function(Object error, StackTrace st)? onError;
 
   WebSocketChannel? _channel;
@@ -64,10 +70,11 @@ class WsClient {
       _channel = channel;
       await channel.ready;
       _reconnectAttempt = 0;
-      _setState(WsConnectionState.connected);
+      _setState(WsConnectionState.connected, connectUri: uri);
       _sub = channel.stream.listen(
         _onData,
         onError: (Object e, StackTrace st) {
+          unawaited(WsLogger.logError(phase: 'stream', error: e, stackTrace: st));
           onError?.call(e, st);
           _scheduleReconnect();
         },
@@ -81,6 +88,7 @@ class WsClient {
         cancelOnError: true,
       );
     } catch (e, st) {
+      unawaited(WsLogger.logError(phase: 'connect', error: e, stackTrace: st));
       onError?.call(e, st);
       _scheduleReconnect();
     }
@@ -97,9 +105,11 @@ class WsClient {
         list = PushMessage.parseFrame(raw);
       }
       for (final msg in list) {
+        unawaited(WsLogger.logPush(cmd: msg.cmd, data: msg.data));
         onMessages?.call(msg);
       }
     } catch (e, st) {
+      unawaited(WsLogger.logError(phase: 'parse', error: e, stackTrace: st));
       onError?.call(e, st);
     }
   }
@@ -112,6 +122,14 @@ class WsClient {
     _reconnectTimer?.cancel();
     final delay = _backoff();
     _reconnectAttempt++;
+    unawaited(
+      WsLogger.logConnection(
+        state: WsConnectionState.disconnected.name,
+        reconnectAttempt: _reconnectAttempt,
+        reconnectIn: delay,
+        note: _manualClose ? 'manual close' : 'will reconnect',
+      ),
+    );
     _reconnectTimer = Timer(delay, () {
       if (!_manualClose) {
         unawaited(_open());
@@ -137,12 +155,25 @@ class WsClient {
     _channel = null;
   }
 
-  void _setState(WsConnectionState next) {
+  void _setState(WsConnectionState next, {Uri? connectUri}) {
     if (_state == next) {
       return;
     }
     _state = next;
-    onState?.call(next);
+    unawaited(
+      WsLogger.logConnection(
+        state: next.name,
+        uri: connectUri,
+        note: next == WsConnectionState.disconnected && _manualClose
+            ? 'manual disconnect'
+            : null,
+      ),
+    );
+    onState?.call(
+      next,
+      manualDisconnect:
+          next == WsConnectionState.disconnected && _manualClose,
+    );
   }
 
   /// 预留：若服务端要求客户端上行心跳，可在此发送。

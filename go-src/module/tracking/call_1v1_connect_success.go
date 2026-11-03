@@ -4,11 +4,9 @@ import (
 	"context"
 	"time"
 
-	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/trackingdto"
 	callentity "xr-game-server/entity/call"
-	liveentity "xr-game-server/entity/live"
 	statentity "xr-game-server/entity/stat"
 )
 
@@ -22,17 +20,8 @@ const (
 )
 
 func recordCall1v1ConnectSuccess(source, callType uint8, callerId, receiverId uint64, at time.Time) {
-	if callType != callentity.CallOrderTypeVideo || callerId == 0 || receiverId == 0 {
-		return
-	}
-	switch source {
-	case callentity.CallOrderSourceOneToOneRoom:
-	case callentity.CallOrderSourceLiveRoom:
-		cfg := liveroomdao.GetLiveRoomCfg(receiverId)
-		if cfg == nil || cfg.Category != liveentity.LiveRoomCategoryHot {
-			return
-		}
-	default:
+	_ = source
+	if callType != callentity.CallOrderTypeVideo || callerId == 0 || receiverId == 0 || callerId == receiverId {
 		return
 	}
 	if at.IsZero() {

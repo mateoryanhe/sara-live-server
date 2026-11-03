@@ -121,8 +121,7 @@ func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (
 // DailyAnchorEffectiveLiveCMSMultiListFilter CMS多主播每日流水查询条件
 type DailyAnchorEffectiveLiveCMSMultiListFilter struct {
 	RoomIds       []uint64
-	GuildIds      []uint64
-	FilterByGuild bool
+	Visibility CMSAnchorRoomVisibilityScope
 	LiveDateStart string
 	LiveDateEnd   string
 	Keyword       string
@@ -137,7 +136,7 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 	if f == nil {
 		return 0, list
 	}
-	if f.FilterByGuild && len(f.GuildIds) == 0 {
+	if f.Visibility.IsEmptyScope() {
 		return 0, list
 	}
 	if f.PageIndex <= 0 {
@@ -148,7 +147,7 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 	}
 	ctx := gctx.New()
 	keyword := strings.TrimSpace(f.Keyword)
-	needAlias := keyword != "" || f.FilterByGuild
+	needAlias := keyword != "" || f.Visibility.Apply
 	colPrefix := ""
 	var m = g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx)
 	if needAlias {
@@ -159,10 +158,7 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 			m = m.LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = d."+string(entity.DailyAnchorEffectiveLiveRoomId)).
 				Where("(d.id LIKE ? OR CAST(d."+string(entity.DailyAnchorEffectiveLiveRoomId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
 		}
-		if f.FilterByGuild {
-			m = m.InnerJoin(string(entity.TbLiveRoom)+" r", "r.id = d."+string(entity.DailyAnchorEffectiveLiveRoomId)).
-				WhereIn("r."+string(entity.LiveRoomGuildId), f.GuildIds)
-		}
+		m = applyCMSAnchorRoomVisibility(m, "d."+string(entity.DailyAnchorEffectiveLiveRoomId), f.Visibility)
 	}
 	if len(f.RoomIds) > 0 {
 		m = m.Where(colPrefix+string(entity.DailyAnchorEffectiveLiveRoomId)+" IN (?)", f.RoomIds)

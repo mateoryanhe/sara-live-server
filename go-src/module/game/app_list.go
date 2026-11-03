@@ -3,6 +3,9 @@ package game
 import (
 	"context"
 
+	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/cfgdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/entity/game"
 )
@@ -13,11 +16,19 @@ const (
 )
 
 // GetAppGameList App 端分页查询已上架游戏(读 game_cfgs 永久缓存).
-func GetAppGameList(_ context.Context, req *gameplatformdto.AppGameListReq) (*gameplatformdto.AppGameListRes, error) {
+func GetAppGameList(ctx context.Context, req *gameplatformdto.AppGameListReq) (*gameplatformdto.AppGameListRes, error) {
 	pageIndex, pageSize := normalizeAppGameListPage(0, 0)
 	if req != nil {
 		pageIndex, pageSize = normalizeAppGameListPage(req.PageIndex, req.PageSize)
 	}
+
+	if cfgdao.GameListRequireRechargeFromMemory() {
+		userId := httpserver.GetAuthId(ctx)
+		if !userinfodao.UserAccountFirstRechargeDone(userId) {
+			return emptyAppGameListRes(pageIndex, pageSize), nil
+		}
+	}
+
 	all := GetAllOnShelfGamesFromMemory()
 	total := len(all)
 	start, end := appGameListPageRange(total, pageIndex, pageSize)
@@ -35,6 +46,15 @@ func GetAppGameList(_ context.Context, req *gameplatformdto.AppGameListReq) (*ga
 		PageSize:  pageSize,
 		List:      list,
 	}, nil
+}
+
+func emptyAppGameListRes(pageIndex, pageSize int) *gameplatformdto.AppGameListRes {
+	return &gameplatformdto.AppGameListRes{
+		Total:     0,
+		PageIndex: pageIndex,
+		PageSize:  pageSize,
+		List:      []*gameplatformdto.AppGameListItem{},
+	}
 }
 
 func toAppGameListItem(row *entity.GameCfg) *gameplatformdto.AppGameListItem {

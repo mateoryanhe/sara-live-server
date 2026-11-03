@@ -153,6 +153,7 @@ const menu = {
   ExtraDomainMappingManagement: '域名映射',
   HostTlsMappingManagement: 'Host证书映射',
   H5LiveDeployManagement: 'H5直播部署',
+  ChannelDownloadLandingDeployManagement: '渠道下载落地页',
   CoinMerchantDeployManagement: '经销商H5部署',
   CountryFlagDeployManagement: '国旗资源部署',
   ThirdPayDeployManagement: '第三方支付部署',

@@ -675,7 +675,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
+            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ChannelDownloadLandingDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
             index="/frontend-module">
           <template #title>
             <el-icon>
@@ -760,7 +760,7 @@ const hasMenuPermission = (moduleName: string) => {
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement')"
+              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ChannelDownloadLandingDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement')"
               index="/frontend-module/deploy">
             <template #title>
               <el-icon>
@@ -773,6 +773,12 @@ const hasMenuPermission = (moduleName: string) => {
                 <UploadFilled/>
               </el-icon>
               <span>{{ t('menu.H5LiveDeployManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('ChannelDownloadLandingDeployManagement')" index="/config/channel-download-landing-deploy">
+              <el-icon>
+                <UploadFilled/>
+              </el-icon>
+              <span>{{ t('menu.ChannelDownloadLandingDeployManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('CoinMerchantDeployManagement')" index="/config/coin-merchant-deploy">
               <el-icon>

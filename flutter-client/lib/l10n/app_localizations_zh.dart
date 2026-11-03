@@ -208,12 +208,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get liveBadgeOnAir => '直播中';
 
   @override
+  String get liveFollowAnchor => '关注';
+
+  @override
+  String get liveFollowingAnchor => '已关注';
+
+  @override
   String liveOnlineCount(int count) {
     return '$count 人在看';
   }
 
   @override
   String get liveChatHint => '说点什么…';
+
+  @override
+  String get liveChatGiftAction => '送出';
 
   @override
   String get liveSendGift => '送礼物';

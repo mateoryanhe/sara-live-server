@@ -11,6 +11,11 @@ class HttpLogger {
   static bool _initialized = false;
 
   static Future<void> init() async {
+    await ensureInitialized();
+  }
+
+  /// Shared with [WsLogger] (same sink / dart-define switches).
+  static Future<void> ensureInitialized() async {
     if (!HttpLogSettings.enabled || _initialized) return;
     _initialized = true;
     await initHttpLogSink(

@@ -4,6 +4,7 @@ import '../app/app_scope.dart';
 import '../core/bus/app_bus_event.dart';
 import '../core/http/api_exception.dart';
 import '../core/ws/push_cmd.dart';
+import '../core/ws/ws_client.dart';
 import '../data/vip/vip_models.dart';
 import '../ui/contracts/vip_ui.dart';
 
@@ -30,12 +31,18 @@ class VipViewModel {
   }
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent) return;
-    switch (event.cmd) {
-      case PushCmd.vipLevel:
-      case PushCmd.wsConnected:
-        onPushRefresh?.call();
-        unawaited(load(forceRefresh: true, silent: true));
+    switch (event) {
+      case WsConnectionBusEvent(:final state):
+        if (state == WsConnectionState.connected) {
+          onPushRefresh?.call();
+          unawaited(load(forceRefresh: true, silent: true));
+        }
+      case WsBusEvent(:final cmd):
+        if (cmd == PushCmd.vipLevel) {
+          onPushRefresh?.call();
+          unawaited(load(forceRefresh: true, silent: true));
+        }
+      default:
         break;
     }
   }

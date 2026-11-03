@@ -1,5 +1,6 @@
 import type {AxiosProgressEvent} from 'axios'
 import {request} from '../request'
+import {APK_UPLOAD_TIMEOUT_MS} from '../constants/apk-upload-timeout'
 
 export interface StaticSiteDeployInfo {
     domain: string
@@ -110,7 +111,7 @@ export const officialSiteDeployApi: StaticSiteDeployApi = {
             '/officialSiteDeploy/uploadFileChunk',
             formData,
             {
-                timeout: 120_000,
+                timeout: APK_UPLOAD_TIMEOUT_MS,
                 headers: {
                     'X-Upload-Id': uploadId,
                     'X-Chunk-Index': String(chunkIndex),
@@ -127,7 +128,7 @@ export const officialSiteDeployApi: StaticSiteDeployApi = {
     completeFileUpload: (uploadId) => request.post<CompleteStaticSiteFileUploadRes>(
         '/officialSiteDeploy/completeFileUpload',
         {uploadId},
-        {timeout: 0},
+        {timeout: APK_UPLOAD_TIMEOUT_MS},
     ),
     abortFileUpload: (uploadId) => request.post<void>(
         '/officialSiteDeploy/abortFileUpload',
@@ -160,7 +161,7 @@ export const thirdPayOfficialSiteDeployApi: StaticSiteDeployApi = {
             '/thirdPayOfficialSiteDeploy/uploadFileChunk',
             formData,
             {
-                timeout: 120_000,
+                timeout: APK_UPLOAD_TIMEOUT_MS,
                 headers: {
                     'X-Upload-Id': uploadId,
                     'X-Chunk-Index': String(chunkIndex),
@@ -177,7 +178,7 @@ export const thirdPayOfficialSiteDeployApi: StaticSiteDeployApi = {
     completeFileUpload: (uploadId) => request.post<CompleteStaticSiteFileUploadRes>(
         '/thirdPayOfficialSiteDeploy/completeFileUpload',
         {uploadId},
-        {timeout: 0},
+        {timeout: APK_UPLOAD_TIMEOUT_MS},
     ),
     abortFileUpload: (uploadId) => request.post<void>(
         '/thirdPayOfficialSiteDeploy/abortFileUpload',
@@ -230,7 +231,7 @@ export const sofieOfficialSiteDeployApi: StaticSiteDeployApi = {
             '/sofieOfficialSiteDeploy/uploadFileChunk',
             formData,
             {
-                timeout: 120_000,
+                timeout: APK_UPLOAD_TIMEOUT_MS,
                 headers: {
                     'X-Upload-Id': uploadId,
                     'X-Chunk-Index': String(chunkIndex),
@@ -247,7 +248,7 @@ export const sofieOfficialSiteDeployApi: StaticSiteDeployApi = {
     completeFileUpload: (uploadId) => request.post<CompleteStaticSiteFileUploadRes>(
         '/sofieOfficialSiteDeploy/completeFileUpload',
         {uploadId},
-        {timeout: 0},
+        {timeout: APK_UPLOAD_TIMEOUT_MS},
     ),
     abortFileUpload: (uploadId) => request.post<void>(
         '/sofieOfficialSiteDeploy/abortFileUpload',

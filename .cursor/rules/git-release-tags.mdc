@@ -1,0 +1,32 @@
+---
+description: Git 发版 tag 命名 vYYYY.MM.DD；用户要求 commit/push/tag 时使用
+alwaysApply: true
+---
+
+# Git 发版 Tag 命名
+
+## 格式（本仓库约定，2026-10-30 起）
+
+- **使用**：`v` + 四位年 + `.` + 两位月 + `.` + 两位日  
+- **示例**：`v2026.10.30`（对应 2026-10-30 发版/打 tag 日）
+- **不要用**旧式短 tag（如 `10-30`、`10-26`），除非用户明确要求兼容历史。
+
+## 创建与推送
+
+用户要求 **commit & push & tag** 或 **新加 tag** 时：
+
+1. 按用户 Git 协议完成 commit / push（勿擅自 force-push）。
+2. 创建 **annotated tag**（推荐）：
+   - 名称：`vYYYY.MM.DD`（以**当天日期**为准，除非用户指定别的日期）。
+   - 说明：一行发版摘要（可与 commit 主题一致或略扩）。
+3. 推送：`git push origin <tagname>`（或 `git push origin --tags` 若用户要求全部 tag）。
+
+```powershell
+git tag -a v2026.10.30 -m "Release 2026-10-30: 简要说明"
+git push origin v2026.10.30
+```
+
+## 注意
+
+- 同一天多次 tag：先与用户确认后缀（如 `v2026.10.30.2` 或带时间），勿覆盖已 push 的 tag。
+- 历史 remote 上已有的 `M-D` 短 tag **保留**，新 tag 一律 `vYYYY.MM.DD`。

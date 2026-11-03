@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/apkpromotionchanneldto"
 	"xr-game-server/module/apkpromotionchannel"
 	"xr-game-server/module/officialsitedeploy"
+	"xr-game-server/module/shareappdownload"
 	"xr-game-server/module/stat"
 )
 
@@ -66,14 +67,61 @@ func (c *ApkPromotionChannelCMSController) ApkPromotionChannelDailyStatList(ctx 
 }
 
 func initApkPromotionChannelShortLinkHandler() {
+	// 渠道落地页: GET ?ch= 上报并 302(免登录,不走 H5 加解密)
+	httpserver.RegNonAuthGETHandler(apkpromotionchannel.ApkChannelPublicDownloadPath, handleApkPromotionChannelDownloadByQuery)
 	// 先注册旧路径兼容;根路径 /{channelCode} 仅对已注册渠道 302(见 handler).
 	httpserver.RegNonAuthGETHandler(apkpromotionchannel.ApkChannelLegacyShortPathPattern, handleApkPromotionChannelShortRedirect)
 	httpserver.RegNonAuthGETHandler(apkpromotionchannel.ApkChannelShortPathPattern, handleApkPromotionChannelShortRedirect)
 }
 
+func handleApkPromotionChannelDownloadByQuery(r *ghttp.Request) {
+	code, ok := apkpromotionchannel.ParseChannelCodeFromQuery(
+		r.GetQuery(apkpromotionchannel.ChannelDownloadQueryParam).String(),
+		r.GetQuery("channelCode").String(),
+		r.GetQuery("channel_code").String(),
+	)
+	if !ok {
+		redirectOfficialSiteApkOrNotFound(r)
+		return
+	}
+	apkPromotionChannelDownloadRedirectWithOfficialFallback(r, code)
+}
+
 func handleApkPromotionChannelShortRedirect(r *ghttp.Request) {
 	code, ok := apkpromotionchannel.ParseChannelCodeFromRequest(r.Get("channelCode").String())
-	if !ok || !apkpromotionchannel.HasCachedChannel(code) {
+	if !ok {
+		r.Response.WriteStatus(http.StatusNotFound, "not found")
+		return
+	}
+	apkPromotionChannelDownloadRedirect(r, code)
+}
+
+// apkPromotionChannelDownloadRedirectWithOfficialFallback 落地页 ?ch= 上报: 渠道无效或未配置 APK 时回落官网包.
+func apkPromotionChannelDownloadRedirectWithOfficialFallback(r *ghttp.Request, code string) {
+	if !apkpromotionchannel.HasCachedChannel(code) {
+		redirectOfficialSiteApkOrNotFound(r)
+		return
+	}
+	target := apkpromotionchannel.ResolveChannelApkDownloadURL(code)
+	if target == "" {
+		redirectOfficialSiteApkOrNotFound(r)
+		return
+	}
+	stat.EnqueueApkPromotionChannelDownloadClick(code, time.Now())
+	r.Response.RedirectTo(target, http.StatusFound)
+}
+
+func redirectOfficialSiteApkOrNotFound(r *ghttp.Request) {
+	target := shareappdownload.GetDownloadUrl()
+	if target == "" {
+		r.Response.WriteStatus(http.StatusNotFound, "apk not available")
+		return
+	}
+	r.Response.RedirectTo(target, http.StatusFound)
+}
+
+func apkPromotionChannelDownloadRedirect(r *ghttp.Request, code string) {
+	if !apkpromotionchannel.HasCachedChannel(code) {
 		r.Response.WriteStatus(http.StatusNotFound, "not found")
 		return
 	}

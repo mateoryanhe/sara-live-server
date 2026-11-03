@@ -229,12 +229,20 @@ class LiveRoomApi {
     return data;
   }
 
-  Future<void> joinRoom({required int roomId}) async {
-    await _client.post<void>(
+  Future<JoinRoomResult> joinRoom({required int roomId}) async {
+    final res = await _client.post<JoinRoomResult>(
       '/liveRoom/join',
       body: {'roomId': roomId},
-      parseData: (_) => null,
+      parseData: (raw) {
+        if (raw is! Map) return null;
+        return JoinRoomResult.fromJson(Map<String, dynamic>.from(raw));
+      },
     );
+    final data = res.data;
+    if (data == null) {
+      throw StateError('liveRoom/join empty data');
+    }
+    return data;
   }
 
   Future<void> leaveRoom({required int roomId}) async {

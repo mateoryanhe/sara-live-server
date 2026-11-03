@@ -5,23 +5,31 @@ import 'package:flutter/foundation.dart';
 import '../../core/bus/app_bus.dart';
 import '../../core/bus/app_bus_event.dart';
 import '../../core/ws/push_cmd.dart';
+import '../../core/ws/ws_client.dart';
 import '../../data/call/call_models.dart';
 import '../../data/live_follow/live_follow_api.dart';
 import '../../data/live_room/live_room_api.dart';
 import '../../data/live_room/live_room_models.dart';
 import '../../data/live_room/live_room_repository.dart';
+import 'live_room_gift_effect_player.dart';
+import 'live_room_heart_reporter.dart';
 
 /// 主播开播会话：公屏 WS、在线人数、观众列表与房管操作。
+///
+/// 自行订阅 [AppBus]：`cmd=8/9/22/24` 等本房推送（与观众端并列，互不调用）。
 class LiveRoomAnchorController extends ChangeNotifier {
   LiveRoomAnchorController({
     required LiveRoomApi liveRoomApi,
     required LiveRoomRepository liveRoomRepository,
     required LiveFollowApi liveFollowApi,
     required AppBus appBus,
+    required LiveRoomGiftEffectPlayer giftEffectPlayer,
   })  : _liveRoomApi = liveRoomApi,
         _liveRoomRepository = liveRoomRepository,
         _liveFollowApi = liveFollowApi,
-        _appBus = appBus {
+        _appBus = appBus,
+        _giftEffectPlayer = giftEffectPlayer,
+        _liveHeart = LiveRoomHeartReporter(liveRoomApi) {
     _appBus.add(_onBus);
   }
 
@@ -29,6 +37,8 @@ class LiveRoomAnchorController extends ChangeNotifier {
   final LiveRoomRepository _liveRoomRepository;
   final LiveFollowApi _liveFollowApi;
   final AppBus _appBus;
+  final LiveRoomGiftEffectPlayer _giftEffectPlayer;
+  final LiveRoomHeartReporter _liveHeart;
 
   int? _roomId;
   String _title = '';
@@ -67,11 +77,15 @@ class LiveRoomAnchorController extends ChangeNotifier {
     _onlineCount = initialOnlineCount;
     _active = true;
     _chatLines.clear();
+    _giftEffectPlayer.bindRoom(roomId);
+    _liveHeart.start(roomId);
     notifyListeners();
     await refreshOnlineList();
   }
 
   void exitSession() {
+    _liveHeart.stop();
+    _giftEffectPlayer.bindRoom(null);
     _active = false;
     _roomId = null;
     _title = '';
@@ -83,38 +97,57 @@ class LiveRoomAnchorController extends ChangeNotifier {
   }
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent || !_active || _roomId == null) return;
-    final roomKey = '${_roomId!}';
-    final map = pushDataMap(event.data);
+    switch (event) {
+      case WsConnectionBusEvent(:final state):
+        if (state == WsConnectionState.connected && _active && _roomId != null) {
+          unawaited(refreshOnlineList(silent: true));
+        }
+        return;
+      case WsBusEvent(:final cmd, :final data):
+        if (!_active || _roomId == null) return;
+        _onRoomPush(cmd, data);
+      default:
+        break;
+    }
+  }
+
+  void _onRoomPush(int cmd, Object? data) {
+    final roomId = _roomId!;
+    final map = pushDataMap(data);
     if (map == null) return;
 
-    switch (event.cmd) {
+    switch (cmd) {
       case PushCmd.liveRoomChat:
-        if ('${map['roomId'] ?? ''}' != roomKey) return;
+      case PushCmd.liveRoomPaidDanmaku:
+        if (!liveRoomPushMatchesRoom(map, roomId)) return;
         _appendChat(
           senderId: '${map['senderId'] ?? ''}',
           senderName: '${map['senderName'] ?? ''}',
+          senderAvatar: '${map['senderAvatar'] ?? ''}',
           content: '${map['content'] ?? ''}',
           vipLevel: _jsonInt(map['vipLevel']),
         );
       case PushCmd.liveRoomGift:
-        if ('${map['roomId'] ?? ''}' != roomKey) return;
+        if (!liveRoomPushMatchesRoom(map, roomId)) return;
+        _giftEffectPlayer.enqueueFromPush(map, roomId);
         _appendChat(
           senderId: '${map['senderId'] ?? ''}',
           senderName: '${map['senderName'] ?? ''}',
+          senderAvatar: '${map['senderAvatar'] ?? ''}',
           content: '',
           vipLevel: _jsonInt(map['vipLevel']),
           isGift: true,
-          giftSummary:
-              '送出 ${map['giftName'] ?? '礼物'} x${_jsonInt(map['count'])}',
+          giftName: '${map['giftName'] ?? '礼物'}',
+          giftIcon: '${map['giftIcon'] ?? ''}',
+          giftCount: _jsonInt(map['count']),
         );
       case PushCmd.liveRoomAudienceListRefresh:
-        if ('${map['roomId'] ?? ''}' != roomKey) return;
+        if (!liveRoomPushMatchesRoom(map, roomId)) return;
         _onlineCount = _jsonInt(map['onlineCount']);
         _applyOnlineListFromPush(map['list']);
         notifyListeners();
-      case PushCmd.wsConnected:
-        unawaited(refreshOnlineList(silent: true));
+      default:
+        break;
     }
   }
 
@@ -135,20 +168,30 @@ class LiveRoomAnchorController extends ChangeNotifier {
   void _appendChat({
     required String senderId,
     required String senderName,
+    String senderAvatar = '',
     required String content,
     int vipLevel = 0,
     bool isGift = false,
-    String? giftSummary,
+    String giftName = '',
+    String giftIcon = '',
+    int giftCount = 0,
   }) {
-    if (senderName.isEmpty && content.isEmpty && giftSummary == null) return;
+    if (isGift) {
+      if (giftName.isEmpty && giftIcon.isEmpty) return;
+    } else if (senderName.isEmpty && content.isEmpty) {
+      return;
+    }
     _chatLines.add(
       LiveRoomChatLine(
         senderId: senderId,
         senderName: senderName,
+        senderAvatar: senderAvatar,
         content: content,
         vipLevel: vipLevel,
         isGift: isGift,
-        giftSummary: giftSummary,
+        giftName: giftName,
+        giftIcon: giftIcon,
+        giftCount: giftCount > 0 ? giftCount : 1,
       ),
     );
     if (_chatLines.length > 300) {

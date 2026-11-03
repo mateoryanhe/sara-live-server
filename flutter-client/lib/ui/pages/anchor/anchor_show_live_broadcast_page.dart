@@ -5,10 +5,13 @@ import 'package:sara_live_app/app/app_scope.dart';
 import 'package:sara_live_app/core/http/api_exception.dart';
 import 'package:sara_live_app/core/widgets/cached_avatar.dart';
 import 'package:sara_live_app/data/live_room/live_room_models.dart';
+import 'package:sara_live_app/data/vip/vip_privilege_frames.dart';
 import 'package:sara_live_app/feature/show_live/live_room_anchor_controller.dart';
 import 'package:sara_live_app/ui/widgets/anchor_live_control_panel.dart'
     show AnchorLiveToolbar;
+import 'package:sara_live_app/ui/widgets/live_room_chat_line_tile.dart';
 import 'package:sara_live_app/ui/widgets/live_room_cover_backdrop.dart';
+import 'package:sara_live_app/ui/widgets/live_room_gift_effect_overlay.dart';
 
 /// 主播开播中的全屏「直播间」：预览、公屏、观众与房管。
 class AnchorShowLiveBroadcastPage extends StatefulWidget {
@@ -34,6 +37,7 @@ class _AnchorShowLiveBroadcastPageState
   String _coverUrl = '';
   String _avatarUrl = '';
   String _anchorNickname = '';
+  VipPrivilegeFrames _vipFrames = VipPrivilegeFrames.empty;
 
   LiveRoomAnchorController get _anchor => widget.scope.liveRoomAnchor;
 
@@ -77,6 +81,7 @@ class _AnchorShowLiveBroadcastPageState
       notice: widget.room.notice,
       initialOnlineCount: widget.room.onlineCount,
     );
+    unawaited(_loadVipFrames());
     final publisher = widget.scope.showLivePublisher;
     if (!publisher.isPublishing && widget.room.isLive && _roomId > 0) {
       try {
@@ -87,6 +92,22 @@ class _AnchorShowLiveBroadcastPageState
         }
       }
     }
+  }
+
+  Future<void> _loadVipFrames() async {
+    final userId =
+        int.tryParse(widget.scope.session.token?.userId ?? '') ?? 0;
+    if (userId <= 0) return;
+    try {
+      final cfgs = await widget.scope.vipRepository.getVipCfgList(
+        userId: userId,
+        forceRefresh: false,
+      );
+      if (!mounted) return;
+      setState(
+        () => _vipFrames = VipPrivilegeFrames.fromCfgList(cfgs),
+      );
+    } catch (_) {}
   }
 
   void _onPublisher() {
@@ -521,7 +542,7 @@ class _AnchorShowLiveBroadcastPageState
                                       OnlineUserItem(
                                         userId: line.senderId,
                                         nickname: line.senderName,
-                                        avatar: '',
+                                        avatar: line.senderAvatar,
                                         vipLevel: line.vipLevel,
                                         totalReward: 0,
                                         joinedAt: '',
@@ -529,7 +550,13 @@ class _AnchorShowLiveBroadcastPageState
                                     );
                                   }
                                 : null,
-                            child: _ChatBubble(line: line),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: LiveRoomChatLineTile(
+                                line: line,
+                                vipFrames: _vipFrames,
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -612,60 +639,10 @@ class _AnchorShowLiveBroadcastPageState
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({required this.line});
-
-  final LiveRoomChatLine line;
-
-  @override
-  Widget build(BuildContext context) {
-    final name = line.senderName.isNotEmpty ? line.senderName : '…';
-    final text = line.isGift ? (line.giftSummary ?? '') : line.content;
-    if (text.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: RichText(
-          text: TextSpan(
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              height: 1.35,
+            LiveRoomGiftEffectOverlay(
+              player: widget.scope.liveRoomGiftEffectPlayer,
             ),
-            children: [
-              if (line.vipLevel > 0)
-                TextSpan(
-                  text: 'VIP${line.vipLevel} ',
-                  style: const TextStyle(
-                    color: Color(0xFFFFD166),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              TextSpan(
-                text: '$name: ',
-                style: TextStyle(
-                  color: line.isGift
-                      ? const Color(0xFFFFD166)
-                      : const Color(0xFF93C5FD),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              TextSpan(text: text),
-            ],
-          ),
+          ],
         ),
       ),
     );

@@ -392,6 +392,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     AnchorDetail: [
         BTN.view,
+        {key: 'viewGuildDetail', label: '查看工会详情'},
         {key: 'dailyEffectiveLive', label: '查看每日流水'},
         {key: 'exportDailyEffectiveLive', label: '导出每日流水'},
         {key: 'liveRecord', label: '查看直播记录'},
@@ -549,6 +550,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.save,
     ],
     H5LiveDeployManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'deploy', label: '上传部署'},
+    ],
+    ChannelDownloadLandingDeployManagement: [
         BTN.view,
         BTN.save,
         {key: 'deploy', label: '上传部署'},

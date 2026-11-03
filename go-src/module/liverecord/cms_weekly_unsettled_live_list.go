@@ -17,16 +17,15 @@ import (
 
 // GetCMSWeeklyUnsettledLiveList CMS分页查询本周未结算流水
 func GetCMSWeeklyUnsettledLiveList(ctx context.Context, req *liverecorddto.CMSWeeklyUnsettledLiveListReq) (*httpserver.CMSQueryResp, error) {
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibility(ctx)
+	if vis.Empty {
 		return httpserver.NewCMSQueryResp(0, []*liverecorddto.CMSWeeklyUnsettledLiveItem{}), nil
 	}
 	weekStart, weekEnd := xrtime.WeekDateRange(time.Now())
 	roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds)
 	total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
 		RoomIds:       roomIds,
-		GuildIds:      guildIds,
-		FilterByGuild: restrict,
+		Visibility:    liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds),
 		LiveDateStart: weekStart,
 		LiveDateEnd:   weekEnd,
 		Keyword:       req.Keyword,

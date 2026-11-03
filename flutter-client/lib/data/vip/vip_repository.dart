@@ -5,6 +5,7 @@ import '../../core/bus/app_bus_event.dart';
 import '../../core/cache/business_object_cache.dart';
 import '../../core/http/auth_token.dart';
 import '../../core/ws/push_cmd.dart';
+import '../../core/ws/ws_client.dart';
 import 'vip_api.dart';
 import 'vip_level_push.dart';
 import 'vip_models.dart';
@@ -81,17 +82,20 @@ class VipRepository {
   }
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent) return;
     final userId = _currentUserId();
     if (userId == null) return;
 
-    switch (event.cmd) {
-      case PushCmd.vipLevel:
-        VipLevelPush.fromData(event.data);
-        unawaited(invalidate(userId));
-        break;
-      case PushCmd.wsConnected:
-        unawaited(invalidate(userId));
+    switch (event) {
+      case WsConnectionBusEvent(:final state):
+        if (state == WsConnectionState.connected) {
+          unawaited(invalidate(userId));
+        }
+      case WsBusEvent(:final cmd, :final data):
+        if (cmd == PushCmd.vipLevel) {
+          VipLevelPush.fromData(data);
+          unawaited(invalidate(userId));
+        }
+      default:
         break;
     }
   }

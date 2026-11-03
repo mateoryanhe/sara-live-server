@@ -16,6 +16,7 @@ import (
 	"xr-game-server/module/call"
 	"xr-game-server/module/coinmerchant"
 	"xr-game-server/module/coinmerchantdeploy"
+	"xr-game-server/module/channeldownloadlandingdeploy"
 	"xr-game-server/module/countryflagdeploy"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
@@ -84,6 +85,7 @@ func Init() {
 	fiatcurrency.Init()
 	game.Init()
 	h5livedeploy.Init()
+	channeldownloadlandingdeploy.Init()
 	coinmerchantdeploy.Init()
 	countryflagdeploy.Init()
 	dbbackup.Init()

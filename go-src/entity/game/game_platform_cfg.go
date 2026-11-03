@@ -18,7 +18,8 @@ type GamePlatformCfg struct {
 	VendorUrl string `gorm:"size:255;default:'';comment:厂家API根地址" json:"vendorUrl"`
 	Token     string `gorm:"size:512;default:'';comment:接入Token(x-token)" json:"token"`
 	SecretKey string `gorm:"size:255;default:'';comment:SecretKey" json:"secretKey"`
-	IconUrl   string `gorm:"size:512;default:'';comment:游戏封面CDN根地址" json:"iconUrl"`
+	IconUrl                    string `gorm:"size:512;default:'';comment:游戏封面CDN根地址" json:"iconUrl"`
+	RequireRechargeForGameList bool   `gorm:"default:0;comment:开启后未充值用户App游戏列表为空" json:"requireRechargeForGameList"`
 }
 
 func initGamePlatformCfg() {

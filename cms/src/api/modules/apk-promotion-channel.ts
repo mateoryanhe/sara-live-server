@@ -1,4 +1,5 @@
 import {request} from '../request'
+import {APK_UPLOAD_TIMEOUT_MS} from '../constants/apk-upload-timeout'
 import type {
   ApkPromotionChannelDailyStatListResponse,
   ApkPromotionChannelDailyStatQuery,
@@ -43,6 +44,7 @@ export const apkPromotionChannelApi = {
         '/apkPromotionChannel/uploadApkFileChunk',
         formData,
         {
+          timeout: APK_UPLOAD_TIMEOUT_MS,
           headers: {
             'X-Upload-Id': uploadId,
             'X-Chunk-Index': String(chunkIndex),
@@ -61,6 +63,7 @@ export const apkPromotionChannelApi = {
     return request.post<{ apkDownloadUrl: string; apkFileName: string }>(
         '/apkPromotionChannel/completeApkPromotionChannelApkUpload',
         { uploadId, channelId },
+        { timeout: APK_UPLOAD_TIMEOUT_MS },
     )
   },
 

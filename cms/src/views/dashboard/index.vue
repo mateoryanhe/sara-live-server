@@ -516,6 +516,10 @@ const userEventSeriesLabel = (key: MinuteLiveActivitySeriesKey) => {
       return t('pages.trackingMinuteLiveActivity.bet')
     case 'call1v1Count':
       return t('pages.trackingMinuteLiveActivity.call1v1')
+    case 'call1v1ConnectSuccessCount':
+      return t('pages.trackingMinuteLiveActivity.call1v1ConnectSuccess')
+    case 'call1v1ConsumeCount':
+      return t('pages.trackingMinuteLiveActivity.call1v1Consume')
     case 'rechargeOrderCount':
       return t('pages.trackingMinuteLiveActivity.rechargeOrder')
     default:
@@ -754,6 +758,8 @@ const dashboardExportLabels = computed((): DashboardExportLabels => ({
   chat: t('pages.trackingMinuteLiveActivity.chat'),
   bet: t('pages.trackingMinuteLiveActivity.bet'),
   call1v1: t('pages.trackingMinuteLiveActivity.call1v1'),
+  call1v1ConnectSuccess: t('pages.trackingMinuteLiveActivity.call1v1ConnectSuccess'),
+  call1v1Consume: t('pages.trackingMinuteLiveActivity.call1v1Consume'),
   rechargeOrder: t('pages.trackingMinuteLiveActivity.rechargeOrder'),
 }))
 

@@ -212,12 +212,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveBadgeOnAir => 'LIVE';
 
   @override
+  String get liveFollowAnchor => 'Follow';
+
+  @override
+  String get liveFollowingAnchor => 'Following';
+
+  @override
   String liveOnlineCount(int count) {
     return '$count watching';
   }
 
   @override
   String get liveChatHint => 'Say something…';
+
+  @override
+  String get liveChatGiftAction => 'Sent';
 
   @override
   String get liveSendGift => 'Send gift';

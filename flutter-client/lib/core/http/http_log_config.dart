@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../platform/platform_check.dart';
 
-/// HTTP debug logging (`--dart-define`).
+/// HTTP + WebSocket debug logging (`--dart-define`; [WsLogger] 共用同一开关与 sink)。
 abstract final class HttpLogConfig {
   static const bool defineEnabled = bool.fromEnvironment(
     'HTTP_LOG_ENABLED',

@@ -95,14 +95,13 @@ func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserI
 
 // GetCMSList CMS分页查询直播收益流水
 func GetCMSList(ctx context.Context, req *liverevenuedto.CMSLiveRevenueLogListReq) (*httpserver.CMSQueryResp, error) {
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibility(ctx)
+	if vis.Empty {
 		return httpserver.NewCMSQueryResp(0, []*liverevenuedto.CMSLiveRevenueLogItem{}), nil
 	}
 	total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
-		ReceiverIds:   liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
-		GuildIds:      guildIds,
-		FilterByGuild: restrict,
+		ReceiverIds: liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
+		Visibility:  liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds),
 		LiveRecordId:  parseUint64Filter(req.LiveRecordId),
 		Keyword:       req.Keyword,
 		RevenueType:   req.RevenueType,

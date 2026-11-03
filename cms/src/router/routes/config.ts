@@ -159,6 +159,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'H5直播部署'},
         },
         {
+            path: 'channel-download-landing-deploy',
+            name: 'ChannelDownloadLandingDeployManagement',
+            component: () => import('@/views/config/channel-download-landing-deploy.vue'),
+            meta: {title: '渠道下载落地页'},
+        },
+        {
             path: 'coin-merchant-deploy',
             name: 'CoinMerchantDeployManagement',
             component: () => import('@/views/config/coin-merchant-deploy.vue'),

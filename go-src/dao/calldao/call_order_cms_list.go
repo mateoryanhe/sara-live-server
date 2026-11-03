@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/entity/call"
-	liveentity "xr-game-server/entity/live"
+	"xr-game-server/dao/liveroomdao"
 	userentity "xr-game-server/entity/user"
 )
 
@@ -16,8 +16,7 @@ type CallOrderCMSListFilter struct {
 	CallerId      uint64
 	ReceiverId    uint64
 	ReceiverIds   []uint64
-	GuildIds      []uint64
-	FilterByGuild bool
+	Visibility liveroomdao.CMSAnchorRoomVisibilityScope
 	Keyword    string
 	CostFilter uint8 // 0=全部 1=总费用>0 2=总费用=0
 	Source     uint8
@@ -35,7 +34,7 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 	if f == nil {
 		return 0, list
 	}
-	if f.FilterByGuild && len(f.GuildIds) == 0 {
+	if f.Visibility.IsEmptyScope() {
 		return 0, list
 	}
 	if f.PageIndex <= 0 {
@@ -46,7 +45,7 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 	}
 	ctx := gctx.New()
 	keyword := strings.TrimSpace(f.Keyword)
-	needAlias := keyword != "" || f.FilterByGuild
+	needAlias := keyword != "" || f.Visibility.Apply
 	colPrefix := ""
 	m := g.Model(string(entity.TbCallOrder)).Ctx(ctx)
 	if needAlias {
@@ -58,10 +57,7 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 				LeftJoin(string(userentity.TbUserInfo)+" u_recv", "u_recv.id = c."+string(entity.CallOrderReceiverId)).
 				Where("(CAST(c."+string(entity.CallOrderCallerId)+" AS CHAR) LIKE ? OR CAST(c."+string(entity.CallOrderReceiverId)+" AS CHAR) LIKE ? OR u_caller."+string(userentity.UserInfoNickname)+" LIKE ? OR u_recv."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like, like)
 		}
-		if f.FilterByGuild {
-			m = m.InnerJoin(string(liveentity.TbLiveRoom)+" r", "r.id = c."+string(entity.CallOrderReceiverId)).
-				WhereIn("r."+string(liveentity.LiveRoomGuildId), f.GuildIds)
-		}
+		m = liveroomdao.ApplyCMSAnchorRoomVisibility(m, "c."+string(entity.CallOrderReceiverId), f.Visibility)
 	}
 	if f.CallerId > 0 {
 		m = m.Where(colPrefix+string(entity.CallOrderCallerId)+" = ?", f.CallerId)

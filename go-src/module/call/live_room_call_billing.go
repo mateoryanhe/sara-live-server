@@ -54,6 +54,23 @@ func callDiamondBillingPartyIds(order *callentity.CallOrder) (anchorId, payerId 
 			return 0, 0, false
 		}
 		return anchorId, payerId, anchorId > 0
+	case callentity.CallOrderSourcePrivateMessage:
+		if order.CallerId == 0 || order.ReceiverId == 0 {
+			return 0, 0, false
+		}
+		payerId = order.PayerId
+		if payerId == 0 {
+			payerId = order.CallerId
+		}
+		if payerId != order.CallerId && payerId != order.ReceiverId {
+			return 0, 0, false
+		}
+		if payerId == order.CallerId {
+			anchorId = order.ReceiverId
+		} else {
+			anchorId = order.CallerId
+		}
+		return anchorId, payerId, true
 	default:
 		return 0, 0, false
 	}
@@ -126,6 +143,7 @@ func chargeLiveRoomCallOnAccept(order *callentity.CallOrder, now time.Time) erro
 		order.AddBillingDuration(1)
 		nextCharge := now.Add(time.Minute)
 		order.SetChargeTime(&nextCharge)
+		pubCall1v1BillingSuccessTracking(order, now)
 	}
 
 	order.SetTotalCost(totalCost)
@@ -157,6 +175,7 @@ func chargeLiveRoomCallBillingIfDue(order *callentity.CallOrder, now time.Time) 
 	order.AddBillingDuration(1)
 	nextCharge := now.Add(time.Minute)
 	order.SetChargeTime(&nextCharge)
+	pubCall1v1BillingSuccessTracking(order, now)
 	return nil
 }
 

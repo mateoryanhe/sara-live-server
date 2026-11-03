@@ -19,6 +19,8 @@ const (
 	metricChat
 	metricBet
 	metricCall1v1
+	metricCall1v1ConnectSuccess
+	metricCall1v1Consume
 	metricRechargeOrder
 )
 
@@ -46,6 +48,10 @@ func record(kind metricKind, at time.Time) {
 		row.AddBetCount(1)
 	case metricCall1v1:
 		row.AddCall1v1Count(1)
+	case metricCall1v1ConnectSuccess:
+		row.AddCall1v1ConnectSuccessCount(1)
+	case metricCall1v1Consume:
+		row.AddCall1v1ConsumeCount(1)
 	case metricRechargeOrder:
 		row.AddRechargeOrderCount(1)
 	default:

@@ -79,6 +79,15 @@ func GamePlatformCfgReady() bool {
 		strings.TrimSpace(row.SecretKey) != ""
 }
 
+// GameListRequireRechargeFromMemory 开启后 App 游戏列表仅对已充值用户可见.
+func GameListRequireRechargeFromMemory() bool {
+	row := GetGamePlatformCfgFromMemory()
+	if row == nil {
+		return false
+	}
+	return row.RequireRechargeForGameList
+}
+
 // GetGameIconBaseUrlFromMemory 游戏封面 CDN 根地址(用于拼接第三方返回的相对路径).
 func GetGameIconBaseUrlFromMemory() string {
 	row := GetGamePlatformCfgFromMemory()

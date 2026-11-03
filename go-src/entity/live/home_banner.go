@@ -36,8 +36,9 @@ type HomeBanner struct {
 	Link      string `gorm:"size:512;default:'';comment:跳转链接" json:"link"`
 	Scene     uint8  `gorm:"default:1;comment:展示场景(1首页,2直播间)" json:"scene"`
 	Direction uint8  `gorm:"default:1;comment:展示位置(1首页顶部,2首页中部,3首页底部,4直播大厅)" json:"direction"`
-	Sort      int    `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
-	Status    uint8  `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
+	Sort                 int    `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
+	Status               uint8  `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
+	ExcludePackageNames  string `gorm:"size:1024;default:'';comment:排除App包名(逗号分隔,命中则不展示)" json:"excludePackageNames"`
 }
 
 func initHomeBanner() {

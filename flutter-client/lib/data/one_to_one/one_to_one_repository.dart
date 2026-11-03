@@ -4,7 +4,7 @@ import '../../core/bus/app_bus.dart';
 import '../../core/bus/app_bus_event.dart';
 import '../../core/cache/business_object_cache.dart';
 import '../../core/http/auth_token.dart';
-import '../../core/ws/push_cmd.dart';
+import '../../core/ws/ws_client.dart';
 import 'one_to_one_api.dart';
 import 'one_to_one_models.dart';
 
@@ -31,8 +31,8 @@ class OneToOneRepository {
       'oneToOneList_p${page}_f$statusFilter';
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent) return;
-    if (event.cmd != PushCmd.wsConnected) return;
+    if (event is! WsConnectionBusEvent) return;
+    if (event.state != WsConnectionState.connected) return;
     final userId = _currentUserId();
     if (userId == null) return;
     unawaited(invalidateListCache(userId));

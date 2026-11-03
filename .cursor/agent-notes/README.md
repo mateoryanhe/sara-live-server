@@ -7,6 +7,7 @@
 | 文件 | 内容 |
 |------|------|
 | [workspace-safety.mdc](../rules/workspace-safety.mdc) | **本机误删、Git push、代码恢复**（2026-08-28 事故） |
+| [git-release-tags.mdc](../rules/git-release-tags.mdc) | **发版 Git tag 命名** `vYYYY.MM.DD`（如 `v2026.10.30`） |
 | [go-build-output.mdc](../rules/go-build-output.mdc) | Go 编译 `-o` 路径，勿生成 `...` 目录 |
 | [go-xrpool-async.mdc](../rules/go-xrpool-async.mdc) | Go 异步须 `xrpool.AddWithRecover`，勿裸 `go func` |
 | [server-safety.mdc](../rules/server-safety.mdc) | 远程/数据库删除须问用户；**发版须用户同意** |

@@ -11,8 +11,9 @@ type GamePlatformCfgItem struct {
 	VendorUrl string `json:"vendorUrl"`
 	Token     string `json:"token"`
 	SecretKey string `json:"secretKey"`
-	IconUrl   string `json:"iconUrl"`
-	CreatedAt string `json:"createdAt"`
+	IconUrl                    string `json:"iconUrl"`
+	RequireRechargeForGameList bool   `json:"requireRechargeForGameList" dc:"开启后未充值用户App游戏列表为空"`
+	CreatedAt                  string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }
 
@@ -26,7 +27,8 @@ type SaveGamePlatformCfgReq struct {
 	VendorUrl string `json:"vendorUrl" v:"required|max-length:255#厂家URL不能为空|厂家URL最长255字符" dc:"厂家API根地址"`
 	Token     string `json:"token" v:"required|max-length:512#Token不能为空|Token最长512字符" dc:"接入Token"`
 	SecretKey string `json:"secretKey" v:"required|max-length:255#SecretKey不能为空|SecretKey最长255字符" dc:"SecretKey"`
-	IconUrl   string `json:"iconUrl" v:"max-length:512#IconUrl最长512字符" dc:"游戏封面CDN根地址"`
+	IconUrl                    string `json:"iconUrl" v:"max-length:512#IconUrl最长512字符" dc:"游戏封面CDN根地址"`
+	RequireRechargeForGameList bool   `json:"requireRechargeForGameList" dc:"开启后未充值用户App游戏列表为空(默认关)"`
 }
 
 type SaveGamePlatformCfgRes struct {

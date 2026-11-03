@@ -54,14 +54,13 @@ func toCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 
 // GetCMSList CMS分页查询直播记录
 func GetCMSList(ctx context.Context, req *liverecorddto.CMSLiveRecordListReq) (*httpserver.CMSQueryResp, error) {
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibility(ctx)
+	if vis.Empty {
 		return httpserver.NewCMSQueryResp(0, []*liverecorddto.CMSLiveRecordItem{}), nil
 	}
 	total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-		AnchorIds:     liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-		GuildIds:      guildIds,
-		FilterByGuild: restrict,
+		AnchorIds:    liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+		Visibility:   liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds),
 		LiveRecordId:  parseUint64Filter(req.LiveRecordId),
 		Keyword:       req.Keyword,
 		StartTime:     req.StartTime,

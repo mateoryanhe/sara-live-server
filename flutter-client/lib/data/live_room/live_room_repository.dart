@@ -5,7 +5,7 @@ import '../../core/bus/app_bus_event.dart';
 import '../../core/cache/business_object_cache.dart';
 import '../../core/http/api_exception.dart';
 import '../../core/http/auth_token.dart';
-import '../../core/ws/push_cmd.dart';
+import '../../core/ws/ws_client.dart';
 import 'live_room_api.dart';
 import 'live_room_models.dart';
 
@@ -34,8 +34,8 @@ class LiveRoomRepository {
   static String liveRoomScope(int roomId) => 'liveRoom_$roomId';
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent) return;
-    if (event.cmd != PushCmd.wsConnected) return;
+    if (event is! WsConnectionBusEvent) return;
+    if (event.state != WsConnectionState.connected) return;
     final userId = _currentUserId();
     if (userId == null) return;
     unawaited(invalidateAnchorCaches(userId));

@@ -26,6 +26,8 @@ export const gamePlatformCfgMessages = definePageMessages(
     fetchFailed: '获取配置失败',
     saveSuccess: '保存成功',
     saveFailed: '保存失败',
+    requireRechargeForGameList: '游戏可见性（需充值）',
+    requireRechargeForGameListTip: '开启后，用户 user_ext 已首充(first_recharge=0)才返回游戏列表；未首充用户列表为空。默认关闭。',
   },
   {
     noteTitle: 'Note',
@@ -52,6 +54,8 @@ export const gamePlatformCfgMessages = definePageMessages(
     fetchFailed: 'Failed to load config',
     saveSuccess: 'Saved successfully',
     saveFailed: 'Save failed',
+    requireRechargeForGameList: 'Game visibility (recharge required)',
+    requireRechargeForGameListTip: 'When on, only users with at least one completed recharge order see the game list; others get an empty list. Off by default.',
   },
   {
     noteTitle: 'Nota',
@@ -78,6 +82,8 @@ export const gamePlatformCfgMessages = definePageMessages(
     fetchFailed: 'Error al cargar la configuración',
     saveSuccess: 'Guardado correctamente',
     saveFailed: 'Error al guardar',
+    requireRechargeForGameList: 'Visibilidad de juegos (requiere recarga)',
+    requireRechargeForGameListTip: 'Si está activo, solo usuarios con al menos un pedido de recarga completado ven la lista; el resto recibe lista vacía. Desactivado por defecto.',
   },
   {
     noteTitle: 'Nota',
@@ -104,6 +110,8 @@ export const gamePlatformCfgMessages = definePageMessages(
     fetchFailed: 'Falha ao carregar configuração',
     saveSuccess: 'Salvo com sucesso',
     saveFailed: 'Falha ao salvar',
+    requireRechargeForGameList: 'Visibilidade de jogos (exige recarga)',
+    requireRechargeForGameListTip: 'Ativado: só usuários com pelo menos um pedido de recarga concluído veem a lista; demais recebem lista vazia. Padrão desligado.',
   },
   {
     noteTitle: 'नोट',
@@ -130,6 +138,8 @@ export const gamePlatformCfgMessages = definePageMessages(
     fetchFailed: 'कॉन्फ़िग लोड विफल',
     saveSuccess: 'सफलतापूर्वक सहेजा',
     saveFailed: 'सहेजना विफल',
+    requireRechargeForGameList: 'गेम दृश्यता (रिचार्ज आवश्यक)',
+    requireRechargeForGameListTip: 'चालू होने पर केवल पूर्ण रिचार्ज वाले उपयोगकर्ताओं को सूची मिलती है; अन्य को खाली सूची। डिफ़ॉल्ट बंद।',
   },
   {
     noteTitle: 'Catatan',
@@ -156,5 +166,7 @@ export const gamePlatformCfgMessages = definePageMessages(
     fetchFailed: 'Gagal memuat konfigurasi',
     saveSuccess: 'Berhasil disimpan',
     saveFailed: 'Gagal menyimpan',
+    requireRechargeForGameList: 'Visibilitas game (wajib isi ulang)',
+    requireRechargeForGameListTip: 'Jika aktif, hanya pengguna dengan minimal satu pesanan isi ulang selesai yang melihat daftar; lainnya kosong. Default mati.',
   },
 )

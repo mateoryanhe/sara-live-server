@@ -3,6 +3,7 @@ class AppGiftItem {
     required this.id,
     required this.name,
     required this.icon,
+    required this.animation,
     required this.price,
     required this.sort,
   });
@@ -10,6 +11,7 @@ class AppGiftItem {
   final String id;
   final String name;
   final String icon;
+  final String animation;
   final double price;
   final int sort;
 
@@ -18,6 +20,7 @@ class AppGiftItem {
       id: '${json['id'] ?? ''}',
       name: '${json['name'] ?? ''}',
       icon: '${json['icon'] ?? ''}',
+      animation: '${json['animation'] ?? ''}',
       price: (json['price'] as num?)?.toDouble() ?? 0,
       sort: (json['sort'] as num?)?.toInt() ?? 0,
     );

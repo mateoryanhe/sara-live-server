@@ -49,6 +49,11 @@
           />
         </el-form-item>
 
+        <el-form-item :label="t('pages.gamePlatformCfg.requireRechargeForGameList')">
+          <el-switch v-model="formData.requireRechargeForGameList"/>
+          <span class="form-tip">{{ t('pages.gamePlatformCfg.requireRechargeForGameListTip') }}</span>
+        </el-form-item>
+
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.gamePlatformCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -79,6 +84,7 @@ const formData = reactive({
   iconUrl: '',
   token: '',
   secretKey: '',
+  requireRechargeForGameList: false,
 })
 
 const metaInfo = reactive({
@@ -109,6 +115,7 @@ const applyCfg = (cfg: GamePlatformCfg | null | undefined) => {
     formData.iconUrl = ''
     formData.token = ''
     formData.secretKey = ''
+    formData.requireRechargeForGameList = false
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -118,6 +125,7 @@ const applyCfg = (cfg: GamePlatformCfg | null | undefined) => {
   formData.iconUrl = cfg.iconUrl || ''
   formData.token = cfg.token || ''
   formData.secretKey = cfg.secretKey || ''
+  formData.requireRechargeForGameList = cfg.requireRechargeForGameList === true
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -148,6 +156,7 @@ const handleSave = async () => {
       iconUrl: formData.iconUrl.trim().replace(/\/+$/, ''),
       token: formData.token.trim(),
       secretKey: formData.secretKey.trim(),
+      requireRechargeForGameList: formData.requireRechargeForGameList,
     })
     if (response?.success) {
       ElMessage.success(t('pages.gamePlatformCfg.saveSuccess'))
@@ -191,6 +200,14 @@ onMounted(() => {
 
 .cfg-form {
   max-width: 860px;
+}
+
+.form-tip {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.4;
 }
 
 code {

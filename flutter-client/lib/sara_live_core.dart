@@ -27,7 +27,8 @@
 /// 5. **缓存不是真相源**：写操作、登录态、余额/下单等不以「仅缓存」为准；可先展示缓存，以服务器结果最终覆盖
 /// 6. **统一事件 [AppBus]**：`add` / `remove` / `publish`；**Repository 与 ViewModel 各自订阅**
 ///    - [AppLifecycleBusEvent]：`started`（[AppScope.create]，sticky；[BusinessObjectCache.bindAppLifecycle] 触发 `clearAll`）、`paused` / `resumed`（根 Widget）
-///    - [WsBusEvent]：`WsClient` 下行 + 本机 `PushCmd.wsConnected`；订 `cmd=12` 等失效/刷 UI
+///    - [WsConnectionBusEvent]：`WsClient` 连接状态（上线/离线）；[WsBusEvent]：服务端 push
+///      **Repository 与 VM/Controller 各自 `appBus.add`**（见 `core/ws/push_subscribers.md`）
 ///    - 登录 `handleLoggedIn` 连 `/ws`；登出断开
 /// 7. **用户维度（key 以 userId 为命名空间）**
 ///    - 用户数据经 [BusinessObjectCache]（内部 `CacheKey.user` + L1/L2）

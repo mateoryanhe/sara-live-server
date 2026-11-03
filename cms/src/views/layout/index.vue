@@ -23,6 +23,7 @@
               <Expand v-else/>
             </el-icon>
           </el-button>
+          <SidebarMenuSearch @navigate="navigateFromMenuSearch"/>
         </div>
         <div class="header-right">
           <LanguageSwitcher class="header-lang" compact show-label/>
@@ -68,11 +69,12 @@ import {computed, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
+import SidebarMenuSearch from '@/components/layout/SidebarMenuSearch.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
 import {ArrowDown, Expand, Fold} from '@element-plus/icons-vue'
 import {clearAuthSession} from '@/utils/auth'
-import {routeNavigating} from '@/utils/route-loading'
+import {routeNavigating, startSidebarRouteLoading} from '@/utils/route-loading'
 import {
   layoutBootstrapping,
   layoutShellReady,
@@ -120,6 +122,15 @@ const username = computed(() => localStorage.getItem('username') || t('common.ad
 
 const toggleCollapse = () => {
   isCollapse.value = !isCollapse.value
+}
+
+const navigateFromMenuSearch = (path: string) => {
+  if (!path || path === route.path) {
+    return
+  }
+  void layoutSidebarRef.value?.openSubmenusForPath(path)
+  startSidebarRouteLoading()
+  void router.push(path)
 }
 
 const logout = () => {

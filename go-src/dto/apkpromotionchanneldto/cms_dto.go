@@ -25,7 +25,7 @@ type ApkPromotionChannelItem struct {
 type ApkPromotionChannelListRes struct {
 	Total         int                        `json:"total"`
 	Data          []*ApkPromotionChannelItem `json:"data"`
-	ShareBaseHost string                     `json:"shareBaseHost" dc:"官网静态域名(短链域名)"`
+	ShareBaseHost string                     `json:"shareBaseHost" dc:"渠道下载落地页域名(短链域名)"`
 }
 
 type CreateApkPromotionChannelReq struct {

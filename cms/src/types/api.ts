@@ -113,6 +113,8 @@ export interface MinuteLiveActivityTrendPoint {
     chatCount: number
     betCount: number
     call1v1Count: number
+    call1v1ConnectSuccessCount: number
+    call1v1ConsumeCount: number
     rechargeOrderCount: number
 }
 
@@ -1702,6 +1704,7 @@ export interface Banner {
     direction: number
     sort: number
     status: number
+    excludePackageNames?: string
     createdAt: string
     updatedAt: string
 }
@@ -2721,6 +2724,7 @@ export interface GamePlatformCfg {
     token: string
     secretKey: string
     iconUrl: string
+    requireRechargeForGameList?: boolean
     createdAt: string
     updatedAt: string
 }
@@ -2735,6 +2739,7 @@ export interface SaveGamePlatformCfgReq {
     token: string
     secretKey: string
     iconUrl?: string
+    requireRechargeForGameList?: boolean
 }
 
 export interface SaveGamePlatformCfgRes {

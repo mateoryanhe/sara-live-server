@@ -87,6 +87,11 @@
             </template>
           </el-table-column>
           <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('pages.bannerList.excludePackageNames')" min-width="160" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ formatExcludePackagesDisplay(row.excludePackageNames) || '-' }}
+            </template>
+          </el-table-column>
           <el-table-column :label="t('common.status')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
@@ -196,6 +201,15 @@
         <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
+        <el-form-item :label="t('pages.bannerList.excludePackageNames')" prop="excludePackageNames">
+          <el-input
+              v-model="currentRow.excludePackageNames"
+              :autosize="{ minRows: 2, maxRows: 5 }"
+              :placeholder="t('pages.bannerList.excludePackageNamesPlaceholder')"
+              type="textarea"
+          />
+          <span class="form-tip">{{ t('pages.bannerList.excludePackageNamesTip') }}</span>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
@@ -231,7 +245,19 @@ interface BannerForm {
   scene: number
   direction: number
   sort: number
+  excludePackageNames: string
 }
+
+const splitExcludePackageInput = (raw: string): string[] => {
+  return raw
+      .split(/[\n,;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+}
+
+const formatExcludePackagesDisplay = (raw?: string) => splitExcludePackageInput(raw ?? '').join(', ')
+
+const serializeExcludePackageNames = (raw: string) => splitExcludePackageInput(raw).join(',')
 
 const homeDirectionOptions = computed(() => [
   {value: 1, label: t('pages.bannerList.positionHomeTop')},
@@ -284,7 +310,8 @@ const defaultForm = (): BannerForm => ({
   link: '',
   scene: 1,
   direction: 1,
-  sort: 0
+  sort: 0,
+  excludePackageNames: ''
 })
 const currentRow = ref<BannerForm>(defaultForm())
 const formRef = ref<FormInstance>()
@@ -363,7 +390,10 @@ const formRules = computed<FormRules>(() => ({
   image: [{required: true, message: t('pages.bannerList.imageRequired'), trigger: 'change'}],
   link: [{max: 512, message: t('pages.bannerList.linkMaxLength'), trigger: 'blur'}],
   scene: [{required: true, message: t('pages.bannerList.sceneRequired'), trigger: 'change'}],
-  direction: [{required: true, message: t('pages.bannerList.positionRequired'), trigger: 'change'}]
+  direction: [{required: true, message: t('pages.bannerList.positionRequired'), trigger: 'change'}],
+  excludePackageNames: [
+    {max: 1024, message: t('pages.bannerList.excludePackageNamesMaxLength'), trigger: 'blur'}
+  ]
 }))
 
 const fetchBannerList = async () => {
@@ -417,7 +447,8 @@ const handleEdit = (row: Banner) => {
     link: row.link,
     scene: Number(row.scene) || 1,
     direction: Number(row.direction) || 1,
-    sort: Number(row.sort) || 0
+    sort: Number(row.sort) || 0,
+    excludePackageNames: splitExcludePackageInput(row.excludePackageNames ?? '').join('\n')
   }
   setImagePreview(row.image || '')
   dialogVisible.value = true
@@ -481,11 +512,19 @@ const handleSave = async () => {
   await formRef.value.validate(async (valid) => {
     if (!valid) return
     try {
+      const payload = {
+        title: currentRow.value.title,
+        image: currentRow.value.image,
+        link: currentRow.value.link,
+        scene: currentRow.value.scene,
+        direction: currentRow.value.direction,
+        sort: currentRow.value.sort,
+        excludePackageNames: serializeExcludePackageNames(currentRow.value.excludePackageNames)
+      }
       if (currentRow.value.id) {
-        await bannerApi.updateBanner(currentRow.value)
+        await bannerApi.updateBanner({id: currentRow.value.id, ...payload})
       } else {
-        const {title, image, link, scene, direction, sort} = currentRow.value
-        await bannerApi.createBanner({title, image, link, scene, direction, sort})
+        await bannerApi.createBanner(payload)
       }
       ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
       dialogVisible.value = false
@@ -628,5 +667,13 @@ onMounted(() => {
 
 .banner-remove-btn {
   padding: 0;
+}
+
+.form-tip {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.4;
 }
 </style>

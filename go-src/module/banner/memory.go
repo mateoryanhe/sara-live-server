@@ -3,6 +3,7 @@ package banner
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/bannerdto"
@@ -73,6 +74,29 @@ func filterAppBannerListByScene(list []*bannerdto.AppBannerItem, scene uint8) []
 	ret := make([]*bannerdto.AppBannerItem, 0, len(list))
 	for _, item := range list {
 		if item == nil || item.Scene != scene {
+			continue
+		}
+		ret = append(ret, item)
+	}
+	return ret
+}
+
+func filterAppBannerListByPackage(list []*bannerdto.AppBannerItem, packageName string) []*bannerdto.AppBannerItem {
+	if strings.TrimSpace(packageName) == "" {
+		return list
+	}
+	ret := make([]*bannerdto.AppBannerItem, 0, len(list))
+	for _, item := range list {
+		if item == nil {
+			continue
+		}
+		id, err := strconv.ParseUint(item.ID, 10, 64)
+		if err != nil {
+			ret = append(ret, item)
+			continue
+		}
+		row := GetBannerFromMemoryById(id)
+		if row != nil && bannerHidesForPackage(row.ExcludePackageNames, packageName) {
 			continue
 		}
 		ret = append(ret, item)

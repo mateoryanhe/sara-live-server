@@ -57,9 +57,11 @@ func buildCMSMinuteLiveActivityTrend(req *trackingdto.CMSMinuteLiveActivityTrend
 			LeaveCount:   row.LeaveCount,
 			GiftCount:    row.GiftCount,
 			ChatCount:    row.ChatCount,
-			BetCount:           row.BetCount,
-			Call1v1Count:       row.Call1v1Count,
-			RechargeOrderCount: row.RechargeOrderCount,
+			BetCount:                   row.BetCount,
+			Call1v1Count:               row.Call1v1Count,
+			Call1v1ConnectSuccessCount: row.Call1v1ConnectSuccessCount,
+			Call1v1ConsumeCount:        row.Call1v1ConsumeCount,
+			RechargeOrderCount:         row.RechargeOrderCount,
 		})
 	}
 	return &trackingdto.CMSMinuteLiveActivityTrendRes{

@@ -107,6 +107,7 @@ import {cmsDomainMappingMessages} from './cms-domain-mapping'
 import {extraDomainMappingMessages} from './extra-domain-mapping'
 import {hostTlsMappingMessages} from './host-tls-mapping'
 import {h5LiveDeployMessages} from './h5-live-deploy'
+import {channelDownloadLandingDeployMessages} from './channel-download-landing-deploy'
 import {coinMerchantDeployMessages} from './coin-merchant-deploy'
 import {countryFlagDeployMessages} from './country-flag-deploy'
 import {thirdPayDeployMessages} from './third-pay-deploy'
@@ -237,6 +238,7 @@ const pageMessageBuilders = [
   ['extraDomainMapping', extraDomainMappingMessages],
   ['hostTlsMapping', hostTlsMappingMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
+  ['channelDownloadLandingDeploy', channelDownloadLandingDeployMessages],
   ['coinMerchantDeploy', coinMerchantDeployMessages],
   ['countryFlagDeploy', countryFlagDeployMessages],
   ['thirdPayDeploy', thirdPayDeployMessages],

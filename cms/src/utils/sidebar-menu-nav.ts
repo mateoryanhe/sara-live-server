@@ -92,6 +92,7 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
     }
     if (
         path === '/config/h5-live-deploy'
+        || path === '/config/channel-download-landing-deploy'
         || path === '/config/coin-merchant-deploy'
         || path === '/config/third-pay-deploy'
         || path === '/config/user-withdraw-deploy'

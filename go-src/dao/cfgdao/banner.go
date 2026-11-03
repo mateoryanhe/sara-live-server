@@ -72,7 +72,7 @@ func UpdateBannerStatus(id uint64, status uint8) error {
 }
 
 func GetBannerList(req *bannerdto.BannerListReq) (int, []*bannerdto.BannerListRes) {
-	sql := `select id, title, image, link, scene, direction, sort, status, created_at, updated_at
+	sql := `select id, title, image, link, scene, direction, sort, status, exclude_package_names, created_at, updated_at
             from home_banners
             where 1=1 `
 	param := make([]any, 0)

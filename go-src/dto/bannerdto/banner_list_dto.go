@@ -23,6 +23,7 @@ type BannerListRes struct {
 	Direction uint8  `json:"direction"`
 	Sort      int    `json:"sort"`
 	Status    uint8  `json:"status"`
+	ExcludePackageNames string `json:"excludePackageNames" dc:"排除App包名(逗号分隔,命中则不展示)"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }

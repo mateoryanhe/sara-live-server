@@ -5,32 +5,25 @@ import 'package:flutter/foundation.dart';
 import '../../core/media/call_media_permission.dart';
 import '../../core/rtc/rtc_session.dart';
 import '../../data/agora/agora_api.dart';
-import '../../data/live_room/live_room_api.dart';
 import 'anchor_live_publish_prefs.dart';
 
 /// 秀场主播推流（独立 [RtcSession]，不与 1v1 [CallController] 共用实例）。
+/// 在房心跳由 [LiveRoomAnchorController] 上报。
 class ShowLivePublisher extends ChangeNotifier {
   ShowLivePublisher({
     required AgoraApi agoraApi,
-    required LiveRoomApi liveRoomApi,
     required AnchorLivePublishPrefs publishPrefs,
   })  : _agoraApi = agoraApi,
-        _liveRoomApi = liveRoomApi,
         _publishPrefs = publishPrefs {
     _loadPrefsFromDisk();
   }
 
   final AgoraApi _agoraApi;
-  final LiveRoomApi _liveRoomApi;
   final AnchorLivePublishPrefs _publishPrefs;
   final RtcSession _rtc = RtcSession();
 
-  static const _liveHeartPeriod = Duration(seconds: 30);
-
   bool _publishing = false;
   String? _lastError;
-  Timer? _liveHeartTimer;
-  int? _liveHeartRoomId;
   Future<void>? _startPublishFuture;
   bool _micMuted = false;
   bool _cameraEnabled = true;
@@ -126,7 +119,6 @@ class ShowLivePublisher extends ChangeNotifier {
     _cameraEnabled = _rtc.cameraEnabled;
     _beautyEnabled = _rtc.beautyEnabled;
     _beautyLevel = _rtc.beautyLevel;
-    _startLiveHeart(anchorId);
     notifyListeners();
   }
 
@@ -181,7 +173,6 @@ class ShowLivePublisher extends ChangeNotifier {
   }
 
   Future<void> stopPublish() async {
-    _stopLiveHeart();
     if (!_publishing) {
       await _rtc.leave();
       return;
@@ -191,32 +182,8 @@ class ShowLivePublisher extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _startLiveHeart(int roomId) {
-    _stopLiveHeart();
-    _liveHeartRoomId = roomId;
-    unawaited(_tickLiveHeart());
-    _liveHeartTimer = Timer.periodic(_liveHeartPeriod, (_) {
-      unawaited(_tickLiveHeart());
-    });
-  }
-
-  void _stopLiveHeart() {
-    _liveHeartTimer?.cancel();
-    _liveHeartTimer = null;
-    _liveHeartRoomId = null;
-  }
-
-  Future<void> _tickLiveHeart() async {
-    final roomId = _liveHeartRoomId;
-    if (roomId == null || !_publishing) return;
-    try {
-      await _liveRoomApi.reportLiveStartStatus(roomId: roomId);
-    } catch (_) {}
-  }
-
   @override
   void dispose() {
-    _stopLiveHeart();
     unawaited(_rtc.disposeViews());
     super.dispose();
   }

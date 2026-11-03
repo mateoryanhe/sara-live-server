@@ -16,17 +16,17 @@ func exportLiveRecordCSV(ctx context.Context, cmsUserId uint64, payload json.Raw
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibilityForUser(cmsUserId)
+	if vis.Empty {
 		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 			return 0, nil
 		}, onProgress)
 	}
+	scope := liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-			AnchorIds:     liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-			GuildIds:      guildIds,
-			FilterByGuild: restrict,
+			AnchorIds:    liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+			Visibility:   scope,
 			LiveRecordId:  parseUint64Filter(req.LiveRecordId),
 			Keyword:       req.Keyword,
 			StartTime:     req.StartTime,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// 业务来源（对齐 Go `CallOrderSource*`）。
 abstract final class CallSource {
   static const liveRoom = 1;
@@ -136,7 +138,24 @@ Map<String, dynamic>? pushDataMap(Object? data) {
   if (data is Map) {
     return Map<String, dynamic>.from(data);
   }
+  if (data is String && data.isNotEmpty) {
+    try {
+      final decoded = jsonDecode(data);
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    } catch (_) {}
+  }
   return null;
+}
+
+/// 直播间推送载荷 `roomId` 与当前房是否一致（兼容 string/num）。
+bool liveRoomPushMatchesRoom(Map<String, dynamic> map, int roomId) {
+  if (roomId <= 0) return false;
+  final raw = map['roomId'];
+  if (raw == null) return false;
+  final parsed = int.tryParse('$raw');
+  return parsed == roomId;
 }
 
 int _jsonInt(Object? v) {

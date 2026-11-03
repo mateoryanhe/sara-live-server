@@ -41,6 +41,10 @@ const zh = {
   syncSuccessDetail: '同步成功：{rows} 条，{files} 个文件',
   syncFailed: '同步失败',
   syncFailedCheckConfig: '同步失败，请检查数据同步配置与目标服务',
+  excludePackageNames: '排除 APK 包名',
+  excludePackageNamesPlaceholder: '多个包名用逗号或换行分隔，如 com.sofie.live',
+  excludePackageNamesTip: '当前 App 请求头 X-App-Package 命中列表中的包名时，不在该 App 展示此 Banner',
+  excludePackageNamesMaxLength: '排除包名最长1024字符',
 } as const
 
 export const bannerListMessages = definePageMessages(
@@ -86,6 +90,10 @@ export const bannerListMessages = definePageMessages(
     syncSuccessDetail: 'Synced: {rows} rows, {files} files',
     syncFailed: 'Sync failed',
     syncFailedCheckConfig: 'Sync failed. Check data sync config and target service',
+    excludePackageNames: 'Exclude APK packages',
+    excludePackageNamesPlaceholder: 'Separate with comma or newline, e.g. com.sofie.live',
+    excludePackageNamesTip: 'Banner hidden when App header X-App-Package matches any listed package',
+    excludePackageNamesMaxLength: 'Exclude list max 1024 characters',
   },
   {
     addBanner: 'Añadir banner',
@@ -128,6 +136,10 @@ export const bannerListMessages = definePageMessages(
     syncSuccessDetail: 'Sincronizado: {rows} filas, {files} archivos',
     syncFailed: 'Error de sincronización',
     syncFailedCheckConfig: 'Error de sync. Revisa config. y servicio destino',
+    excludePackageNames: 'Excluir paquetes APK',
+    excludePackageNamesPlaceholder: 'Separar por coma o línea, p. ej. com.sofie.live',
+    excludePackageNamesTip: 'No mostrar si X-App-Package coincide con algún paquete listado',
+    excludePackageNamesMaxLength: 'Lista de exclusión máx. 1024 caracteres',
   },
   {
     addBanner: 'Adicionar banner',
@@ -170,6 +182,10 @@ export const bannerListMessages = definePageMessages(
     syncSuccessDetail: 'Sincronizado: {rows} linhas, {files} arquivos',
     syncFailed: 'Falha na sincronização',
     syncFailedCheckConfig: 'Falha no sync. Verifique config. e serviço destino',
+    excludePackageNames: 'Excluir pacotes APK',
+    excludePackageNamesPlaceholder: 'Separe por vírgula ou linha, ex. com.sofie.live',
+    excludePackageNamesTip: 'Ocultar se X-App-Package coincidir com pacote listado',
+    excludePackageNamesMaxLength: 'Lista de exclusão máx. 1024 caracteres',
   },
   {
     addBanner: 'बैनर जोड़ें',
@@ -212,6 +228,10 @@ export const bannerListMessages = definePageMessages(
     syncSuccessDetail: 'सिंक: {rows} पंक्तियाँ, {files} फ़ाइलें',
     syncFailed: 'सिंक विफल',
     syncFailedCheckConfig: 'सिंक विफल। कॉन्फ़िग जाँचें',
+    excludePackageNames: 'APK पैकेज बहिष्कृत करें',
+    excludePackageNamesPlaceholder: 'अल्पविराम या नई पंक्ति से अलग करें',
+    excludePackageNamesTip: 'X-App-Package सूची में हो तो Banner न दिखाएँ',
+    excludePackageNamesMaxLength: 'अधिकतम 1024 अक्षर',
   },
   {
     addBanner: 'Tambah banner',
@@ -254,5 +274,9 @@ export const bannerListMessages = definePageMessages(
     syncSuccessDetail: 'Tersinkron: {rows} baris, {files} file',
     syncFailed: 'Sinkronisasi gagal',
     syncFailedCheckConfig: 'Sinkron gagal. Periksa konfigurasi',
+    excludePackageNames: 'Kecualikan paket APK',
+    excludePackageNamesPlaceholder: 'Pisahkan dengan koma atau baris baru, mis. com.sofie.live',
+    excludePackageNamesTip: 'Sembunyikan jika X-App-Package cocok dengan paket terdaftar',
+    excludePackageNamesMaxLength: 'Daftar kecualian maks. 1024 karakter',
   },
 )

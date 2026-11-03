@@ -295,17 +295,41 @@ class LiveRoomChatLine {
     required this.senderName,
     required this.content,
     this.senderId = '',
+    this.senderAvatar = '',
     this.vipLevel = 0,
     this.isGift = false,
-    this.giftSummary,
+    this.giftName = '',
+    this.giftIcon = '',
+    this.giftCount = 0,
   });
 
   final String senderName;
   final String senderId;
+  final String senderAvatar;
   final String content;
   final int vipLevel;
   final bool isGift;
-  final String? giftSummary;
+  final String giftName;
+  final String giftIcon;
+  final int giftCount;
+}
+
+/// 对齐 Go `JoinRoomRes`（HTTP 200 也可能带 kickBanned）。
+class JoinRoomResult {
+  JoinRoomResult({
+    required this.kickBanned,
+    required this.kickRemainSeconds,
+  });
+
+  final bool kickBanned;
+  final int kickRemainSeconds;
+
+  factory JoinRoomResult.fromJson(Map<String, dynamic> json) {
+    return JoinRoomResult(
+      kickBanned: json['kickBanned'] == true,
+      kickRemainSeconds: (json['kickRemainSeconds'] as num?)?.toInt() ?? 0,
+    );
+  }
 }
 
 class AudienceRestrictStatus {

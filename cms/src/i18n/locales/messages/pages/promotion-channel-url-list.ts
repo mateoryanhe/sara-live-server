@@ -6,7 +6,7 @@ const zh = {
   channelName: '渠道名称',
   channelCode: '渠道编码',
   shareUrl: '分享链接',
-  shareBaseHostHint: '分享域名取自「前端部署 → H5直播部署」中的站点域名，链接格式：https://{域名}?ch={渠道编码}',
+  shareBaseHostHint: '分享域名取自「前端部署 → H5直播部署」中的站点域名，链接格式：https://域名?ch=渠道编码（按实际上线域名与编码替换）',
   shareBaseHostEmpty: '未配置 H5 直播域名，请先在 H5直播部署 页保存站点域名后再新建渠道。',
   shareBaseHostCurrent: '当前分享域名：{host}',
   copyShareUrl: '复制链接',

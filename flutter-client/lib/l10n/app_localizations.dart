@@ -488,6 +488,18 @@ abstract class AppLocalizations {
   /// **'LIVE'**
   String get liveBadgeOnAir;
 
+  /// No description provided for @liveFollowAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get liveFollowAnchor;
+
+  /// No description provided for @liveFollowingAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get liveFollowingAnchor;
+
   /// No description provided for @liveOnlineCount.
   ///
   /// In en, this message translates to:
@@ -499,6 +511,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Say something…'**
   String get liveChatHint;
+
+  /// No description provided for @liveChatGiftAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get liveChatGiftAction;
 
   /// No description provided for @liveSendGift.
   ///

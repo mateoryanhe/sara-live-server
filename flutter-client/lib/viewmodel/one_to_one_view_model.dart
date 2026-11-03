@@ -3,7 +3,7 @@ import 'dart:async';
 import '../app/app_scope.dart';
 import '../core/bus/app_bus_event.dart';
 import '../core/http/api_exception.dart';
-import '../core/ws/push_cmd.dart';
+import '../core/ws/ws_client.dart';
 import '../data/one_to_one/one_to_one_models.dart';
 import '../ui/contracts/one_to_one_ui.dart';
 
@@ -36,8 +36,8 @@ class OneToOneViewModel {
   }
 
   void _onBus(AppBusEvent event) {
-    if (event is! WsBusEvent) return;
-    if (event.cmd == PushCmd.wsConnected) {
+    if (event is WsConnectionBusEvent &&
+        event.state == WsConnectionState.connected) {
       unawaited(refresh(silent: true));
     }
   }

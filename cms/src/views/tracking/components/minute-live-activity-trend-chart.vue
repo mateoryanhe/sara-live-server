@@ -33,6 +33,8 @@ const seriesDefs = () => [
   {key: 'chatCount' as const, label: t('pages.trackingMinuteLiveActivity.chat'), color: '#64748b'},
   {key: 'betCount' as const, label: t('pages.trackingMinuteLiveActivity.bet'), color: '#F56C6C'},
   {key: 'call1v1Count' as const, label: t('pages.trackingMinuteLiveActivity.call1v1'), color: '#9C27B0'},
+  {key: 'call1v1ConnectSuccessCount' as const, label: t('pages.trackingMinuteLiveActivity.call1v1ConnectSuccess'), color: '#7B1FA2'},
+  {key: 'call1v1ConsumeCount' as const, label: t('pages.trackingMinuteLiveActivity.call1v1Consume'), color: '#512DA8'},
   {key: 'rechargeOrderCount' as const, label: t('pages.trackingMinuteLiveActivity.rechargeOrder'), color: '#00BCD4'},
 ]
 
@@ -54,6 +56,8 @@ function toDisplayPoints(points: MinuteLiveActivityTrendPoint[]): MinuteLiveActi
       chatCount: 0,
       betCount: 0,
       call1v1Count: 0,
+      call1v1ConnectSuccessCount: 0,
+      call1v1ConsumeCount: 0,
       rechargeOrderCount: 0,
     }
     for (let j = start; j < end && j < points.length; j++) {
@@ -64,6 +68,8 @@ function toDisplayPoints(points: MinuteLiveActivityTrendPoint[]): MinuteLiveActi
       agg.chatCount = Math.max(agg.chatCount, Number(row.chatCount || 0))
       agg.betCount = Math.max(agg.betCount, Number(row.betCount || 0))
       agg.call1v1Count = Math.max(agg.call1v1Count, Number(row.call1v1Count || 0))
+      agg.call1v1ConnectSuccessCount = Math.max(agg.call1v1ConnectSuccessCount, Number(row.call1v1ConnectSuccessCount || 0))
+      agg.call1v1ConsumeCount = Math.max(agg.call1v1ConsumeCount, Number(row.call1v1ConsumeCount || 0))
       agg.rechargeOrderCount = Math.max(agg.rechargeOrderCount, Number(row.rechargeOrderCount || 0))
       if (j === Math.floor((start + end - 1) / 2)) {
         mid = row

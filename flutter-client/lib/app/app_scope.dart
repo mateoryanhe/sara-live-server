@@ -10,13 +10,13 @@ import '../core/cache/api_disk_cache.dart';
 import '../core/cache/business_object_cache.dart';
 import '../core/cache/device_tier.dart';
 import '../core/cache/device_tier_detect.dart';
+import '../core/cache/gift_effect_cache.dart';
 import '../core/cache/image_disk_cache.dart';
 import '../core/cache/memory_cache_store.dart';
 import '../core/http/api_client.dart';
 import '../core/http/api_exception.dart';
 import '../core/http/auth_token.dart';
 import '../core/http/http_logger.dart';
-import '../core/ws/push_cmd.dart';
 import '../core/ws/ws_client.dart';
 import '../core/ws/ws_config.dart';
 import '../data/agora/agora_api.dart';
@@ -25,6 +25,7 @@ import '../data/auth/device_info_builder.dart';
 import '../data/auth/session_store.dart';
 import '../data/call/call_api.dart';
 import '../data/gift/gift_api.dart';
+import '../feature/show_live/live_room_gift_effect_player.dart';
 import '../feature/show_live/live_room_viewer_controller.dart';
 import '../feature/show_live/live_room_anchor_controller.dart';
 import '../feature/show_live/anchor_live_publish_prefs.dart';
@@ -42,7 +43,7 @@ import '../data/vip/vip_repository.dart';
 
 /// 进程级依赖（数据层），UI/ViewModel 从这里取。
 ///
-/// 统一事件：[appBus] — `AppLifecycleBusEvent` / `WsBusEvent`；模块同一套 `add`/`remove`。
+/// 统一事件：[appBus] — `AppLifecycleBusEvent` / `WsConnectionBusEvent` / `WsBusEvent`；模块同一套 `add`/`remove`。
 class AppScope {
   AppScope._({
     required this.tier,
@@ -60,6 +61,7 @@ class AppScope {
     required this.liveRoomAnchor,
     required this.liveFollowApi,
     required this.giftApi,
+    required this.liveRoomGiftEffectPlayer,
     required this.cache,
     required this.appBus,
     required this.wsClient,
@@ -81,6 +83,7 @@ class AppScope {
   final LiveRoomAnchorController liveRoomAnchor;
   final LiveFollowApi liveFollowApi;
   final GiftApi giftApi;
+  final LiveRoomGiftEffectPlayer liveRoomGiftEffectPlayer;
   final BusinessObjectCache cache;
   final AppBus appBus;
   final WsClient wsClient;
@@ -112,6 +115,7 @@ class AppScope {
 
     final tier = await detectDeviceTier();
     ImageDiskCache.init(tier);
+    GiftEffectCache.init(tier);
     await ApiDiskCache.init(tier);
     final memory = MemoryCacheStore(tier: tier);
     final cache = BusinessObjectCache(
@@ -157,11 +161,9 @@ class AppScope {
       config: WsConfig(wsBaseUrlProvider: () => serverEndpoint.wsBaseUrl),
       tokenProvider: () => scope.session.token,
       onMessages: (msg) => appBus.publish(WsBusEvent.fromPush(msg)),
-      onState: (state) {
-        if (state == WsConnectionState.connected) {
-          appBus.publish(const WsBusEvent(cmd: PushCmd.wsConnected));
-        }
-      },
+      onState: (state, {required manualDisconnect}) => appBus.publish(
+        WsConnectionBusEvent(state, manualDisconnect: manualDisconnect),
+      ),
     );
 
     AuthToken? tokenProvider() => scope.session.token;
@@ -176,18 +178,24 @@ class AppScope {
       tokenProvider: tokenProvider,
     );
 
+    final userRepository = UserRepository(
+      api: UserApi(client),
+      cache: cache,
+      appBus: appBus,
+      tokenProvider: tokenProvider,
+    );
+
+    final liveRoomGiftEffectPlayer = LiveRoomGiftEffectPlayer(
+      apiBaseUrl: serverEndpoint.apiBaseUrl,
+    );
+
     scope = AppScope._(
       tier: tier,
       session: session,
       apiClient: client,
       authApi: AuthApi(client),
       deviceInfoBuilder: DeviceInfoBuilder(),
-      userRepository: UserRepository(
-        api: UserApi(client),
-        cache: cache,
-        appBus: appBus,
-        tokenProvider: tokenProvider,
-      ),
+      userRepository: userRepository,
       vipRepository: VipRepository(
         api: VipApi(client),
         cache: cache,
@@ -207,13 +215,15 @@ class AppScope {
       ),
       showLivePublisher: ShowLivePublisher(
         agoraApi: agoraApi,
-        liveRoomApi: liveRoomApi,
         publishPrefs: AnchorLivePublishPrefs(prefs),
       ),
       liveRoomViewer: LiveRoomViewerController(
         liveRoomApi: liveRoomApi,
         agoraApi: agoraApi,
+        userRepository: userRepository,
+        tokenProvider: tokenProvider,
         appBus: appBus,
+        giftEffectPlayer: liveRoomGiftEffectPlayer,
       ),
       liveFollowApi: liveFollowApi,
       liveRoomAnchor: LiveRoomAnchorController(
@@ -221,13 +231,22 @@ class AppScope {
         liveRoomRepository: liveRoomRepository,
         liveFollowApi: liveFollowApi,
         appBus: appBus,
+        giftEffectPlayer: liveRoomGiftEffectPlayer,
       ),
       giftApi: GiftApi(client),
+      liveRoomGiftEffectPlayer: liveRoomGiftEffectPlayer,
       cache: cache,
       appBus: appBus,
       wsClient: wsClient,
       serverEndpoint: serverEndpoint,
     );
+
+    appBus.add((event) {
+      if (event is! AppLifecycleBusEvent) return;
+      if (event.kind != AppLifecycleKind.resumed) return;
+      if (!scope.session.isLoggedIn) return;
+      unawaited(scope.wsClient.connect());
+    });
 
     appBus.publish(AppLifecycleBusEvent.started());
     return scope;
@@ -244,6 +263,12 @@ class AppScope {
   /// 登录成功后连接 WS。
   Future<void> handleLoggedIn() async {
     await wsClient.connect();
+    final userId = _currentUserId;
+    if (userId != null && userId > 0) {
+      unawaited(
+        userRepository.getProfile(userId: userId, forceRefresh: false),
+      );
+    }
   }
 
   /// Start an explicit device-code account switch.

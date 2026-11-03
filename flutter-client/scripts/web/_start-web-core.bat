@@ -68,8 +68,8 @@ echo API     : %API_BASE%
 echo HttpLog : enabled=%HTTP_LOG_ENABLED%
 echo Log dir : %HTTP_LOG_DIR%
 echo.
-echo WHERE TO SEE HTTP LOGS (Web):
-echo   1^) THIS cmd window - blocks appear after each API call
+echo WHERE TO SEE HTTP / WS LOGS (Web):
+echo   1^) THIS cmd window - blocks appear after each API call / WS push
 echo   2^) Chrome F12 - Console tab
 echo   3^) Folder opened in Explorer - read WHERE-TO-SEE-LOGS.txt
 echo   Edit: scripts\web\start-web-config.bat ^(API_BASE, HTTP_LOG_DIR_*^)
@@ -129,16 +129,16 @@ exit /b 0
 
 :WriteLogReadme
 > "%HTTP_LOG_DIR%\WHERE-TO-SEE-LOGS.txt" (
-  echo Sara Live - HTTP debug logs
+  echo Sara Live - HTTP + WebSocket debug logs
   echo Role: %ROLE_LABEL%
   echo Directory: %HTTP_LOG_DIR%
   echo.
   echo Web ^(Chrome on Win11^):
-  echo   - Keep the launcher CMD window open; each POST prints a block here.
-  echo   - Chrome DevTools ^(F12^) - Console - same HTTP blocks.
+  echo   - Keep the launcher CMD window open; each POST / WS push prints a block here.
+  echo   - Chrome DevTools ^(F12^) - Console - same blocks.
   echo.
   echo Android:
-  echo   - Files: http_android_YYYY-MM-DD.log when HTTP_LOG_DIR is set.
+  echo   - Files: http_android_YYYY-MM-DD.log ^(HTTP + WS in one file^).
   echo.
   echo Customize:
   echo   Edit flutter-client\scripts\web\start-web-config.bat

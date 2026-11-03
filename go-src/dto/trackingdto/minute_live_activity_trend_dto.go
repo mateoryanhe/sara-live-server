@@ -17,9 +17,11 @@ type CMSMinuteLiveActivityTrendPoint struct {
 	LeaveCount   uint64 `json:"leaveCount"`
 	GiftCount    uint64 `json:"giftCount"`
 	ChatCount    uint64 `json:"chatCount"`
-	BetCount           uint64 `json:"betCount"`
-	Call1v1Count       uint64 `json:"call1v1Count"`
-	RechargeOrderCount uint64 `json:"rechargeOrderCount"`
+	BetCount                   uint64 `json:"betCount"`
+	Call1v1Count               uint64 `json:"call1v1Count"`
+	Call1v1ConnectSuccessCount uint64 `json:"call1v1ConnectSuccessCount"`
+	Call1v1ConsumeCount        uint64 `json:"call1v1ConsumeCount"`
+	RechargeOrderCount         uint64 `json:"rechargeOrderCount"`
 }
 
 type CMSMinuteLiveActivityTrendRes struct {

@@ -28,6 +28,8 @@ export type DashboardExportLabels = {
   chat: string
   bet: string
   call1v1: string
+  call1v1ConnectSuccess: string
+  call1v1Consume: string
   rechargeOrder: string
 }
 
@@ -212,6 +214,8 @@ export function buildDashboardUserEventsCsvContent(
     {header: labels.chat, value: (r) => r.chatCount},
     {header: labels.bet, value: (r) => r.betCount},
     {header: labels.call1v1, value: (r) => r.call1v1Count},
+    {header: labels.call1v1ConnectSuccess, value: (r) => r.call1v1ConnectSuccessCount},
+    {header: labels.call1v1Consume, value: (r) => r.call1v1ConsumeCount},
     {header: labels.rechargeOrder, value: (r) => r.rechargeOrderCount},
   ]
   return buildCsvContent(columns, points)

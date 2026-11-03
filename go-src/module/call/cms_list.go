@@ -117,16 +117,15 @@ func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string, prof
 
 // GetCMSVideoCallLogList CMS分页查询视频通话日志
 func GetCMSVideoCallLogList(ctx context.Context, req *calldto.CMSVideoCallLogListReq) (*httpserver.CMSQueryResp, error) {
-	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
-	if empty {
+	vis := cmsvis.ResolveAnchorRoomVisibility(ctx)
+	if vis.Empty {
 		return httpserver.NewCMSQueryResp(0, []*calldto.CMSVideoCallLogItem{}), nil
 	}
 	receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 	total, rows := calldao.CallOrderCMSList(&calldao.CallOrderCMSListFilter{
-		CallerId:      parseUint64Filter(req.CallerId),
-		ReceiverIds:   receiverIds,
-		GuildIds:      guildIds,
-		FilterByGuild: restrict,
+		CallerId:     parseUint64Filter(req.CallerId),
+		ReceiverIds:  receiverIds,
+		Visibility:   liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds),
 		Keyword:       req.Keyword,
 		CostFilter:    req.CostFilter,
 		Source:        req.Source,

@@ -6,11 +6,13 @@ Future<void> initHttpLogSink({
 }) async {
   if (logDir.trim().isNotEmpty) {
     debugPrint(
-      '[HttpLog] web: logs go to DevTools Console + flutter run terminal '
+      '[HttpLog] web: HTTP + WS logs -> DevTools Console + flutter run terminal '
       '(HTTP_LOG_DIR=$logDir is label only; use Android build for file sink)',
     );
   } else {
-    debugPrint('[HttpLog] web: logs -> DevTools Console + flutter run terminal');
+    debugPrint(
+      '[HttpLog] web: HTTP + WS -> DevTools Console + flutter run terminal',
+    );
   }
 }
 
