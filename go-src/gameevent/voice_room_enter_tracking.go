@@ -13,9 +13,10 @@ const (
 
 // VoiceRoomEnterTrackingEventData joinRoom 成功埋点载荷
 type VoiceRoomEnterTrackingEventData struct {
-	UserId uint64
-	RoomId uint64
-	StatAt time.Time
+	UserId         uint64
+	RoomId         uint64
+	StatAt         time.Time
+	ClientPlatform string
 }
 
 func NewVoiceRoomEnterTrackingEventData(userId, roomId uint64, statAt time.Time) *VoiceRoomEnterTrackingEventData {

@@ -614,9 +614,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'PromotionChannelUrlListManagement:create': '/promotionChannelUrl/createPromotionChannelUrl',
     'PromotionChannelUrlListManagement:edit': '/promotionChannelUrl/updatePromotionChannelUrl',
     'PromotionChannelUrlListManagement:delete': '/promotionChannelUrl/deletePromotionChannelUrl',
+    'PromotionChannelUrlListManagement:uploadApk': '/promotionChannelUrl/initPromotionChannelUrlApkUpload',
     PromotionChannelDailyStatManagement: '/promotionChannelUrl/promotionChannelDailyStatList',
     'PromotionChannelDailyStatManagement:view': '/promotionChannelUrl/promotionChannelDailyStatList',
     'PromotionChannelDailyStatManagement:search': '/promotionChannelUrl/promotionChannelDailyStatList',
+    H5AppPromotionDailyStatManagement: '/promotionChannelUrl/h5AppPromotionDailyStatList',
+    'H5AppPromotionDailyStatManagement:view': '/promotionChannelUrl/h5AppPromotionDailyStatList',
+    'H5AppPromotionDailyStatManagement:search': '/promotionChannelUrl/h5AppPromotionDailyStatList',
 
     ApkPromotionChannelListManagement: '/apkPromotionChannel/apkPromotionChannelList',
     'ApkPromotionChannelListManagement:view': '/apkPromotionChannel/apkPromotionChannelList',

@@ -75,7 +75,13 @@ func FirebaseLogin(ctx context.Context, req *authdto.FirebaseLoginReq) (*authdto
 	}
 	userinfodao.SaveCancelCode(account.ID)
 	if isNewUser {
-		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), req.DeviceInfo))
+		if req.DeviceInfo != nil {
+			userinfodao.TrySetPromotionChannelPairFromDevice(account.ID, req.DeviceInfo)
+		}
+		ev := gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), req.DeviceInfo)
+		ev.RegisterAccountChannel = account.Channel
+		ev.RegisterPromotionPlatform = userinfodao.SaveRegisterPromotionPlatform(ctx, account.ID, account.Channel)
+		event.Pub(gameevent.RegisterEvent, ev)
 	}
 
 	return &authdto.FirebaseLoginRes{

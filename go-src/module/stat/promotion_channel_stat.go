@@ -33,6 +33,9 @@ func recordDailyPromotionChannelH5DownloadApk(at time.Time, channelCode int) {
 }
 
 func recordDailyPromotionChannelOrder(at time.Time, userId uint64, price float64) {
+	if !userEligibleForPromotionChannelURLDailyStat(userId) {
+		return
+	}
 	channelCode := userinfodao.GetPromotionChannelCode(userId)
 	if channelCode <= 0 || price <= 0 {
 		return
@@ -49,6 +52,9 @@ func recordDailyPromotionChannelOrder(at time.Time, userId uint64, price float64
 
 func recordDailyPromotionChannelRechargeSuccess(at time.Time, userId uint64, amount float64) {
 	if userId == 0 || amount <= 0 {
+		return
+	}
+	if !userEligibleForPromotionChannelURLDailyStat(userId) {
 		return
 	}
 	channelCode := userinfodao.GetPromotionChannelCode(userId)
@@ -86,4 +92,5 @@ func consumePromotionChannelOrderJob(job *statJob) {
 	}
 	recordDailyPromotionChannelOrder(at, order.UserId, order.Price)
 	recordDailyApkPromotionChannelOrder(at, order.UserId, order.Price)
+	recordDailyH5AppPromotionChannelOrder(at, order.UserId, order.Price)
 }

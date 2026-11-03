@@ -601,6 +601,14 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.delete,
         {key: 'uploadApk', label: '上传APK'},
     ],
+    PromotionChannelUrlListManagement: [
+        BTN.view,
+        BTN.search,
+        BTN.create,
+        BTN.edit,
+        BTN.delete,
+        {key: 'uploadApk', label: '上传APK'},
+    ],
     AuditCodeCfgManagement: [
         BTN.view,
         {key: 'generate', label: '生成'},

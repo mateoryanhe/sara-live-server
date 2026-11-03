@@ -104,6 +104,7 @@ const menu = {
   PromotionChannelDailyStatManagement: '推广渠道日统计',
   ApkPromotionChannelListManagement: 'APK推广渠道',
   ApkPromotionChannelDailyStatManagement: 'APK推广渠道日统计',
+  H5AppPromotionDailyStatManagement: 'H5下载App推广日志报表',
   PromotionInviteLogListManagement: '邀请列表',
   PromotionShareAppDownloadCfgManagement: '分享下载文案',
   ConfigManagement: '系统配置',

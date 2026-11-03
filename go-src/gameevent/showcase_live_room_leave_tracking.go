@@ -13,9 +13,10 @@ const (
 
 // ShowcaseLiveRoomLeaveTrackingEventData leaveRoom 成功埋点载荷
 type ShowcaseLiveRoomLeaveTrackingEventData struct {
-	UserId uint64
-	RoomId uint64
-	StatAt time.Time
+	UserId         uint64
+	RoomId         uint64
+	StatAt         time.Time
+	ClientPlatform string
 }
 
 func NewShowcaseLiveRoomLeaveTrackingEventData(userId, roomId uint64, statAt time.Time) *ShowcaseLiveRoomLeaveTrackingEventData {

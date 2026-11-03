@@ -45,7 +45,7 @@ func ConfirmCall(ctx context.Context, req *calldto.ConfirmCallReq) (*calldto.Con
 		return buildConfirmCallRes(order, false), nil
 	}
 
-	firstChargeExecuted, err := applyCallAnswerConfirm(order, userId, time.Now())
+	firstChargeExecuted, err := applyCallAnswerConfirm(ctx, order, userId, time.Now())
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func ConfirmCall(ctx context.Context, req *calldto.ConfirmCallReq) (*calldto.Con
 	return buildConfirmCallRes(order, firstChargeExecuted), nil
 }
 
-func applyCallAnswerConfirm(order *entity.CallOrder, userId uint64, now time.Time) (bool, error) {
+func applyCallAnswerConfirm(ctx context.Context, order *entity.CallOrder, userId uint64, now time.Time) (bool, error) {
 	otherConfirmed := (userId == order.CallerId && order.ReceiverConfirmTime != nil) ||
 		(userId == order.ReceiverId && order.CallerConfirmTime != nil)
 
@@ -76,7 +76,7 @@ func applyCallAnswerConfirm(order *entity.CallOrder, userId uint64, now time.Tim
 	}
 	order.SetStatus(entity.CallOrderStatusInCall)
 	pushCallStarted(order, now.Unix())
-	pubCall1v1ConnectSuccessTracking(order, now)
+	pubCall1v1ConnectSuccessTracking(ctx, order, now)
 	return true, nil
 }
 

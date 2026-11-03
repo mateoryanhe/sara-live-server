@@ -4,11 +4,12 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // CMSMinuteLiveActivityTrendReq CMS 直播间分钟级活跃趋势(保留约 3 天)
 type CMSMinuteLiveActivityTrendReq struct {
-	g.Meta    `path:"/getMinuteLiveActivityTrend" method:"post" summary:"CMS直播间分钟活跃趋势" tags:"埋点"`
-	StartTime int64 `json:"startTime" dc:"开始时间 Unix 秒(UTC)"`
-	EndTime   int64 `json:"endTime" dc:"结束时间 Unix 秒(UTC)"`
-	Limit                int   `json:"limit" dc:"最多返回点数,默认4320"`
-	BypassDashboardCache bool  `json:"bypassDashboardCache" dc:"true 时跳过仪表盘读缓存, 重新查库"`
+	g.Meta               `path:"/getMinuteLiveActivityTrend" method:"post" summary:"CMS直播间分钟活跃趋势" tags:"埋点"`
+	StartTime            int64  `json:"startTime" dc:"开始时间 Unix 秒(UTC)"`
+	EndTime              int64  `json:"endTime" dc:"结束时间 Unix 秒(UTC)"`
+	Limit                int    `json:"limit" dc:"最多返回点数,默认4320"`
+	Platform             string `json:"platform" dc:"客户端平台过滤 android/ios/web 空=全部汇总"`
+	BypassDashboardCache bool   `json:"bypassDashboardCache" dc:"true 时跳过仪表盘读缓存, 重新查库"`
 }
 
 type CMSMinuteLiveActivityTrendPoint struct {

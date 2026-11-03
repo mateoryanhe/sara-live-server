@@ -6,6 +6,7 @@ import (
 
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/trackingdto"
+	"xr-game-server/gameevent"
 	statentity "xr-game-server/entity/stat"
 )
 
@@ -14,7 +15,7 @@ const maxTrendPoints = 4320
 func GetCMSMinuteLiveActivityTrend(_ context.Context, req *trackingdto.CMSMinuteLiveActivityTrendReq) (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
 	bypass := req != nil && req.BypassDashboardCache
 	if isDefaultMinuteLiveActivityTrendReq(req) {
-		return getCachedDashboardUserEventsTrend(bypass, func() (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
+		return getCachedDashboardUserEventsTrend(req, bypass, func() (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
 			return buildCMSMinuteLiveActivityTrend(req)
 		})
 	}
@@ -29,6 +30,7 @@ func buildCMSMinuteLiveActivityTrend(req *trackingdto.CMSMinuteLiveActivityTrend
 	if limit <= 0 || limit > maxTrendPoints {
 		limit = maxTrendPoints
 	}
+	platform := gameevent.NormalizeStatClientPlatform(req.Platform)
 	now := time.Now().UTC()
 	end := now
 	start := end.AddDate(0, 0, -retentionDays)
@@ -44,19 +46,19 @@ func buildCMSMinuteLiveActivityTrend(req *trackingdto.CMSMinuteLiveActivityTrend
 		start, end = end, start
 	}
 
-	rows := statdao.ListMinuteLiveActivityStats(start, end, limit)
-	rows = overlayLiveMinuteBucket(rows, now)
+	rows := statdao.ListMinuteLiveActivityStats(start, end, limit, platform)
+	rows = overlayLiveMinuteBucket(rows, now, platform)
 	points := make([]*trackingdto.CMSMinuteLiveActivityTrendPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
 			continue
 		}
 		points = append(points, &trackingdto.CMSMinuteLiveActivityTrendPoint{
-			Time:         row.BucketAt.UTC().Format("2006-01-02 15:04:05"),
-			JoinCount:    row.JoinCount,
-			LeaveCount:   row.LeaveCount,
-			GiftCount:    row.GiftCount,
-			ChatCount:    row.ChatCount,
+			Time:                       row.BucketAt.UTC().Format("2006-01-02 15:04:05"),
+			JoinCount:                  row.JoinCount,
+			LeaveCount:                 row.LeaveCount,
+			GiftCount:                  row.GiftCount,
+			ChatCount:                  row.ChatCount,
 			BetCount:                   row.BetCount,
 			Call1v1Count:               row.Call1v1Count,
 			Call1v1ConnectSuccessCount: row.Call1v1ConnectSuccessCount,
@@ -71,8 +73,14 @@ func buildCMSMinuteLiveActivityTrend(req *trackingdto.CMSMinuteLiveActivityTrend
 	}, nil
 }
 
-func overlayLiveMinuteBucket(rows []*statentity.MinuteLiveActivityStat, now time.Time) []*statentity.MinuteLiveActivityStat {
-	live := statdao.GetMinuteLiveActivityStatByTime(now)
+func overlayLiveMinuteBucket(rows []*statentity.MinuteLiveActivityStat, now time.Time, platform string) []*statentity.MinuteLiveActivityStat {
+	platform = gameevent.NormalizeStatClientPlatform(platform)
+	var live *statentity.MinuteLiveActivityStat
+	if platform == "" {
+		live = statdao.GetMinuteLiveActivityLiveBucketAggregate(now)
+	} else {
+		live = statdao.GetMinuteLiveActivityStatByTimePlatform(now, platform)
+	}
 	if live == nil {
 		return rows
 	}

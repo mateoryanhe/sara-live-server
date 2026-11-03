@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrpool"
 	"xr-game-server/dao/statdao"
+	"xr-game-server/gameevent"
 	statentity "xr-game-server/entity/stat"
 )
 
@@ -24,17 +26,22 @@ const (
 	metricRechargeOrder
 )
 
-func schedule(kind metricKind, at time.Time) {
+func schedule(kind metricKind, at time.Time, platform string) {
 	if at.IsZero() {
 		at = time.Now()
 	}
+	platform = gameevent.NormalizeStatClientPlatform(platform)
+	kindCopy := kind
+	atCopy := at
+	platformCopy := platform
 	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
-		record(kind, at)
+		record(kindCopy, atCopy, platformCopy)
 	})
 }
 
-func record(kind metricKind, at time.Time) {
-	row := statdao.GetMinuteLiveActivityStatByTime(at)
+func record(kind metricKind, at time.Time, platform string) {
+	platform = gameevent.NormalizeStatClientPlatform(platform)
+	row := statdao.GetMinuteLiveActivityStatByTimePlatform(at, platform)
 	switch kind {
 	case metricJoin:
 		row.AddJoinCount(1)
@@ -57,17 +64,27 @@ func record(kind metricKind, at time.Time) {
 	default:
 		return
 	}
-	statdao.PublishMinuteLiveActivityStat(at, row)
+	statdao.PublishMinuteLiveActivityStat(at, platform, row)
 }
 
 // RecordGift 直播间送礼成功
 func RecordGift(at time.Time) {
-	schedule(metricGift, at)
+	schedule(metricGift, at, "")
+}
+
+// RecordGiftFromCtx 带 X-Platform 的送礼统计
+func RecordGiftFromCtx(ctx context.Context, at time.Time) {
+	schedule(metricGift, at, httpserver.ClientPlatformFromContext(ctx))
 }
 
 // RecordChat 直播间公屏文字或付费弹幕
 func RecordChat(at time.Time) {
-	schedule(metricChat, at)
+	schedule(metricChat, at, "")
+}
+
+// RecordChatFromCtx 带 X-Platform 的聊天统计
+func RecordChatFromCtx(ctx context.Context, at time.Time) {
+	schedule(metricChat, at, httpserver.ClientPlatformFromContext(ctx))
 }
 
 func onDayCleanup(_ any) {

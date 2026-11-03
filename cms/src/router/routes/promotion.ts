@@ -31,6 +31,12 @@ export const promotionRoutes: RouteRecordRaw = {
             meta: {title: 'APK推广渠道日统计'},
         },
         {
+            path: 'h5-app-promotion-daily-stat',
+            name: 'H5AppPromotionDailyStatManagement',
+            component: () => import('@/views/promotion/h5-app-promotion-daily-stat-list.vue'),
+            meta: {title: 'H5下载App推广日志报表'},
+        },
+        {
             path: 'invite-log-list',
             name: 'PromotionInviteLogListManagement',
             component: () => import('@/views/promotion/promotion-invite-log-list.vue'),

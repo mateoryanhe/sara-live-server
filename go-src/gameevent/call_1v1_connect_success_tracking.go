@@ -13,11 +13,12 @@ const (
 
 // Call1v1ConnectSuccessTrackingEventData 1v1 视频通话双方成功接通埋点
 type Call1v1ConnectSuccessTrackingEventData struct {
-	Source     uint8
-	CallType   uint8
-	CallerId   uint64
-	ReceiverId uint64
-	StatAt     time.Time
+	Source         uint8
+	CallType       uint8
+	CallerId       uint64
+	ReceiverId     uint64
+	StatAt         time.Time
+	ClientPlatform string
 }
 
 func NewCall1v1ConnectSuccessTrackingEventData(source, callType uint8, callerId, receiverId uint64, statAt time.Time) *Call1v1ConnectSuccessTrackingEventData {

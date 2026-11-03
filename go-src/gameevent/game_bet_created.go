@@ -9,9 +9,10 @@ const (
 
 // GameBetCreatedEventData 游戏下注事件数据
 type GameBetCreatedEventData struct {
-	UserId       uint64
-	LiveRecordId uint64
-	Amount       float64
+	UserId         uint64
+	LiveRecordId   uint64
+	Amount         float64
+	ClientPlatform string
 }
 
 func NewGameBetCreatedEventData(userId, liveRecordId uint64, amount float64) *GameBetCreatedEventData {

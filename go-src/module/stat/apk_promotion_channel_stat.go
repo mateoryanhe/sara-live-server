@@ -1,44 +1,42 @@
 package stat
 
 import (
-	"strings"
 	"time"
 
-	"xr-game-server/dao/apkpromotionchanneldao"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/userinfodao"
 	statentity "xr-game-server/entity/stat"
+	"xr-game-server/module/promotionattribution"
 )
 
 func recordDailyApkPromotionChannelRegister(at time.Time, channelCode string) {
-	channelCode = normalizeApkChannelCode(channelCode)
-	if channelCode == "" || apkpromotionchanneldao.GetByChannelCode(channelCode) == nil {
+	code, ok := promotionattribution.NormalizeApkPromotionChannelCode(channelCode)
+	if !ok {
 		return
 	}
 	date := statentity.FormatDailyLoginStatDate(at)
-	stat := statdao.GetDailyApkPromotionChannelStat(date, channelCode)
+	stat := statdao.GetDailyApkPromotionChannelStat(date, code)
 	stat.AddRegisterCount(1)
 	statdao.PublishDailyApkPromotionChannelStat(stat)
 }
 
 func recordDailyApkPromotionChannelDownloadClick(at time.Time, channelCode string) {
-	channelCode = normalizeApkChannelCode(channelCode)
-	if channelCode == "" || apkpromotionchanneldao.GetByChannelCode(channelCode) == nil {
+	code, ok := promotionattribution.NormalizeApkPromotionChannelCode(channelCode)
+	if !ok {
 		return
 	}
 	date := statentity.FormatDailyLoginStatDate(at)
-	stat := statdao.GetDailyApkPromotionChannelStat(date, channelCode)
+	stat := statdao.GetDailyApkPromotionChannelStat(date, code)
 	stat.AddDownloadClickCount(1)
 	statdao.PublishDailyApkPromotionChannelStat(stat)
 }
 
 func recordDailyApkPromotionChannelOrder(at time.Time, userId uint64, price float64) {
-	channelCode := userinfodao.GetApkPromotionChannel(userId)
-	channelCode = normalizeApkChannelCode(channelCode)
-	if channelCode == "" || price <= 0 {
+	if userId == 0 || price <= 0 {
 		return
 	}
-	if apkpromotionchanneldao.GetByChannelCode(channelCode) == nil {
+	channelCode, ok := promotionattribution.NormalizeApkPromotionChannelCode(userinfodao.GetApkPromotionChannel(userId))
+	if !ok {
 		return
 	}
 	date := statentity.FormatDailyLoginStatDate(at)
@@ -52,11 +50,8 @@ func recordDailyApkPromotionChannelRechargeSuccess(at time.Time, userId uint64, 
 	if userId == 0 || amount <= 0 {
 		return
 	}
-	channelCode := normalizeApkChannelCode(userinfodao.GetApkPromotionChannel(userId))
-	if channelCode == "" {
-		return
-	}
-	if apkpromotionchanneldao.GetByChannelCode(channelCode) == nil {
+	channelCode, ok := promotionattribution.NormalizeApkPromotionChannelCode(userinfodao.GetApkPromotionChannel(userId))
+	if !ok {
 		return
 	}
 	date := statentity.FormatDailyLoginStatDate(at)
@@ -68,14 +63,10 @@ func recordDailyApkPromotionChannelRechargeSuccess(at time.Time, userId uint64, 
 	statdao.PublishDailyApkPromotionChannelStat(stat)
 }
 
-func normalizeApkChannelCode(code string) string {
-	return strings.TrimSpace(code)
-}
-
 // EnqueueApkPromotionChannelDownloadClick 渠道短链 GET 302 前入队统计.
 func EnqueueApkPromotionChannelDownloadClick(channelCode string, at time.Time) {
-	code := normalizeApkChannelCode(channelCode)
-	if code == "" {
+	code, ok := promotionattribution.NormalizeApkPromotionChannelCode(channelCode)
+	if !ok {
 		return
 	}
 	enqueue(&statJob{Kind: jobApkPromotionChannelDownload, Payload: &apkPromotionChannelDownloadPayload{

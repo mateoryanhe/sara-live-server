@@ -75,9 +75,11 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 	userinfodao.SaveRegisterInfo(account.ID, deviceInfo)
 	userinfodao.SaveCancelCode(account.ID)
 	if isNewUser {
-		userinfodao.TrySetPromotionChannelFromDevice(account.ID, deviceInfo)
-		userinfodao.TrySetApkPromotionChannelFromDevice(account.ID, deviceInfo)
-		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), deviceInfo))
+		userinfodao.TrySetPromotionChannelPairFromDevice(account.ID, deviceInfo)
+		ev := gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), deviceInfo)
+		ev.RegisterAccountChannel = channel
+		ev.RegisterPromotionPlatform = userinfodao.SaveRegisterPromotionPlatform(ctx, account.ID, channel)
+		event.Pub(gameevent.RegisterEvent, ev)
 	}
 
 	return &authdto.DeviceLoginRes{

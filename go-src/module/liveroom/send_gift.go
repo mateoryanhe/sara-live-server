@@ -41,7 +41,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	push.Data(req.RoomId, cmd.LiveRoomGift, roomGiftPayload)
 
 	pushLuckyGiftWinByTier(result.senderId, req.RoomId, result.payload)
-	recordSendGiftStats(result)
+	recordSendGiftStats(ctx, result)
 	return buildSendGiftRes(result), nil
 }
 
@@ -66,7 +66,7 @@ func SendGiftToAnchor(ctx context.Context, req *liveroomdto.SendGiftToAnchorReq)
 	push.Data(anchorId, cmd.LiveRoomDirectGift, roomDirectPayload)
 
 	pushLuckyGiftWinByTier(result.senderId, anchorId, result.payload)
-	recordSendGiftStats(result)
+	recordSendGiftStats(ctx, result)
 	return buildSendGiftToAnchorRes(result), nil
 }
 
@@ -171,7 +171,7 @@ func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*se
 	}, nil
 }
 
-func recordSendGiftStats(result *sendGiftResult) {
+func recordSendGiftStats(ctx context.Context, result *sendGiftResult) {
 	if result == nil || result.room == nil {
 		return
 	}
@@ -204,7 +204,7 @@ func recordSendGiftStats(result *sendGiftResult) {
 		liveroomdao.PublishLiveRoomOnline(online)
 	}
 	refreshRoomAudienceCaches(result.room.ID)
-	minuteactivity.RecordGift(time.Now())
+	minuteactivity.RecordGiftFromCtx(ctx, time.Now())
 }
 
 func calcSendGiftTotalCost(unitPrice float64, count int) (float64, error) {

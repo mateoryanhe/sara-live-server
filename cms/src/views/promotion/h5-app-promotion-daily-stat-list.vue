@@ -1,0 +1,304 @@
+<template>
+  <div class="page-container">
+    <el-card>
+      <template #header>
+        <div class="card-header">
+          <span>{{ t('menu.H5AppPromotionDailyStatManagement') }}</span>
+        </div>
+      </template>
+
+      <p class="page-desc">{{ t('pages.h5AppPromotionDailyStatList.pageDesc') }}</p>
+
+      <el-form :model="searchForm" class="search-form" inline label-width="100px">
+        <el-form-item :label="t('pages.h5AppPromotionDailyStatList.dateRange')">
+          <el-date-picker
+              v-model="searchForm.dateRange"
+              clearable
+              :end-placeholder="t('pages.h5AppPromotionDailyStatList.endDate')"
+              format="YYYY-MM-DD"
+              :range-separator="t('pages.h5AppPromotionDailyStatList.dateRangeSeparator')"
+              :start-placeholder="t('pages.h5AppPromotionDailyStatList.startDate')"
+              style="width: 260px"
+              type="daterange"
+              value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.h5AppPromotionDailyStatList.channelCode')">
+          <div class="channel-code-field">
+            <el-input
+                v-model="searchForm.h5AppChannelCode"
+                clearable
+                maxlength="64"
+                :placeholder="t('pages.h5AppPromotionDailyStatList.channelCodePlaceholder')"
+                style="width: 200px"
+            />
+            <el-button @click="openChannelPicker">{{ t('pages.h5AppPromotionDailyStatList.selectChannel') }}</el-button>
+          </div>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+        </el-form-item>
+      </el-form>
+
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.statDate')" prop="statDate" width="120"/>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.channelName')" min-width="140" prop="channelName">
+          <template #default="{ row }">{{ row.channelName || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.channelCode')" min-width="140" prop="h5AppChannelCode">
+          <template #default="{ row }">{{ row.h5AppChannelCode || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.registerCount')" prop="registerCount" width="100"/>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.orderCount')" prop="orderCount" width="100"/>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.payUserCount')" prop="payUserCount" width="100"/>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.orderTotalAmount')" min-width="130" prop="orderTotalAmount">
+          <template #default="{ row }">{{ formatUsd(row.orderTotalAmount) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.rechargeSuccessAmount')" min-width="140" prop="rechargeSuccessAmount">
+          <template #default="{ row }">{{ formatUsd(row.rechargeSuccessAmount) }}</template>
+        </el-table-column>
+      </el-table>
+
+      <div class="pagination-container">
+        <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[10, 20, 50, 100]"
+            :total="total"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog
+        v-model="channelPickerVisible"
+        :title="t('pages.h5AppPromotionDailyStatList.channelPickerTitle')"
+        width="640px"
+        destroy-on-close
+        @open="handleChannelPickerOpen"
+    >
+      <div class="channel-picker-toolbar">
+        <el-input
+            v-model="channelPickerSearchKey"
+            clearable
+            :placeholder="t('pages.h5AppPromotionDailyStatList.channelPickerSearchPlaceholder')"
+            style="flex: 1"
+            @keyup.enter="fetchChannelPickerList"
+        />
+        <el-button type="primary" @click="fetchChannelPickerList">{{ t('common.search') }}</el-button>
+        <el-button @click="selectH5AppChannelCode('')">{{ t('pages.h5AppPromotionDailyStatList.channelPickerAll') }}</el-button>
+      </div>
+      <el-table
+          v-loading="channelPickerLoading"
+          :data="channelPickerRows"
+          highlight-current-row
+          max-height="420"
+          style="width: 100%; margin-top: 12px"
+          @row-dblclick="(row: PromotionChannelUrl) => selectH5AppChannelCode(row.h5AppChannelCode)"
+      >
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.channelName')" min-width="160" prop="channelName"/>
+        <el-table-column :label="t('pages.h5AppPromotionDailyStatList.channelCode')" min-width="140" prop="h5AppChannelCode">
+          <template #default="{ row }">{{ row.h5AppChannelCode || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('common.actions')" width="100">
+          <template #default="{ row }">
+            <el-button link type="primary" :disabled="!row.h5AppChannelCode" @click="selectH5AppChannelCode(row.h5AppChannelCode)">
+              {{ t('pages.h5AppPromotionDailyStatList.channelPickerSelect') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="channel-picker-pagination">
+        <el-pagination
+            v-model:current-page="channelPickerPage"
+            v-model:page-size="channelPickerPageSize"
+            :page-sizes="[10, 20, 50]"
+            :total="channelPickerTotal"
+            layout="total, prev, pager, next"
+            @current-change="fetchChannelPickerList"
+            @size-change="handleChannelPickerSizeChange"
+        />
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
+import {onMounted, reactive, ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {promotionChannelUrlApi, h5AppPromotionDailyStatApi} from '@/api/modules/promotion-channel-url'
+import type {PromotionChannelUrl, H5AppPromotionDailyStatRow} from '@/types/api'
+import {formatServerDateOnly} from '@/utils/server-datetime'
+
+interface SearchForm {
+  dateRange: string[]
+  h5AppChannelCode: string
+}
+
+const {t} = useI18n()
+const loading = ref(false)
+const tableData = ref<H5AppPromotionDailyStatRow[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(20)
+
+const createDefaultDateRange = () => {
+  const end = new Date()
+  const start = new Date(end.getTime() - 6 * 86400000)
+  return [formatServerDateOnly(start), formatServerDateOnly(end)] as string[]
+}
+
+const searchForm = reactive<SearchForm>({
+  dateRange: createDefaultDateRange(),
+  h5AppChannelCode: '',
+})
+
+const channelPickerVisible = ref(false)
+const channelPickerLoading = ref(false)
+const channelPickerRows = ref<PromotionChannelUrl[]>([])
+const channelPickerTotal = ref(0)
+const channelPickerPage = ref(1)
+const channelPickerPageSize = ref(20)
+const channelPickerSearchKey = ref('')
+
+const openChannelPicker = () => {
+  channelPickerVisible.value = true
+}
+
+const handleChannelPickerOpen = () => {
+  channelPickerPage.value = 1
+  channelPickerSearchKey.value = ''
+  void fetchChannelPickerList()
+}
+
+const fetchChannelPickerList = async () => {
+  channelPickerLoading.value = true
+  try {
+    const response = await promotionChannelUrlApi.getList({
+      pageIndex: channelPickerPage.value,
+      pageSize: channelPickerPageSize.value,
+      key: channelPickerSearchKey.value.trim(),
+    })
+    channelPickerRows.value = response.data
+    channelPickerTotal.value = response.total
+  } catch (error) {
+    console.error('fetch channel picker list failed:', error)
+    ElMessage.error(t('pages.h5AppPromotionDailyStatList.fetchChannelListFailed'))
+  } finally {
+    channelPickerLoading.value = false
+  }
+}
+
+const handleChannelPickerSizeChange = () => {
+  channelPickerPage.value = 1
+  void fetchChannelPickerList()
+}
+
+const selectH5AppChannelCode = (code: string) => {
+  searchForm.h5AppChannelCode = (code || '').trim()
+  channelPickerVisible.value = false
+}
+
+const formatUsd = (val: number | undefined) => Number(val ?? 0).toFixed(2)
+
+const buildQueryParams = () => {
+  const [startDate, endDate] = searchForm.dateRange || []
+  return {
+    pageIndex: currentPage.value,
+    pageSize: pageSize.value,
+    startDate: startDate || '',
+    endDate: endDate || '',
+    h5AppChannelCode: searchForm.h5AppChannelCode.trim(),
+  }
+}
+
+const fetchList = async () => {
+  const [startDate, endDate] = searchForm.dateRange || []
+  if (!startDate || !endDate) {
+    ElMessage.warning(t('pages.h5AppPromotionDailyStatList.dateRangeRequired'))
+    return
+  }
+  loading.value = true
+  try {
+    const response = await h5AppPromotionDailyStatApi.getList(buildQueryParams())
+    tableData.value = response.data
+    total.value = response.total
+  } catch (error) {
+    console.error('fetch apk promotion daily stat failed:', error)
+    ElMessage.error(t('pages.h5AppPromotionDailyStatList.fetchFailed'))
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleSearch = () => {
+  currentPage.value = 1
+  void fetchList()
+}
+
+const handleReset = () => {
+  searchForm.dateRange = createDefaultDateRange()
+  searchForm.h5AppChannelCode = ''
+  currentPage.value = 1
+  void fetchList()
+}
+
+const handleSizeChange = () => {
+  currentPage.value = 1
+  void fetchList()
+}
+
+const handleCurrentChange = () => {
+  void fetchList()
+}
+
+onMounted(() => {
+  void fetchList()
+})
+</script>
+
+<style scoped>
+.page-container {
+  padding: 20px;
+}
+
+.page-desc {
+  margin: 0 0 16px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.search-form {
+  margin-bottom: 16px;
+}
+
+.pagination-container {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.channel-code-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-picker-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-picker-pagination {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+</style>

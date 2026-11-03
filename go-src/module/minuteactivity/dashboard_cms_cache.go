@@ -2,11 +2,13 @@ package minuteactivity
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
 	"xr-game-server/dto/trackingdto"
+	"xr-game-server/gameevent"
 )
 
 const dashboardUserEventsCacheSuffix = "userEvents"
@@ -30,9 +32,20 @@ func isDefaultMinuteLiveActivityTrendReq(req *trackingdto.CMSMinuteLiveActivityT
 	return req.StartTime == 0 && req.EndTime == 0
 }
 
-func getCachedDashboardUserEventsTrend(bypass bool, build func() (*trackingdto.CMSMinuteLiveActivityTrendRes, error)) (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
+func dashboardUserEventsTrendCacheKey(req *trackingdto.CMSMinuteLiveActivityTrendReq) string {
+	platform := ""
+	if req != nil {
+		platform = gameevent.NormalizeStatClientPlatform(req.Platform)
+	}
+	if platform == "" {
+		return cache.DashboardCMSCacheBucketKey(dashboardUserEventsCacheSuffix)
+	}
+	return cache.DashboardCMSCacheBucketKey(fmt.Sprintf("%s:%s", dashboardUserEventsCacheSuffix, platform))
+}
+
+func getCachedDashboardUserEventsTrend(req *trackingdto.CMSMinuteLiveActivityTrendReq, bypass bool, build func() (*trackingdto.CMSMinuteLiveActivityTrendRes, error)) (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
 	mgr := dashboardUserEventsTrendCache()
-	key := cache.DashboardCMSCacheBucketKey(dashboardUserEventsCacheSuffix)
+	key := dashboardUserEventsTrendCacheKey(req)
 	if bypass {
 		v, err := build()
 		if err != nil {

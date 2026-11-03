@@ -13,9 +13,10 @@ const (
 
 // GameLiveRoomJoinTrackingEventData joinRoom 成功埋点载荷
 type GameLiveRoomJoinTrackingEventData struct {
-	UserId uint64
-	RoomId uint64
-	StatAt time.Time
+	UserId         uint64
+	RoomId         uint64
+	StatAt         time.Time
+	ClientPlatform string
 }
 
 func NewGameLiveRoomJoinTrackingEventData(userId, roomId uint64, statAt time.Time) *GameLiveRoomJoinTrackingEventData {

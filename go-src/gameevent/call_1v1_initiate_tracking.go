@@ -13,9 +13,10 @@ const (
 
 // Call1v1InitiateTrackingEventData 1v1 视频通话发起埋点(call_order.source=1)
 type Call1v1InitiateTrackingEventData struct {
-	CallerId uint64
-	AnchorId uint64
-	StatAt   time.Time
+	CallerId       uint64
+	AnchorId       uint64
+	StatAt         time.Time
+	ClientPlatform string
 }
 
 func NewCall1v1InitiateTrackingEventData(callerId, anchorId uint64, statAt time.Time) *Call1v1InitiateTrackingEventData {

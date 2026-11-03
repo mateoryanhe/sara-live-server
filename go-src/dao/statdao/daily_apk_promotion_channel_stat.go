@@ -47,9 +47,12 @@ func syncDailyApkPromotionChannelStatName(stat *entity.DailyApkPromotionChannelS
 func apkPromotionChannelName(channelCode string) string {
 	row := apkpromotionchanneldao.GetByChannelCode(channelCode)
 	if row == nil {
-		return ""
+		return channelCode
 	}
-	return row.ChannelName
+	if strings.TrimSpace(row.ChannelName) != "" {
+		return row.ChannelName
+	}
+	return channelCode
 }
 
 func PublishDailyApkPromotionChannelStat(data *entity.DailyApkPromotionChannelStat) {

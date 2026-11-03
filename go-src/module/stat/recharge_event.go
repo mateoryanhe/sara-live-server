@@ -69,6 +69,7 @@ func consumeRechargeJob(job *statJob) {
 	recordPeriodClientRecharge(statAt, order.UserId, amount)
 	recordDailyPromotionChannelRechargeSuccess(statAt, order.UserId, amount)
 	recordDailyApkPromotionChannelRechargeSuccess(statAt, order.UserId, amount)
+	recordDailyH5AppPromotionChannelRechargeSuccess(statAt, order.UserId, amount)
 
 	if !shouldCountUserStat(order.UserId) {
 		return

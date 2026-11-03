@@ -6,9 +6,11 @@ import (
 	"strings"
 
 	"xr-game-server/dao/apkpromotionchanneldao"
+	"xr-game-server/dao/promotionchannelurldao"
 	"xr-game-server/dto/apkpromotionchanneldto"
 	entity "xr-game-server/entity/cms"
 	"xr-game-server/errercode"
+	"xr-game-server/module/promotionattribution"
 	"xr-game-server/module/upload"
 )
 
@@ -38,12 +40,17 @@ func Create(_ context.Context, req *apkpromotionchanneldto.CreateApkPromotionCha
 	if apkpromotionchanneldao.GetByChannelCode(code) != nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	h5AppCode, err := normalizeApkH5AppChannelCode(req.H5AppChannelCode, code, 0)
+	if err != nil {
+		return nil, err
+	}
 	if BuildChannelShortURL(code) == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	row := &entity.ApkPromotionChannel{
-		ChannelName: channelName,
-		ChannelCode: code,
+		ChannelName:      channelName,
+		H5AppChannelCode: h5AppCode,
+		ChannelCode:      code,
 	}
 	if err := apkpromotionchanneldao.Create(row); err != nil {
 		return nil, err
@@ -65,7 +72,12 @@ func Update(_ context.Context, req *apkpromotionchanneldto.UpdateApkPromotionCha
 	if existing := apkpromotionchanneldao.GetByChannelCode(code); existing != nil && existing.ID != row.ID {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	h5AppCode, err := normalizeApkH5AppChannelCode(req.H5AppChannelCode, code, row.ID)
+	if err != nil {
+		return nil, err
+	}
 	row.ChannelName = channelName
+	row.H5AppChannelCode = h5AppCode
 	oldCode := row.ChannelCode
 	row.ChannelCode = code
 	if oldCode != code {
@@ -93,4 +105,29 @@ func Delete(_ context.Context, req *apkpromotionchanneldto.DeleteApkPromotionCha
 		upload.DeleteApkPromotionChannelStored(stored)
 	}
 	return &apkpromotionchanneldto.DeleteApkPromotionChannelRes{Success: true}, nil
+}
+
+func normalizeApkH5AppChannelCode(raw, apkChannelCode string, excludeID uint64) (string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return "", nil
+	}
+	h5AppCode, ok := promotionattribution.NormalizeH5AppChannelCode(raw)
+	if !ok {
+		return "", errercode.CreateCode(errercode.InvalidParam)
+	}
+	urlRow := promotionchannelurldao.GetByH5AppChannelCode(h5AppCode)
+	if urlRow == nil {
+		return "", errercode.CreateCode(errercode.InvalidParam)
+	}
+	if strings.TrimSpace(urlRow.H5AppChannelCode) != h5AppCode {
+		return "", errercode.CreateCode(errercode.InvalidParam)
+	}
+	// 复合唯一 (h5_app_channel_code, channel_code) 由 DB 约束; 先查同 APK 码是否被其它 h5 占用
+	if existing := apkpromotionchanneldao.GetByChannelCode(apkChannelCode); existing != nil && existing.ID != excludeID {
+		if strings.TrimSpace(existing.H5AppChannelCode) != h5AppCode {
+			return "", errercode.CreateCode(errercode.InvalidParam)
+		}
+	}
+	return h5AppCode, nil
 }

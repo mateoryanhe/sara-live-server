@@ -108,6 +108,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   PromotionChannelDailyStatManagement: 'Promotion Daily Stats',
   ApkPromotionChannelListManagement: 'APK Promotion Channels',
   ApkPromotionChannelDailyStatManagement: 'APK Channel Daily Stats',
+  H5AppPromotionDailyStatManagement: 'H5 App Promotion Daily Report',
   PromotionInviteLogListManagement: 'Invite List',
   PromotionShareAppDownloadCfgManagement: 'Share download copy',
   ConfigManagement: 'System Config',

@@ -3,12 +3,14 @@ package controller
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/shareappdownloaddto"
 	"xr-game-server/module/shareappdownload"
+	"xr-game-server/module/stat"
 	"xr-game-server/module/tracking"
 )
 
@@ -23,9 +25,16 @@ func initShareAppDownloadAppController() {
 	httpserver.RegNonAuthGETHandler(shareappdownload.ApkShortPath, handleApkShortRedirect)
 }
 
-// GetApkDownloadUrl 查询当前 APK 下载链接
+// GetApkDownloadUrl 查询当前 APK 下载链接(可选 ch 匹配推广渠道包)
 func (c *ShareAppDownloadAppController) GetApkDownloadUrl(ctx context.Context, req *shareappdownloaddto.GetApkDownloadUrlReq) (*shareappdownloaddto.GetApkDownloadUrlRes, error) {
-	return shareappdownload.GetApkDownloadUrl(ctx, req)
+	res, err := shareappdownload.GetApkDownloadUrl(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if code := shareappdownload.LookupApkDownloadStatChannelCode(req); code > 0 {
+		stat.EnqueuePromotionChannelH5DownloadApk(code, time.Now())
+	}
+	return res, nil
 }
 
 func handleApkShortRedirect(r *ghttp.Request) {

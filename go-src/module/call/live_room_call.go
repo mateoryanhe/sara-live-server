@@ -100,7 +100,7 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		appId = agoraCfg.AppId
 	}
 
-	pubCall1v1InitiateTracking(callerId, anchorId, now)
+	pubCall1v1InitiateTracking(ctx, callerId, anchorId, now)
 
 	return &calldto.LiveRoomCallRes{
 		OrderId:     strconv.FormatUint(order.ID, 10),

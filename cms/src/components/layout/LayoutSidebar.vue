@@ -569,7 +569,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement') || hasMenuPermission('ApkPromotionChannelListManagement') || hasMenuPermission('ApkPromotionChannelDailyStatManagement') || hasMenuPermission('PromotionInviteLogListManagement') || hasMenuPermission('PromotionShareAppDownloadCfgManagement')"
+            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement') || hasMenuPermission('ApkPromotionChannelListManagement') || hasMenuPermission('ApkPromotionChannelDailyStatManagement') || hasMenuPermission('H5AppPromotionDailyStatManagement') || hasMenuPermission('PromotionInviteLogListManagement') || hasMenuPermission('PromotionShareAppDownloadCfgManagement')"
             index="/promotion">
           <template #title>
             <el-icon>
@@ -600,6 +600,12 @@ const hasMenuPermission = (moduleName: string) => {
               <DataLine/>
             </el-icon>
             <span>{{ t('menu.ApkPromotionChannelDailyStatManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('H5AppPromotionDailyStatManagement')" index="/promotion/h5-app-promotion-daily-stat">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.H5AppPromotionDailyStatManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('PromotionInviteLogListManagement')" index="/promotion/invite-log-list">
             <el-icon>

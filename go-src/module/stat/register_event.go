@@ -35,8 +35,11 @@ func consumeRegisterJob(job *statJob) {
 	if val.PromotionChannelCode > 0 {
 		recordDailyPromotionChannelRegister(now, val.PromotionChannelCode)
 	}
-	if val.ApkPromotionChannel != "" {
-		recordDailyApkPromotionChannelRegister(now, val.ApkPromotionChannel)
+	if apk := resolveApkChannelCodeForAppRegister(val); apk != "" {
+		recordDailyApkPromotionChannelRegister(now, apk)
+	}
+	if promo := appRegisterPromotionURLChannelCode(val); promo > 0 {
+		recordDailyH5AppPromotionChannelRegister(now, promo)
 	}
 }
 

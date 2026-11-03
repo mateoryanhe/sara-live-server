@@ -111,6 +111,8 @@ func Init() {
 	initDailyPromotionChannelPayUserDao()
 	initDailyApkPromotionChannelStatDao()
 	initDailyApkPromotionChannelPayUserDao()
+	initDailyH5AppPromotionChannelStatDao()
+	initDailyH5AppPromotionChannelPayUserDao()
 	initDailyGameBetUserStatDao()
 	initWeeklyGameBetUserStatDao()
 	initMonthlyGameBetUserStatDao()

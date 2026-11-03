@@ -45,6 +45,8 @@ type uploadSessionMeta struct {
 	CreatedAt    int64  `json:"createdAt"`
 	// ApkPromotionChannelCode 非空时 APK 写入渠道独立静态目录(见 apkPromotionChannelTarget),非官网 assets
 	ApkPromotionChannelCode string `json:"apkPromotionChannelCode,omitempty"`
+	// PromotionChannelURLCode 非空时 APK 写入推广渠道 URL(H5 ch 整数编码)
+	PromotionChannelURLCode int `json:"promotionChannelUrlCode,omitempty"`
 }
 
 func InitOfficialSiteFileUpload(_ context.Context, req *officialsitedeploydto.InitOfficialSiteFileUploadReq) (*officialsitedeploydto.InitOfficialSiteFileUploadRes, error) {

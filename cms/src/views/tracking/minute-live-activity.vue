@@ -4,7 +4,22 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.TrackingMinuteLiveActivityManagement') }}</span>
-          <el-button :loading="loading" @click="fetchTrend">{{ t('common.refresh') }}</el-button>
+          <div class="card-header-actions">
+            <el-select
+                v-model="platform"
+                class="platform-select"
+                :placeholder="t('pages.trackingMinuteLiveActivity.platformFilter')"
+                @change="fetchTrend"
+            >
+              <el-option
+                  v-for="opt in platformOptions"
+                  :key="opt.value || 'all'"
+                  :label="opt.label"
+                  :value="opt.value"
+              />
+            </el-select>
+            <el-button :loading="loading" @click="fetchTrend">{{ t('common.refresh') }}</el-button>
+          </div>
         </div>
       </template>
 
@@ -30,7 +45,7 @@
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {nextTick, onMounted, reactive, ref} from 'vue'
+import {nextTick, onMounted, reactive, ref, computed} from 'vue'
 import {ElMessage} from 'element-plus'
 import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {MinuteLiveActivityTrendRes} from '@/types/api'
@@ -46,6 +61,13 @@ const rangeTruncated = ref(false)
 const trendMaxPoints = ref(MINUTE_TREND_MAX_POINTS)
 
 const trend = reactive<MinuteLiveActivityTrendRes>({points: []})
+const platform = ref('')
+const platformOptions = computed(() => [
+  {value: '', label: t('pages.trackingMinuteLiveActivity.platformAll')},
+  {value: 'android', label: t('pages.trackingMinuteLiveActivity.platformAndroid')},
+  {value: 'ios', label: t('pages.trackingMinuteLiveActivity.platformIOS')},
+  {value: 'web', label: t('pages.trackingMinuteLiveActivity.platformWeb')},
+])
 
 const fetchTrend = async () => {
   loading.value = true
@@ -54,6 +76,7 @@ const fetchTrend = async () => {
       startTime: 0,
       endTime: 0,
       limit: MINUTE_TREND_MAX_POINTS,
+      platform: platform.value || undefined,
     })
     trend.points = res.points || []
     rangeTruncated.value = Boolean(res.rangeTruncated)
@@ -82,6 +105,16 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.platform-select {
+  width: 120px;
 }
 
 .page-desc {

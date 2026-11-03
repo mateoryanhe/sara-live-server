@@ -1,6 +1,8 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
+  pageDesc:
+    '统计范围：注册时 deviceInfo.ch 有效且 CMS 存在对应推广 URL 渠道；含该用户的下单/充值与 H5 下载 APK 点击。App 注册请用 apkCh，不计入本表注册（除非同时上报 ch）。',
   dateRange: '统计日期',
   startDate: '开始日期',
   endDate: '结束日期',
@@ -16,7 +18,7 @@ const zh = {
   channelPickerSelect: '选用',
   fetchChannelListFailed: '获取推广渠道列表失败',
   registerCount: '注册人数',
-  h5DownloadApkCount: 'H5下载APK量',
+  h5DownloadApkCount: 'H5下载APK按钮点击量',
   orderCount: '下单笔数',
   payUserCount: '支付人次',
   orderTotalAmount: '下单总金额(USD)',
@@ -27,6 +29,8 @@ const zh = {
 } as const
 
 export const promotionChannelDailyStatListMessages = definePageMessagesFromEn(zh, {
+  pageDesc:
+    'Scope: registrations with valid deviceInfo.ch and a matching promotion URL channel, plus orders/recharges and H5 APK download clicks. App uses apkCh; URL register counts only when ch is sent.',
   dateRange: 'Date range',
   startDate: 'Start',
   endDate: 'End',
@@ -42,7 +46,7 @@ export const promotionChannelDailyStatListMessages = definePageMessagesFromEn(zh
   channelPickerSelect: 'Use',
   fetchChannelListFailed: 'Failed to load promotion channels',
   registerCount: 'Registrations',
-  h5DownloadApkCount: 'H5 APK downloads',
+  h5DownloadApkCount: 'H5 APK download button clicks',
   orderCount: 'Orders',
   payUserCount: 'Paying users',
   orderTotalAmount: 'Order total (USD)',

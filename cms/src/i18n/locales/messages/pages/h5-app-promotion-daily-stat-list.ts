@@ -1,0 +1,53 @@
+import {definePageMessagesFromEn} from './_define'
+
+const zh = {
+  pageDesc:
+    '统计范围：仅展示「推广渠道URL列表」中已配置的渠道编码；App 注册 apkCh 与 URL 的 H5-App 渠道码匹配后按 URL 渠道汇总。',
+  dateRange: '日期范围',
+  startDate: '开始日期',
+  endDate: '结束日期',
+  dateRangeSeparator: '至',
+  channelCode: 'H5-App渠道码',
+  channelCodePlaceholder: '空=全部',
+  selectChannel: '选择渠道',
+  statDate: '日期',
+  channelName: '渠道名称',
+  registerCount: '注册人数',
+  orderCount: '下单笔数',
+  payUserCount: '支付人次',
+  orderTotalAmount: '下单总额(USD)',
+  rechargeSuccessAmount: '充值成功(USD)',
+  channelPickerTitle: '选择推广渠道(URL列表)',
+  channelPickerSearchPlaceholder: '搜索渠道名称/编码',
+  channelPickerAll: '全部渠道',
+  channelPickerSelect: '选择',
+  dateRangeRequired: '请选择日期范围',
+  fetchFailed: '获取报表失败',
+  fetchChannelListFailed: '获取渠道列表失败',
+} as const
+
+export const h5AppPromotionDailyStatListMessages = definePageMessagesFromEn(zh, {
+  pageDesc:
+    'Only channels in Promotion Channel URL List; App apkCh matched to URL h5_app_channel_code, aggregated by URL channel code.',
+  dateRange: 'Date range',
+  startDate: 'Start',
+  endDate: 'End',
+  dateRangeSeparator: 'to',
+  channelCode: 'H5-App channel code',
+  channelCodePlaceholder: 'Empty = all',
+  selectChannel: 'Pick channel',
+  statDate: 'Date',
+  channelName: 'Channel name',
+  registerCount: 'Registrations',
+  orderCount: 'Orders',
+  payUserCount: 'Pay users',
+  orderTotalAmount: 'Order total (USD)',
+  rechargeSuccessAmount: 'Recharge (USD)',
+  channelPickerTitle: 'Select promotion URL channel',
+  channelPickerSearchPlaceholder: 'Search name/code',
+  channelPickerAll: 'All channels',
+  channelPickerSelect: 'Select',
+  dateRangeRequired: 'Select a date range',
+  fetchFailed: 'Failed to load report',
+  fetchChannelListFailed: 'Failed to load channels',
+})

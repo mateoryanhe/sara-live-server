@@ -39,6 +39,21 @@ func GetByChannelCode(code int) *entity.PromotionChannelUrl {
 	return &row
 }
 
+func GetByH5AppChannelCode(h5AppCode string) *entity.PromotionChannelUrl {
+	h5AppCode = strings.TrimSpace(h5AppCode)
+	if h5AppCode == "" {
+		return nil
+	}
+	var row entity.PromotionChannelUrl
+	if err := g.DB().Model(string(entity.TbPromotionChannelUrl)).Where("h5_app_channel_code = ?", h5AppCode).Scan(&row); err != nil {
+		return nil
+	}
+	if row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
 func Create(row *entity.PromotionChannelUrl) error {
 	_, err := g.DB().Model(string(entity.TbPromotionChannelUrl)).Save(row)
 	return err
@@ -53,8 +68,14 @@ func Delete(id uint64) error {
 	return err
 }
 
+func ListAllForURLCache() []*entity.PromotionChannelUrl {
+	ret := make([]*entity.PromotionChannelUrl, 0)
+	_ = g.DB().Model(string(entity.TbPromotionChannelUrl)).Order("channel_code asc").Scan(&ret)
+	return ret
+}
+
 func GetList(req *promotionchannelurldto.PromotionChannelUrlListReq) (int, []*promotionchannelurldto.PromotionChannelUrlItem) {
-	sql := `select id, channel_name as channelName, channel_code as channelCode, url, created_at as createdAt, updated_at as updatedAt from promotion_channel_urls where 1=1 `
+	sql := `select id, channel_name as channelName, channel_code as channelCode, h5_app_channel_code as h5AppChannelCode, url, created_at as createdAt, updated_at as updatedAt from promotion_channel_urls where 1=1 `
 	param := make([]any, 0)
 	ctx := gctx.New()
 	ret := make([]*promotionchannelurldto.PromotionChannelUrlItem, 0)

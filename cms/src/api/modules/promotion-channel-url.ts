@@ -1,20 +1,77 @@
 import {request} from '../request'
-import type {PromotionChannelUrlListResponse, PromotionChannelUrlQuery} from '@/types/api'
+import {APK_UPLOAD_TIMEOUT_MS} from '../constants/apk-upload-timeout'
+import type {PromotionChannelUrlListResponse, PromotionChannelUrlQuery, H5AppPromotionDailyStatListResponse, H5AppPromotionDailyStatQuery} from '@/types/api'
 
 export const promotionChannelUrlApi = {
   getList: (params: PromotionChannelUrlQuery) => {
     return request.post<PromotionChannelUrlListResponse>('/promotionChannelUrl/promotionChannelUrlList', params)
   },
 
-  create: (data: {channelName: string; channelCode: number}) => {
+  create: (data: {channelName: string; channelCode: number; h5AppChannelCode: string}) => {
     return request.post<{id: string}>('/promotionChannelUrl/createPromotionChannelUrl', data)
   },
 
-  update: (data: {id: string | number; channelName: string; channelCode: number}) => {
+  update: (data: {id: string | number; channelName: string; channelCode: number; h5AppChannelCode: string}) => {
     return request.post<{success: boolean}>('/promotionChannelUrl/updatePromotionChannelUrl', data)
   },
 
   remove: (id: string | number) => {
     return request.post<{success: boolean}>('/promotionChannelUrl/deletePromotionChannelUrl', {id})
+  },
+
+  initApkUpload: (channelId: string, fileName: string, fileSize: number) => {
+    return request.post<{ uploadId: string; chunkSize: number; totalChunk: number }>(
+        '/promotionChannelUrl/initPromotionChannelUrlApkUpload',
+        { channelId, fileName, fileSize },
+    )
+  },
+
+  uploadApkChunk: (
+      uploadId: string,
+      chunkIndex: number,
+      chunk: Blob,
+      fileName: string,
+      onUploadProgress?: (percent: number) => void,
+  ) => {
+    const formData = new FormData()
+    formData.append('file', chunk, fileName)
+    return request.post<{ chunkIndex: number; fileSize: number }>(
+        '/promotionChannelUrl/uploadPromotionChannelUrlApkChunk',
+        formData,
+        {
+          timeout: APK_UPLOAD_TIMEOUT_MS,
+          headers: {
+            'X-Upload-Id': uploadId,
+            'X-Chunk-Index': String(chunkIndex),
+          },
+          onUploadProgress: (event) => {
+            if (!onUploadProgress || !event.total) {
+              return
+            }
+            onUploadProgress(Math.round((event.loaded * 100) / event.total))
+          },
+        },
+    )
+  },
+
+  completeApkUpload: (uploadId: string, channelId: string) => {
+    return request.post<{ apkDownloadUrl: string; apkFileName: string }>(
+        '/promotionChannelUrl/completePromotionChannelUrlApkUpload',
+        { uploadId, channelId },
+        { timeout: APK_UPLOAD_TIMEOUT_MS },
+    )
+  },
+
+  abortApkUpload: (uploadId: string) => {
+    return request.post('/promotionChannelUrl/abortPromotionChannelUrlApkUpload', { uploadId })
+  },
+}
+
+export const h5AppPromotionDailyStatApi = {
+  getList: (params: H5AppPromotionDailyStatQuery) => {
+    return request.post<H5AppPromotionDailyStatListResponse>(
+        '/promotionChannelUrl/h5AppPromotionDailyStatList',
+        params,
+    )
   },
 }

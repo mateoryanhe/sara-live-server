@@ -11,18 +11,22 @@ import (
 )
 
 func ListDailyApkPromotionChannelStats(req *apkpromotionchanneldto.ApkPromotionChannelDailyStatListReq) (int, []*apkpromotionchanneldto.ApkPromotionChannelDailyStatItem) {
-	sql := `select stat_date as statDate, channel_name as channelName, channel_code as channelCode,
-register_count as registerCount, download_click_count as downloadClickCount,
-order_count as orderCount, pay_user_count as payUserCount,
-order_total_amount as orderTotalAmount, recharge_success_amount as rechargeSuccessAmount
-from daily_apk_promotion_channel_stats where stat_date >= ? and stat_date <= ? `
+	sql := `select s.stat_date as statDate,
+coalesce(nullif(c.channel_name, ''), s.channel_name) as channelName,
+s.channel_code as channelCode,
+s.register_count as registerCount, s.download_click_count as downloadClickCount,
+s.order_count as orderCount, s.pay_user_count as payUserCount,
+s.order_total_amount as orderTotalAmount, s.recharge_success_amount as rechargeSuccessAmount
+from daily_apk_promotion_channel_stats s
+inner join apk_promotion_channels c on c.channel_code = s.channel_code
+where s.stat_date >= ? and s.stat_date <= ? `
 	param := []any{strings.TrimSpace(req.StartDate), strings.TrimSpace(req.EndDate)}
 	channelCode := strings.TrimSpace(req.ChannelCode)
 	if channelCode != "" {
-		sql += ` and channel_code = ? `
+		sql += ` and s.channel_code = ? `
 		param = append(param, channelCode)
 	}
-	sql += ` order by stat_date desc, channel_code asc`
+	sql += ` order by s.stat_date desc, s.channel_code asc`
 	ctx := gctx.New()
 	ret := make([]*apkpromotionchanneldto.ApkPromotionChannelDailyStatItem, 0)
 	countSql := str.GetCountSQL(sql)

@@ -13,8 +13,9 @@ type ApkPromotionChannelListReq struct {
 
 type ApkPromotionChannelItem struct {
 	ID             string `json:"id"`
-	ChannelName    string `json:"channelName"`
-	ChannelCode    string `json:"channelCode"`
+	ChannelName      string `json:"channelName"`
+	H5AppChannelCode string `json:"h5AppChannelCode"`
+	ChannelCode      string `json:"channelCode"`
 	ApkFileName    string `json:"apkFileName"`
 	ApkDownloadURL string `json:"apkDownloadUrl"`
 	ShareURL       string `json:"shareUrl" dc:"渠道专用下载短链"`
@@ -30,8 +31,9 @@ type ApkPromotionChannelListRes struct {
 
 type CreateApkPromotionChannelReq struct {
 	g.Meta      `path:"/createApkPromotionChannel" method:"post" summary:"新增APK推广渠道" tags:"推广"`
-	ChannelName string `json:"channelName" v:"required#渠道名称不能为空" dc:"渠道名称"`
-	ChannelCode string `json:"channelCode" v:"required#渠道编码不能为空" dc:"渠道编码(字符串,唯一)"`
+	ChannelName      string `json:"channelName" v:"required#渠道名称不能为空" dc:"渠道名称"`
+	H5AppChannelCode string `json:"h5AppChannelCode" dc:"(可选,兼容旧数据)H5-App渠道码"`
+	ChannelCode      string `json:"channelCode" v:"required#渠道编码不能为空" dc:"渠道编码(App deviceInfo.apkCh)"`
 }
 
 type CreateApkPromotionChannelRes struct {
@@ -41,8 +43,9 @@ type CreateApkPromotionChannelRes struct {
 type UpdateApkPromotionChannelReq struct {
 	g.Meta      `path:"/updateApkPromotionChannel" method:"post" summary:"修改APK推广渠道" tags:"推广"`
 	ID          uint64 `json:"id" v:"required#配置ID不能为空" dc:"配置ID"`
-	ChannelName string `json:"channelName" v:"required#渠道名称不能为空" dc:"渠道名称"`
-	ChannelCode string `json:"channelCode" v:"required#渠道编码不能为空" dc:"渠道编码(字符串,唯一)"`
+	ChannelName      string `json:"channelName" v:"required#渠道名称不能为空" dc:"渠道名称"`
+	H5AppChannelCode string `json:"h5AppChannelCode" dc:"(可选,兼容旧数据)H5-App渠道码"`
+	ChannelCode      string `json:"channelCode" v:"required#渠道编码不能为空" dc:"渠道编码(App deviceInfo.apkCh)"`
 }
 
 type UpdateApkPromotionChannelRes struct {
@@ -90,7 +93,7 @@ type AbortApkPromotionChannelApkUploadReq struct {
 type AbortApkPromotionChannelApkUploadRes struct{}
 
 type ApkPromotionChannelDailyStatListReq struct {
-	g.Meta `path:"/apkPromotionChannelDailyStatList" method:"post" summary:"APK推广渠道日统计报表" tags:"推广"`
+	g.Meta `path:"/apkPromotionChannelDailyStatList" method:"post" summary:"APK推广渠道日统计(deviceInfo.apkCh)" tags:"推广"`
 	httpserver.CMSQueryReq
 	StartDate   string `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d" dc:"开始日期(含)"`
 	EndDate     string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d" dc:"结束日期(含)"`

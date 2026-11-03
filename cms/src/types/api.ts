@@ -102,6 +102,8 @@ export interface MinuteLiveActivityTrendQuery {
     startTime?: number
     endTime?: number
     limit?: number
+    /** 空=全部；android / ios / web */
+    platform?: string
     bypassDashboardCache?: boolean
 }
 
@@ -1012,8 +1014,11 @@ export interface PromotionChannelUrl {
     id: string
     channelName: string
     channelCode: number
+    h5AppChannelCode?: string
     shareUrl: string
     url: string
+    apkFileName?: string
+    apkDownloadUrl?: string
     createdAt: string
     updatedAt: string
 }
@@ -1050,6 +1055,7 @@ export interface PromotionChannelDailyStatQuery extends PageQuery {
 export interface ApkPromotionChannel {
     id: string
     channelName: string
+    h5AppChannelCode?: string
     channelCode: string
     apkFileName: string
     apkDownloadUrl: string
@@ -1085,6 +1091,27 @@ export interface ApkPromotionChannelDailyStatQuery extends PageQuery {
     startDate: string
     endDate: string
     channelCode?: string
+}
+
+export interface H5AppPromotionDailyStatRow {
+    statDate: string
+    channelName: string
+    h5AppChannelCode: string
+    registerCount: number
+    orderCount: number
+    payUserCount: number
+    orderTotalAmount: number
+    rechargeSuccessAmount: number
+}
+
+export interface H5AppPromotionDailyStatListResponse extends PageResponse<H5AppPromotionDailyStatRow> {
+}
+
+export interface H5AppPromotionDailyStatQuery extends PageQuery {
+    startDate: string
+    endDate: string
+    channelCode?: number
+    h5AppChannelCode?: string
 }
 
 export interface SimulatorDeviceWhitelist {

@@ -21,9 +21,10 @@ type RechargeCheckoutHint struct {
 
 // RechargeOrderCreatedEventData 充值订单创建成功事件数据
 type RechargeOrderCreatedEventData struct {
-	OrderId     uint64
-	Attribution RegisterAttribution
-	Checkout    RechargeCheckoutHint
+	OrderId        uint64
+	Attribution    RegisterAttribution
+	Checkout       RechargeCheckoutHint
+	ClientPlatform string
 }
 
 func NewRechargeOrderCreatedEventData(orderId uint64) *RechargeOrderCreatedEventData {
@@ -33,8 +34,9 @@ func NewRechargeOrderCreatedEventData(orderId uint64) *RechargeOrderCreatedEvent
 // NewRechargeOrderCreatedFromCtx 携带下单 HTTP 归因(IP/UA/Cookie fbp/fbc)与可选联系信息.
 func NewRechargeOrderCreatedFromCtx(ctx context.Context, orderId uint64, checkout RechargeCheckoutHint) *RechargeOrderCreatedEventData {
 	return &RechargeOrderCreatedEventData{
-		OrderId:     orderId,
-		Attribution: registerAttributionFromCtx(ctx, nil),
+		OrderId:        orderId,
+		Attribution:    registerAttributionFromCtx(ctx, nil),
+		ClientPlatform: StatClientPlatformFromCtx(ctx),
 		Checkout: RechargeCheckoutHint{
 			Email: strings.TrimSpace(checkout.Email),
 			Phone: strings.TrimSpace(checkout.Phone),

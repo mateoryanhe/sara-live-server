@@ -22,7 +22,7 @@ func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto
 	}
 	now := time.Now()
 	exitRoom(userId, req.RoomId)
-	pubShowcaseLiveRoomLeaveTracking(userId, req.RoomId, now)
+	pubShowcaseLiveRoomLeaveTracking(ctx, userId, req.RoomId, now)
 	return &liveroomdto.LeaveRoomRes{
 		OnlineCount: getLenForRoom(req.RoomId),
 	}, nil

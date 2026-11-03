@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
@@ -143,7 +144,7 @@ func chargeLiveRoomCallOnAccept(order *callentity.CallOrder, now time.Time) erro
 		order.AddBillingDuration(1)
 		nextCharge := now.Add(time.Minute)
 		order.SetChargeTime(&nextCharge)
-		pubCall1v1BillingSuccessTracking(order, now)
+		pubCall1v1BillingSuccessTracking(gctx.New(), order, now)
 	}
 
 	order.SetTotalCost(totalCost)
@@ -175,7 +176,7 @@ func chargeLiveRoomCallBillingIfDue(order *callentity.CallOrder, now time.Time) 
 	order.AddBillingDuration(1)
 	nextCharge := now.Add(time.Minute)
 	order.SetChargeTime(&nextCharge)
-	pubCall1v1BillingSuccessTracking(order, now)
+	pubCall1v1BillingSuccessTracking(gctx.New(), order, now)
 	return nil
 }
 

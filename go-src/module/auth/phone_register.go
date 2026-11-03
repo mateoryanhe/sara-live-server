@@ -61,8 +61,12 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	accountdao.PublishAccountList(account.OpenId, account.Channel)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 	userinfodao.SaveRegisterInfo(account.ID, req.DeviceInfo)
+	userinfodao.TrySetPromotionChannelPairFromDevice(account.ID, req.DeviceInfo)
 	now := time.Now()
-	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, now, req.DeviceInfo))
+	ev := gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, now, req.DeviceInfo)
+	ev.RegisterAccountChannel = account.Channel
+	ev.RegisterPromotionPlatform = userinfodao.SaveRegisterPromotionPlatform(ctx, account.ID, account.Channel)
+	event.Pub(gameevent.RegisterEvent, ev)
 	if req.InviteCode != "" {
 		inviterId := userinfo.ResolveInviteCodeToUserId(req.InviteCode)
 		if inviterId == 0 || accountdao.GetAccountById(inviterId) == nil {

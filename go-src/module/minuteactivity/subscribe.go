@@ -11,7 +11,7 @@ func onShowcaseJoin(data any) {
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 || ev.UserId == ev.RoomId {
 		return
 	}
-	schedule(metricJoin, ev.StatAt)
+	schedule(metricJoin, ev.StatAt, ev.ClientPlatform)
 }
 
 func onGameJoin(data any) {
@@ -19,7 +19,7 @@ func onGameJoin(data any) {
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 || ev.UserId == ev.RoomId {
 		return
 	}
-	schedule(metricJoin, ev.StatAt)
+	schedule(metricJoin, ev.StatAt, ev.ClientPlatform)
 }
 
 func onVoiceJoin(data any) {
@@ -27,7 +27,7 @@ func onVoiceJoin(data any) {
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 || ev.UserId == ev.RoomId {
 		return
 	}
-	schedule(metricJoin, ev.StatAt)
+	schedule(metricJoin, ev.StatAt, ev.ClientPlatform)
 }
 
 func onShowcaseLeave(data any) {
@@ -35,7 +35,7 @@ func onShowcaseLeave(data any) {
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 {
 		return
 	}
-	schedule(metricLeave, ev.StatAt)
+	schedule(metricLeave, ev.StatAt, ev.ClientPlatform)
 }
 
 func onCall1v1Initiate(data any) {
@@ -52,12 +52,12 @@ func scheduleCall1v1InitiateMetric(data any) {
 		if ev == nil || ev.CallerId == 0 || ev.AnchorId == 0 || ev.CallerId == ev.AnchorId {
 			return
 		}
-		schedule(metricCall1v1, ev.StatAt)
+		schedule(metricCall1v1, ev.StatAt, ev.ClientPlatform)
 	case *gameevent.Call1v1RoomTrackingEventData:
 		if ev == nil || ev.CallerId == 0 || ev.AnchorId == 0 || ev.CallerId == ev.AnchorId {
 			return
 		}
-		schedule(metricCall1v1, ev.StatAt)
+		schedule(metricCall1v1, ev.StatAt, ev.ClientPlatform)
 	}
 }
 
@@ -66,7 +66,7 @@ func onCall1v1ConnectSuccess(data any) {
 	if !ok || ev == nil || ev.CallerId == 0 || ev.ReceiverId == 0 || ev.CallerId == ev.ReceiverId {
 		return
 	}
-	schedule(metricCall1v1ConnectSuccess, ev.StatAt)
+	schedule(metricCall1v1ConnectSuccess, ev.StatAt, ev.ClientPlatform)
 }
 
 func onCall1v1BillingSuccess(data any) {
@@ -74,7 +74,7 @@ func onCall1v1BillingSuccess(data any) {
 	if !ok || ev == nil || ev.OrderId == 0 {
 		return
 	}
-	schedule(metricCall1v1Consume, ev.StatAt)
+	schedule(metricCall1v1Consume, ev.StatAt, ev.ClientPlatform)
 }
 
 func onGameBet(data any) {
@@ -82,7 +82,7 @@ func onGameBet(data any) {
 	if !ok || ev == nil || ev.UserId == 0 {
 		return
 	}
-	schedule(metricBet, time.Now())
+	schedule(metricBet, time.Now(), ev.ClientPlatform)
 }
 
 func onRechargeOrderCreated(data any) {
@@ -90,5 +90,5 @@ func onRechargeOrderCreated(data any) {
 	if !ok || ev == nil || ev.OrderId == 0 {
 		return
 	}
-	schedule(metricRechargeOrder, time.Now())
+	schedule(metricRechargeOrder, time.Now(), ev.ClientPlatform)
 }

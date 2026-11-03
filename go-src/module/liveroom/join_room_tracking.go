@@ -1,6 +1,7 @@
 package liveroom
 
 import (
+	"context"
 	"time"
 
 	"xr-game-server/core/event"
@@ -8,16 +9,23 @@ import (
 )
 
 // pubLiveRoomJoinTracking joinRoom 成功返回前发布进房埋点(秀场/游戏/语聊由 tracking 按 category 过滤累计).
-func pubLiveRoomJoinTracking(userId, roomId uint64, at time.Time) {
+func pubLiveRoomJoinTracking(ctx context.Context, userId, roomId uint64, at time.Time) {
 	if userId == 0 || roomId == 0 || userId == roomId {
 		return
 	}
 	if at.IsZero() {
 		at = time.Now()
 	}
-	event.Pub(gameevent.ShowcaseLiveRoomJoinTrackingEvent, gameevent.NewShowcaseLiveRoomJoinTrackingEventData(userId, roomId, at))
+	platform := gameevent.StatClientPlatformFromCtx(ctx)
+	showcase := gameevent.NewShowcaseLiveRoomJoinTrackingEventData(userId, roomId, at)
+	showcase.ClientPlatform = platform
+	event.Pub(gameevent.ShowcaseLiveRoomJoinTrackingEvent, showcase)
 	if !gameevent.GameLiveRoomTrackingPersistDisabled {
-		event.Pub(gameevent.GameLiveRoomJoinTrackingEvent, gameevent.NewGameLiveRoomJoinTrackingEventData(userId, roomId, at))
+		game := gameevent.NewGameLiveRoomJoinTrackingEventData(userId, roomId, at)
+		game.ClientPlatform = platform
+		event.Pub(gameevent.GameLiveRoomJoinTrackingEvent, game)
 	}
-	event.Pub(gameevent.VoiceRoomEnterTrackingEvent, gameevent.NewVoiceRoomEnterTrackingEventData(userId, roomId, at))
+	voice := gameevent.NewVoiceRoomEnterTrackingEventData(userId, roomId, at)
+	voice.ClientPlatform = platform
+	event.Pub(gameevent.VoiceRoomEnterTrackingEvent, voice)
 }

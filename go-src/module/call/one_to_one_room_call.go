@@ -83,7 +83,7 @@ func OneToOneRoomCall(ctx context.Context, req *calldto.OneToOneRoomCallReq) (*c
 		appId = agoraCfg.AppId
 	}
 
-	pubCall1v1RoomTracking(callerId, callCtx.anchorId, now)
+	pubCall1v1RoomTracking(ctx, callerId, callCtx.anchorId, now)
 
 	return &calldto.OneToOneRoomCallRes{
 		OrderId:     strconv.FormatUint(order.ID, 10),

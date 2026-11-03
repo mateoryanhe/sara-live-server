@@ -7,6 +7,8 @@
         </div>
       </template>
 
+      <p class="page-desc">{{ t('pages.promotionChannelDailyStatList.pageDesc') }}</p>
+
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
         <el-form-item :label="t('pages.promotionChannelDailyStatList.dateRange')">
           <el-date-picker
@@ -274,6 +276,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.page-container {
+  padding: 20px;
+}
+
+.page-desc {
+  margin: 0 0 16px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .search-form {
   margin-bottom: 16px;
 }

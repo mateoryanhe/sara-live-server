@@ -107,7 +107,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 		liveroomdao.PublishLiveRoomOnline(online)
 	}
 	refreshRoomAudienceCaches(req.RoomId)
-	minuteactivity.RecordChat(time.Now())
+	minuteactivity.RecordChatFromCtx(ctx, time.Now())
 
 	return &liveroomdto.SendPaidDanmakuRes{
 		Success: true,

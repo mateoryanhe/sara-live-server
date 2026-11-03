@@ -20,10 +20,12 @@ type DeviceInfo struct {
 	// Meta Conversions API 归因(可选,App/Web 从 Meta SDK 或 Cookie 采集)
 	MetaFbp string `json:"metaFbp" dc:"Meta _fbp"`
 	MetaFbc string `json:"metaFbc" dc:"Meta _fbc"`
-	// Ch 推广渠道编码(可选); JSON 无此字段、空字符串或仅空白时不写 user_ext、不计推广日统计
-	Ch string `json:"ch,omitempty" dc:"推广渠道编码(非空且为正整数才统计)"`
-	// ApkCh APK 推广渠道编码(可选字符串); deviceInfo.apkCh
-	ApkCh string `json:"apkCh,omitempty" dc:"APK推广渠道编码(非空合法字符串才统计)"`
+	// Ch 推广 URL 整数渠道(H5 端 deviceLogin/h5DeviceLogin/邮箱等上报 deviceInfo.ch)
+	Ch string `json:"ch,omitempty" dc:"H5推广URL渠道编码(正整数字符串)"`
+	// ApkCh APK 推广渠道字符串(App 端 deviceLogin 上报 deviceInfo.apkCh)
+	ApkCh string `json:"apkCh,omitempty" dc:"App APK推广渠道编码"`
+	// H5AppCh 可选; H5-App 配对以 deviceInfo.ch + CMS 为准, 保留字段仅兼容旧客户端
+	H5AppCh string `json:"h5AppCh,omitempty" dc:"(兼容)H5-App渠道码"`
 }
 
 // PromotionChannelCode 解析 deviceInfo.ch; 无字段/空/非正整数时 ok=false,推广统计全部跳过
@@ -48,6 +50,18 @@ func (d *DeviceInfo) ApkPromotionChannel() (code string, ok bool) {
 		return "", false
 	}
 	ch := strings.TrimSpace(d.ApkCh)
+	if ch == "" || !apkPromotionChannelCodePattern.MatchString(ch) {
+		return "", false
+	}
+	return ch, true
+}
+
+// H5AppChannel 解析 deviceInfo.h5AppCh
+func (d *DeviceInfo) H5AppChannel() (code string, ok bool) {
+	if d == nil {
+		return "", false
+	}
+	ch := strings.TrimSpace(d.H5AppCh)
 	if ch == "" || !apkPromotionChannelCodePattern.MatchString(ch) {
 		return "", false
 	}

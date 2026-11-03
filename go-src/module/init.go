@@ -38,6 +38,7 @@ import (
 	"xr-game-server/module/preload"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/privateroombilling"
+	"xr-game-server/module/promotionchannelurl"
 	"xr-game-server/module/randomnick"
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/resourcemonitor"
@@ -85,6 +86,7 @@ func Init() {
 	fiatcurrency.Init()
 	game.Init()
 	h5livedeploy.Init()
+	promotionchannelurl.Init()
 	channeldownloadlandingdeploy.Init()
 	coinmerchantdeploy.Init()
 	countryflagdeploy.Init()

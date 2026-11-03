@@ -11,6 +11,7 @@ import (
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/user"
+	"xr-game-server/module/promotionattribution"
 )
 
 const cancelCodeValidDuration = 3 * 24 * time.Hour
@@ -101,6 +102,32 @@ func MarkFirstRechargeDone(userId uint64) bool {
 	return true
 }
 
+// SaveRegisterPromotionPlatform 注册时按 accounts.channel 写入 h5/app(不读 Header),仅写一次.
+func SaveRegisterPromotionPlatform(ctx context.Context, userId uint64, accountChannel uint) string {
+	if userId == 0 {
+		return ""
+	}
+	platform := promotionattribution.ResolveRegisterPromotionPlatform(ctx, accountChannel)
+	if platform == "" {
+		return ""
+	}
+	ext := GetUserExtByUserId(userId)
+	if strings.TrimSpace(ext.RegisterPromotionPlatform) != "" {
+		return ext.RegisterPromotionPlatform
+	}
+	ext.SetRegisterPromotionPlatform(platform)
+	PublishUserExt(ext)
+	return platform
+}
+
+// GetRegisterPromotionPlatform 用户注册时的推广报表平台(h5/app); 空表示历史账号未落库.
+func GetRegisterPromotionPlatform(userId uint64) string {
+	if userId == 0 {
+		return ""
+	}
+	return strings.TrimSpace(GetUserExtByUserId(userId).RegisterPromotionPlatform)
+}
+
 // SaveRegisterInfo 保存注册时的包名与版本号(可为空)
 func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
 	if userId == 0 || info == nil {
@@ -143,6 +170,49 @@ func TrySetApkPromotionChannelFromDevice(userId uint64, info *entity.DeviceInfo)
 		return
 	}
 	ext.SetApkPromotionChannel(code)
+	PublishUserExt(ext)
+}
+
+// TrySetPromotionChannelPairFromDevice 注册时写入推广渠道; H5 用 deviceInfo.ch, App 用 deviceInfo.apkCh(CMS 配对).
+func TrySetPromotionChannelPairFromDevice(userId uint64, info *entity.DeviceInfo) {
+	if userId == 0 || info == nil {
+		return
+	}
+	ext := GetUserExtByUserId(userId)
+	if ext.PromotionChannelCode != 0 || strings.TrimSpace(ext.ApkPromotionChannel) != "" {
+		return
+	}
+	if promo, ok := info.PromotionChannelCode(); ok {
+		if apkCh, paired := promotionattribution.ResolveH5AppPairByPromotionChannelCode(promo); paired {
+			ext.SetPromotionChannelCode(promo)
+			ext.SetApkPromotionChannel(apkCh)
+			PublishUserExt(ext)
+			return
+		}
+		TrySetPromotionChannelFromDevice(userId, info)
+		return
+	}
+	if apkCh, ok := info.ApkPromotionChannel(); ok {
+		if promo, paired := promotionattribution.ResolvePromotionChannelCodeByApkChannelCode(apkCh); paired {
+			ext.SetPromotionChannelCode(promo)
+			ext.SetApkPromotionChannel(apkCh)
+			PublishUserExt(ext)
+			return
+		}
+		TrySetApkPromotionChannelFromDevice(userId, info)
+		return
+	}
+	h5AppCh, ok1 := info.H5AppChannel()
+	apkCh, ok2 := info.ApkPromotionChannel()
+	if !ok1 || !ok2 {
+		return
+	}
+	promoCode, ok := promotionattribution.ValidatePair(h5AppCh, apkCh)
+	if !ok || promoCode <= 0 {
+		return
+	}
+	ext.SetPromotionChannelCode(promoCode)
+	ext.SetApkPromotionChannel(apkCh)
 	PublishUserExt(ext)
 }
 

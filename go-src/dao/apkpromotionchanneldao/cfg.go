@@ -40,6 +40,26 @@ func GetByChannelCode(code string) *entity.ApkPromotionChannel {
 	return &row
 }
 
+// GetFirstByH5AppChannelCode CMS 中与 URL 列表 h5_app_channel_code 配对的 APK 行(多条时取 channel_code 最小).
+func GetFirstByH5AppChannelCode(h5AppCode string) *entity.ApkPromotionChannel {
+	h5AppCode = strings.TrimSpace(h5AppCode)
+	if h5AppCode == "" {
+		return nil
+	}
+	var row entity.ApkPromotionChannel
+	if err := g.DB().Model(string(entity.TbApkPromotionChannel)).
+		Where("h5_app_channel_code = ?", h5AppCode).
+		Order("channel_code asc").
+		Limit(1).
+		Scan(&row); err != nil {
+		return nil
+	}
+	if row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
 func Create(row *entity.ApkPromotionChannel) error {
 	_, err := g.DB().Model(string(entity.TbApkPromotionChannel)).Save(row)
 	return err
@@ -61,7 +81,7 @@ func ListAllForURLCache() []*entity.ApkPromotionChannel {
 }
 
 func GetList(req *apkpromotionchanneldto.ApkPromotionChannelListReq) (int, []*apkpromotionchanneldto.ApkPromotionChannelItem) {
-	sql := `select id, channel_name as channelName, channel_code as channelCode,
+	sql := `select id, channel_name as channelName, h5_app_channel_code as h5AppChannelCode, channel_code as channelCode,
 apk_file_name as apkFileName, apk_download_url as apkDownloadUrl,
 created_at as createdAt, updated_at as updatedAt from apk_promotion_channels where 1=1 `
 	param := make([]any, 0)

@@ -16,6 +16,11 @@ const zh = {
   call1v1ConnectSuccess: '1v1成功连线',
   call1v1Consume: '1v1成功消费',
   rechargeOrder: '充值下单',
+  platformAll: '全部',
+  platformAndroid: '安卓',
+  platformIOS: 'iOS',
+  platformWeb: 'Web',
+  platformFilter: '平台',
 }
 
 export const trackingMinuteLiveActivityMessages = definePageMessagesFromEn(zh, {
@@ -34,4 +39,9 @@ export const trackingMinuteLiveActivityMessages = definePageMessagesFromEn(zh, {
   call1v1ConnectSuccess: '1v1 connect success',
   call1v1Consume: '1v1 billing success',
   rechargeOrder: 'Recharge order',
+  platformAll: 'All',
+  platformAndroid: 'Android',
+  platformIOS: 'iOS',
+  platformWeb: 'Web',
+  platformFilter: 'Platform',
 })

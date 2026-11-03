@@ -16,6 +16,7 @@
         >
           <template #default>
             <p class="hint-text">{{ t('pages.apkPromotionChannelList.shareBaseHostHint') }}</p>
+            <p class="hint-text">{{ t('pages.apkPromotionChannelList.uploadVersionHint') }}</p>
           </template>
         </el-alert>
 
@@ -48,11 +49,47 @@
           <el-table-column :label="t('pages.apkPromotionChannelList.apkFileName')" prop="apkFileName" min-width="240">
             <template #default="{ row }">{{ row.apkFileName || '-' }}</template>
           </el-table-column>
-          <el-table-column fixed="right" :label="t('common.actions')" width="240">
+          <el-table-column fixed="right" :label="t('common.actions')" width="100">
             <template #default="{ row }">
-              <el-button v-if="can('edit')" size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
-              <el-button v-if="can('uploadApk')" size="small" type="primary" @click="openUpload(row)">{{ t('pages.apkPromotionChannelList.uploadApk') }}</el-button>
-              <el-button v-if="can('delete')" size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
+              <div class="table-actions-cell">
+                <el-dropdown
+                    v-if="hasRowActions"
+                    trigger="click"
+                    @command="(cmd: string) => handleRowCommand(row, cmd)"
+                >
+                  <el-button
+                      size="small"
+                      type="primary"
+                      :loading="isRowUploading(row.id)"
+                      :disabled="isRowUploading(row.id)"
+                  >
+                    {{ t('common.actions') }}
+                    <el-icon class="el-icon--right">
+                      <ArrowDown/>
+                    </el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item v-if="can('uploadApk')" command="uploadApk">
+                        {{ t('pages.apkPromotionChannelList.uploadApk') }}
+                      </el-dropdown-item>
+                      <el-dropdown-item v-if="can('edit')" :divided="can('uploadApk')" command="edit">
+                        {{ t('common.edit') }}
+                      </el-dropdown-item>
+                      <el-dropdown-item v-if="can('delete')" divided command="delete">
+                        {{ t('common.delete') }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+                <el-progress
+                    v-if="uploadTasks[row.id]"
+                    :percentage="uploadTasks[row.id].percent"
+                    :status="uploadTasks[row.id].status || undefined"
+                    :stroke-width="6"
+                    class="row-upload-progress"
+                />
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -90,36 +127,32 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="uploadVisible" :title="t('pages.apkPromotionChannelList.uploadDialogTitle')" width="480px" destroy-on-close>
-      <p class="upload-channel-name">{{ uploadChannel?.channelName }} ({{ uploadChannel?.channelCode }})</p>
-      <p class="form-tip">{{ t('pages.apkPromotionChannelList.uploadVersionHint') }}</p>
-      <el-upload
-          :auto-upload="false"
-          :limit="1"
-          accept=".apk"
-          :on-change="handleApkFileChange"
-          :on-remove="handleApkRemove"
-      >
-        <el-button type="primary">{{ t('pages.apkPromotionChannelList.uploadSelectFile') }}</el-button>
-      </el-upload>
-      <el-progress v-if="uploading" :percentage="uploadPercent" :status="uploadStatus || undefined" style="margin-top: 16px"/>
-      <template #footer>
-        <el-button @click="uploadVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="uploading" :disabled="!selectedApkFile" @click="handleApkUpload">
-          {{ t('pages.apkPromotionChannelList.uploadStart') }}
-        </el-button>
-      </template>
-    </el-dialog>
+    <input
+        ref="apkFileInputRef"
+        type="file"
+        accept=".apk"
+        class="apk-file-input-hidden"
+        @change="onApkFilePicked"
+    />
+
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
-import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadFile} from 'element-plus'
+import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
+import {ArrowDown} from '@element-plus/icons-vue'
 import {apkPromotionChannelApi} from '@/api/modules/apk-promotion-channel'
 import {usePagePermission} from '@/composables/usePagePermission'
 import type {ApkPromotionChannel} from '@/types/api'
+import {uploadApkFileInParallelChunks} from '@/utils/apk-chunk-upload'
+
+interface RowUploadTask {
+  percent: number
+  status: 'success' | 'exception' | ''
+  fileName: string
+}
 
 const CHANNEL_CODE_RE = /^[a-zA-Z0-9_-]{1,64}$/
 
@@ -160,6 +193,27 @@ interface ChannelForm {
 
 const {t} = useI18n()
 const {can} = usePagePermission('ApkPromotionChannelListManagement')
+
+const ROW_ACTION_KEYS = ['uploadApk', 'edit', 'delete'] as const
+const hasRowActions = computed(() => ROW_ACTION_KEYS.some(key => can(key)))
+
+const handleRowCommand = (row: ApkPromotionChannel, cmd: string) => {
+  if (isRowUploading(row.id)) {
+    return
+  }
+  switch (cmd) {
+    case 'uploadApk':
+      pickApkFile(row)
+      break
+    case 'edit':
+      handleEdit(row)
+      break
+    case 'delete':
+      void handleDelete(row)
+      break
+  }
+}
+
 const loading = ref(false)
 const tableData = ref<ApkPromotionChannel[]>([])
 const total = ref(0)
@@ -200,12 +254,14 @@ const previewShareUrl = computed(() => {
   return `https://${host}/${encodeURIComponent(code)}`
 })
 
-const uploadVisible = ref(false)
-const uploadChannel = ref<ApkPromotionChannel | null>(null)
-const selectedApkFile = ref<File | null>(null)
-const uploading = ref(false)
-const uploadPercent = ref(0)
-const uploadStatus = ref<'success' | 'exception' | ''>('')
+const apkFileInputRef = ref<HTMLInputElement | null>(null)
+const pendingUploadChannel = ref<ApkPromotionChannel | null>(null)
+const uploadTasks = reactive<Record<string, RowUploadTask>>({})
+
+const isRowUploading = (channelId: string) => {
+  const task = uploadTasks[channelId]
+  return !!task && task.status === '' && task.percent < 100
+}
 
 const fetchList = async () => {
   loading.value = true
@@ -310,55 +366,25 @@ const handleDelete = async (row: ApkPromotionChannel) => {
   }
 }
 
-const openUpload = (row: ApkPromotionChannel) => {
-  uploadChannel.value = row
-  selectedApkFile.value = null
-  uploadPercent.value = 0
-  uploadStatus.value = ''
-  uploadVisible.value = true
-}
-
-const handleApkFileChange = (uploadFile: UploadFile) => {
-  selectedApkFile.value = uploadFile.raw ?? null
-}
-
-const handleApkRemove = () => {
-  selectedApkFile.value = null
-}
-
-const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms))
-
-const uploadApkInChunks = async (file: File, channelId: string, onProgress: (p: number) => void) => {
-  const session = await apkPromotionChannelApi.initApkUpload(channelId, file.name, file.size)
-  if (!session.uploadId || session.chunkSize <= 0 || session.totalChunk <= 0) {
-    throw new Error('invalid upload session')
+const pickApkFile = (row: ApkPromotionChannel) => {
+  if (isRowUploading(row.id)) {
+    return
   }
-  try {
-    for (let chunkIndex = 0; chunkIndex < session.totalChunk; chunkIndex += 1) {
-      const start = chunkIndex * session.chunkSize
-      const end = Math.min(start + session.chunkSize, file.size)
-      const chunk = file.slice(start, end)
-      await apkPromotionChannelApi.uploadApkChunk(session.uploadId, chunkIndex, chunk, file.name, (chunkPercent) => {
-        const loaded = start + (chunk.size * chunkPercent) / 100
-        onProgress(Math.min(99, Math.round((loaded * 100) / file.size)))
-      })
-      onProgress(Math.min(99, Math.round((end * 100) / file.size)))
-    }
-    await apkPromotionChannelApi.completeApkUpload(session.uploadId, channelId)
-    onProgress(100)
-  } catch (error) {
-    try {
-      await apkPromotionChannelApi.abortApkUpload(session.uploadId)
-    } catch {
-      // ignore
-    }
-    throw error
+  pendingUploadChannel.value = row
+  const input = apkFileInputRef.value
+  if (!input) {
+    return
   }
+  input.value = ''
+  input.click()
 }
 
-const handleApkUpload = async () => {
-  const file = selectedApkFile.value
-  const channel = uploadChannel.value
+const onApkFilePicked = (event: Event) => {
+  const channel = pendingUploadChannel.value
+  pendingUploadChannel.value = null
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
   if (!file || !channel?.id) {
     return
   }
@@ -366,23 +392,54 @@ const handleApkUpload = async () => {
     ElMessage.error(t('pages.apkPromotionChannelList.apkOnly'))
     return
   }
-  uploading.value = true
-  uploadPercent.value = 0
-  uploadStatus.value = ''
+  void startRowApkUpload(channel, file)
+}
+
+const startRowApkUpload = async (channel: ApkPromotionChannel, file: File) => {
+  const channelId = channel.id
+  uploadTasks[channelId] = {percent: 0, status: '', fileName: file.name}
   try {
-    await uploadApkInChunks(file, channel.id, (p) => {
-      uploadPercent.value = p
-    })
-    uploadStatus.value = 'success'
-    ElMessage.success(t('pages.apkPromotionChannelList.uploadSuccess'))
-    uploadVisible.value = false
+    await uploadApkFileInParallelChunks(
+        file,
+        {
+          init: () => apkPromotionChannelApi.initApkUpload(channelId, file.name, file.size),
+          uploadChunk: (uploadId, chunkIndex, chunk, fileName, onChunkProgress) =>
+              apkPromotionChannelApi.uploadApkChunk(uploadId, chunkIndex, chunk, fileName, onChunkProgress),
+          complete: (uploadId) => apkPromotionChannelApi.completeApkUpload(uploadId, channelId),
+          abort: (uploadId) => apkPromotionChannelApi.abortApkUpload(uploadId),
+        },
+        (p) => {
+          const task = uploadTasks[channelId]
+          if (task) {
+            task.percent = p
+          }
+        },
+    )
+    const task = uploadTasks[channelId]
+    if (task) {
+      task.status = 'success'
+      task.percent = 100
+    }
+    ElMessage.success(
+        t('pages.apkPromotionChannelList.uploadSuccessForChannel', {
+          name: channel.channelName,
+          code: channel.channelCode,
+        }),
+    )
     void fetchList()
+    window.setTimeout(() => {
+      delete uploadTasks[channelId]
+    }, 4000)
   } catch (error) {
-    uploadStatus.value = 'exception'
     console.error('upload apk promotion channel failed:', error)
+    const task = uploadTasks[channelId]
+    if (task) {
+      task.status = 'exception'
+    }
     notifyOperationFailed(error, 'uploadFailed')
-  } finally {
-    uploading.value = false
+    window.setTimeout(() => {
+      delete uploadTasks[channelId]
+    }, 8000)
   }
 }
 
@@ -435,6 +492,26 @@ onMounted(() => {
   font-size: 12px;
 }
 
+.channel-code-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.channel-picker-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-picker-pagination {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .share-url-cell {
   display: flex;
   align-items: center;
@@ -453,5 +530,20 @@ onMounted(() => {
 .upload-channel-name {
   margin-bottom: 12px;
   font-weight: 500;
+}
+
+.apk-file-input-hidden {
+  display: none;
+}
+
+.table-actions-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.row-upload-progress {
+  width: 88px;
 }
 </style>

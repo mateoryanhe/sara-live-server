@@ -31,11 +31,12 @@ type SaveShareAppDownloadCfgRes struct {
 	ID      string `json:"id"`
 }
 
-// GetApkDownloadUrlReq App 查询 APK 下载链接(免登录).
+// GetApkDownloadUrlReq App 查询 APK 下载链接(免登录). 可选 ch 匹配 CMS APK 推广渠道包.
 type GetApkDownloadUrlReq struct {
 	g.Meta `path:"/getApkDownloadUrl" method:"post" summary:"查询APK下载链接" tags:"分享下载"`
+	Ch     string `json:"ch" dc:"推广渠道编码(可选,与 channel-url-list 渠道编码一致,如 \"2\");匹配 lookupApkDownload 渠道包"`
 }
 
 type GetApkDownloadUrlRes struct {
-	DownloadUrl string `json:"downloadUrl" dc:"官网assets下体积最大apk的公开URL,无则空"`
+	DownloadUrl string `json:"downloadUrl" dc:"渠道包或官网assets最大apk公开URL,均无则空"`
 }

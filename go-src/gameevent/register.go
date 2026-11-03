@@ -6,8 +6,9 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/event"
-	userentity "xr-game-server/entity/user"
 	"xr-game-server/module/randomnick"
+	"xr-game-server/module/promotionattribution"
+	userentity "xr-game-server/entity/user"
 )
 
 const (
@@ -21,8 +22,11 @@ type RegisterEventData struct {
 	RegisteredAt          time.Time
 	NickLang              uint8 // 随机昵称语言(0=英文默认)
 	Attribution           RegisterAttribution
-	PromotionChannelCode  int // deviceInfo.ch 解析出的渠道编码,0 为无
+	PromotionChannelCode  int    // deviceInfo.ch 解析出的渠道编码,0 为无
 	ApkPromotionChannel   string // deviceInfo.apkCh,空为无
+	PairedPromotionChannelCode int // H5-App 配对成功时的推广URL渠道编码(deviceInfo.ch 或兼容 h5AppCh+apkCh),0 为无
+	RegisterAccountChannel     uint   // accounts.channel
+	RegisterPromotionPlatform  string // h5/app, 仅按 accounts.channel 落库(不读 Header)
 }
 
 func NewRegisterEventData(userId uint64, registeredAt time.Time) *RegisterEventData {
@@ -44,6 +48,7 @@ func NewRegisterEventDataFromCtxWithDevice(ctx context.Context, userId uint64, r
 	}
 	code := 0
 	apkCh := ""
+	pairedCode := 0
 	if deviceInfo != nil {
 		if c, ok := deviceInfo.PromotionChannelCode(); ok {
 			code = c
@@ -51,6 +56,7 @@ func NewRegisterEventDataFromCtxWithDevice(ctx context.Context, userId uint64, r
 		if c, ok := deviceInfo.ApkPromotionChannel(); ok {
 			apkCh = c
 		}
+		pairedCode = promotionattribution.PairedPromotionChannelCodeFromDevice(deviceInfo)
 	}
 	return &RegisterEventData{
 		UserId:               userId,
@@ -59,5 +65,6 @@ func NewRegisterEventDataFromCtxWithDevice(ctx context.Context, userId uint64, r
 		Attribution:          registerAttributionFromCtx(ctx, deviceInfo),
 		PromotionChannelCode: code,
 		ApkPromotionChannel:  apkCh,
+		PairedPromotionChannelCode: pairedCode,
 	}
 }

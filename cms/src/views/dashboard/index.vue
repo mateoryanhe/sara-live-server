@@ -150,10 +150,25 @@
                 <span class="basic-stat-section-title">{{ t('pages.dashboard.userEvents') }}</span>
                 <span class="basic-stat-section-line"/>
               </div>
-              <el-button :loading="userEventsLoading" @click="() => void refreshUserEventsTab()">
-                {{ t('common.refresh') }}
-              </el-button>
-              <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
+              <div class="game-stats-toolbar-actions">
+                <el-button :loading="userEventsLoading" @click="() => void refreshUserEventsTab()">
+                  {{ t('common.refresh') }}
+                </el-button>
+                <el-select
+                    v-model="userEventsPlatform"
+                    class="user-events-platform-select"
+                    :placeholder="t('pages.trackingMinuteLiveActivity.platformFilter')"
+                    @change="handleUserEventsPlatformChange"
+                >
+                  <el-option
+                      v-for="opt in userEventsPlatformOptions"
+                      :key="opt.value || 'all'"
+                      :label="opt.label"
+                      :value="opt.value"
+                  />
+                </el-select>
+                <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
+              </div>
             </div>
             <div class="game-stats-chart-panel user-events-chart-panel">
               <div class="game-stats-chart-head">
@@ -420,6 +435,13 @@ const gameStatTrendMaxPoints = ref(0)
 const userEventsRangeTruncated = ref(false)
 const userEventsTrendMaxPoints = ref(USER_EVENTS_TREND_MAX_POINTS)
 const activeUserEventMetric = ref<MinuteLiveActivitySeriesKey>('joinCount')
+const userEventsPlatform = ref('')
+const userEventsPlatformOptions = computed(() => [
+  {value: '', label: t('pages.trackingMinuteLiveActivity.platformAll')},
+  {value: 'android', label: t('pages.trackingMinuteLiveActivity.platformAndroid')},
+  {value: 'ios', label: t('pages.trackingMinuteLiveActivity.platformIOS')},
+  {value: 'web', label: t('pages.trackingMinuteLiveActivity.platformWeb')},
+])
 /** 下拉展示用；定时器始终 DASHBOARD_AUTO_REFRESH_MS */
 const autoRefreshMs = ref(DASHBOARD_AUTO_REFRESH_MS)
 const dashboardRouteActive = ref(false)
@@ -500,7 +522,15 @@ const clientLoginChartTitle = computed(() =>
 const onlineChartTitle = computed(() => t('pages.dashboard.onlineLiveChartTitleLast3Days'))
 
 const gameStatChartTitle = computed(() => t('pages.dashboard.gameStatChartTitleLast3Days'))
-const userEventsChartTitle = computed(() => t('pages.trackingMinuteLiveActivity.chartTitleLast3Days'))
+const userEventsChartTitle = computed(() => {
+  const base = t('pages.trackingMinuteLiveActivity.chartTitleLast3Days')
+  const plat = userEventsPlatform.value
+  if (!plat) {
+    return base
+  }
+  const opt = userEventsPlatformOptions.value.find((o) => o.value === plat)
+  return opt ? `${base} · ${opt.label}` : base
+})
 
 const userEventSeriesLabel = (key: MinuteLiveActivitySeriesKey) => {
   switch (key) {
@@ -1168,6 +1198,11 @@ const refreshUserEventsTab = async () => {
   }
 }
 
+const handleUserEventsPlatformChange = () => {
+  tabDataLoaded.userEventsTrend = false
+  void fetchUserEventsTrend(false, true)
+}
+
 const fetchUserEventsTrend = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
   if (!silent) {
     userEventsLoading.value = true
@@ -1177,6 +1212,7 @@ const fetchUserEventsTrend = async (silent = false, bypassDashboardCache = false
       startTime: 0,
       endTime: 0,
       limit: USER_EVENTS_TREND_MAX_POINTS,
+      platform: userEventsPlatform.value || undefined,
       bypassDashboardCache,
     })
     userEventsTrend.points = data.points || []
@@ -1627,6 +1663,23 @@ onUnmounted(() => {
   flex: 1;
   min-width: 0;
   margin-bottom: 0;
+}
+
+.game-stats-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.user-events-platform-select {
+  width: 112px;
+  flex: 0 0 112px;
+}
+
+.user-events-platform-select :deep(.el-select__wrapper) {
+  width: 100%;
 }
 
 .game-stats-chart-panel {

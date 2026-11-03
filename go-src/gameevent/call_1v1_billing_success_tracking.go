@@ -13,12 +13,13 @@ const (
 
 // Call1v1BillingSuccessTrackingEventData 1v1 视频通话成功消费埋点
 type Call1v1BillingSuccessTrackingEventData struct {
-	Source     uint8
-	CallType   uint8
-	CallerId   uint64
-	ReceiverId uint64
-	OrderId    uint64
-	StatAt     time.Time
+	Source         uint8
+	CallType       uint8
+	CallerId       uint64
+	ReceiverId     uint64
+	OrderId        uint64
+	StatAt         time.Time
+	ClientPlatform string
 }
 
 func NewCall1v1BillingSuccessTrackingEventData(source, callType uint8, callerId, receiverId, orderId uint64, statAt time.Time) *Call1v1BillingSuccessTrackingEventData {

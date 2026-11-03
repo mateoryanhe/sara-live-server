@@ -1,6 +1,8 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
+  pageDesc:
+    '统计范围：仅展示「APK 推广渠道列表」中已配置的渠道；注册/下单/充值按 deviceInfo.apkCh 入账。',
   dateRange: '日期范围',
   startDate: '开始日期',
   endDate: '结束日期',
@@ -26,6 +28,8 @@ const zh = {
 } as const
 
 export const apkPromotionChannelDailyStatListMessages = definePageMessagesFromEn(zh, {
+  pageDesc:
+    'Only channels configured in APK Promotion Channel List; stats from deviceInfo.apkCh.',
   dateRange: 'Date range',
   startDate: 'Start',
   endDate: 'End',

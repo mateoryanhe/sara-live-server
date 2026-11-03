@@ -48,7 +48,7 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 	}
 
 	pushRoomChat(req.RoomId, senderId, content)
-	minuteactivity.RecordChat(time.Now())
+	minuteactivity.RecordChatFromCtx(ctx, time.Now())
 	return &liveroomdto.SendChatRes{Success: true}, nil
 }
 

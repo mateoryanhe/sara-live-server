@@ -12,6 +12,7 @@ import (
 const TbMinuteLiveActivityStat db.TbName = "minute_live_activity_stats"
 
 const (
+	MinuteLiveActivityStatPlatform     db.TbCol = "platform"
 	MinuteLiveActivityStatBucketAt     db.TbCol = "bucket_at"
 	MinuteLiveActivityStatJoinCount    db.TbCol = "join_count"
 	MinuteLiveActivityStatLeaveCount   db.TbCol = "leave_count"
@@ -27,7 +28,8 @@ const (
 // MinuteLiveActivityStat 直播间分钟级活跃计数(UTC 分钟桶,保留约 3 天)
 type MinuteLiveActivityStat struct {
 	migrate.OneModel
-	BucketAt     time.Time `gorm:"uniqueIndex;comment:分钟桶起点(UTC)" json:"bucketAt"`
+	BucketAt time.Time `gorm:"uniqueIndex:idx_minute_live_activity_bucket_platform,priority:1;comment:分钟桶起点(UTC)" json:"bucketAt"`
+	Platform string    `gorm:"size:16;default:'';uniqueIndex:idx_minute_live_activity_bucket_platform,priority:2;comment:客户端平台 android/ios/web 空=未知" json:"platform"`
 	JoinCount    uint64    `gorm:"default:0;comment:进房次数" json:"joinCount"`
 	LeaveCount   uint64    `gorm:"default:0;comment:离房次数" json:"leaveCount"`
 	GiftCount    uint64    `gorm:"default:0;comment:送礼次数" json:"giftCount"`
@@ -46,16 +48,31 @@ func TruncateUTCMinute(at time.Time) time.Time {
 	return at.UTC().Truncate(time.Minute)
 }
 
-func MinuteLiveActivityStatID(at time.Time) uint64 {
-	return uint64(TruncateUTCMinute(at).Unix())
+func MinuteLiveActivityStatID(at time.Time, platform string) uint64 {
+	base := uint64(TruncateUTCMinute(at).Unix())
+	switch platform {
+	case "android":
+		return base*4 + 1
+	case "ios":
+		return base*4 + 2
+	case "web":
+		return base*4 + 3
+	default:
+		return base
+	}
 }
 
-func NewMinuteLiveActivityStat(at time.Time) *MinuteLiveActivityStat {
+func NewMinuteLiveActivityStat(at time.Time, platform string) *MinuteLiveActivityStat {
 	bucket := TruncateUTCMinute(at)
-	row := &MinuteLiveActivityStat{BucketAt: bucket}
-	row.ID = MinuteLiveActivityStatID(at)
+	row := &MinuteLiveActivityStat{BucketAt: bucket, Platform: platform}
+	row.ID = MinuteLiveActivityStatID(at, platform)
 	row.touchBucketAt()
+	row.touchPlatform()
 	return row
+}
+
+func (r *MinuteLiveActivityStat) touchPlatform() {
+	syndb.AddData(TbMinuteLiveActivityStat, MinuteLiveActivityStatPlatform, &syndb.ColData{IdVal: r.ID, ColVal: r.Platform})
 }
 
 func (r *MinuteLiveActivityStat) touchBucketAt() {
@@ -108,6 +125,7 @@ func (r *MinuteLiveActivityStat) AddRechargeOrderCount(n uint64) {
 }
 
 func initMinuteLiveActivityStat() {
+	syndb.RegQuick(TbMinuteLiveActivityStat, MinuteLiveActivityStatPlatform)
 	syndb.RegQuick(TbMinuteLiveActivityStat, MinuteLiveActivityStatBucketAt)
 	syndb.RegQuick(TbMinuteLiveActivityStat, MinuteLiveActivityStatJoinCount)
 	syndb.RegQuick(TbMinuteLiveActivityStat, MinuteLiveActivityStatLeaveCount)
