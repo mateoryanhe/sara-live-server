@@ -2,7 +2,7 @@ import {definePageMessagesFromEn} from './_define'
 
 const zh = {
   pageDesc:
-    '统计范围：仅展示「APK 推广渠道列表」中已配置的渠道；注册/下单/充值按 deviceInfo.apkCh 入账。',
+    '统计范围：仅展示「落地页推广」中已配置的渠道；注册/下单/充值按 deviceInfo.apkCh 入账。',
   dateRange: '日期范围',
   startDate: '开始日期',
   endDate: '结束日期',
@@ -18,18 +18,18 @@ const zh = {
   payUserCount: '支付人次',
   orderTotalAmount: '下单总额(USD)',
   rechargeSuccessAmount: '充值成功(USD)',
-  channelPickerTitle: '选择 APK 推广渠道',
+  channelPickerTitle: '选择落地页推广渠道',
   channelPickerSearchPlaceholder: '搜索渠道名称/编码',
   channelPickerAll: '全部渠道',
   channelPickerSelect: '选择',
   dateRangeRequired: '请选择日期范围',
-  fetchFailed: '获取报表失败',
+  fetchFailed: '获取落地页下载日统计失败',
   fetchChannelListFailed: '获取渠道列表失败',
 } as const
 
 export const apkPromotionChannelDailyStatListMessages = definePageMessagesFromEn(zh, {
   pageDesc:
-    'Only channels configured in APK Promotion Channel List; stats from deviceInfo.apkCh.',
+    'Only channels configured in Landing Page Promotion; stats from deviceInfo.apkCh.',
   dateRange: 'Date range',
   startDate: 'Start',
   endDate: 'End',
@@ -45,11 +45,11 @@ export const apkPromotionChannelDailyStatListMessages = definePageMessagesFromEn
   payUserCount: 'Pay users',
   orderTotalAmount: 'Order total (USD)',
   rechargeSuccessAmount: 'Recharge (USD)',
-  channelPickerTitle: 'Select APK channel',
+  channelPickerTitle: 'Select landing page promotion channel',
   channelPickerSearchPlaceholder: 'Search name/code',
   channelPickerAll: 'All channels',
   channelPickerSelect: 'Select',
   dateRangeRequired: 'Select a date range',
-  fetchFailed: 'Failed to load report',
+  fetchFailed: 'Failed to load landing page download daily stats',
   fetchChannelListFailed: 'Failed to load channels',
 })

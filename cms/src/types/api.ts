@@ -690,6 +690,17 @@ export interface UserWalletDetailItem {
     diamond?: number
 }
 
+export interface UserPromotionAttributionDetailItem {
+    promotionChannelCode?: number
+    promotionUrlChannelName?: string
+    h5AppChannelCode?: string
+    promotionLandingUrl?: string
+    promotionUrlApkDownloadUrl?: string
+    apkChannelCode?: string
+    apkChannelName?: string
+    apkChannelApkDownloadUrl?: string
+}
+
 export interface UserExtDetailItem {
     canRank?: boolean
     prettyId?: string
@@ -704,6 +715,8 @@ export interface UserExtDetailItem {
     email?: string
     apkPromotionChannel?: string
     apkPromotionChannelName?: string
+    promotionChannelCode?: number
+    registerPromotionPlatform?: string
     updatedAt?: string | null
 }
 
@@ -789,6 +802,7 @@ export interface UserDetail {
     loginDevice?: UserLoginDeviceDetailItem | null
     channelPayProfile?: UserChannelPayProfileDetailItem | null
     withdrawPayout?: UserWithdrawPayoutDetailItem | null
+    promotionAttribution?: UserPromotionAttributionDetailItem | null
 }
 
 export interface QueryBotAnchorListReq extends PageQuery {

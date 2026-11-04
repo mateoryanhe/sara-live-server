@@ -96,8 +96,14 @@
                   <el-descriptions-item :label="t('pages.userList.registerLoginChannel')">
                     {{ channelLabel(detail.account?.channel) }}
                   </el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.userList.apkPromotionChannel')">
-                    {{ apkPromotionChannelLabel }}
+                  <el-descriptions-item :label="t('pages.userList.registerPromotionPlatform')">
+                    {{ registerPromotionPlatformLabel }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.h5DownloadChannelName')">
+                    {{ h5DownloadChannelNameLabel }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.landingPageDownloadChannelName')">
+                    {{ landingPageDownloadChannelNameLabel }}
                   </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.lastLoginTime')">{{ formatDate(detail.profile?.lastLoginTime) }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.ip')">{{ detail.account?.ip || '-' }}</el-descriptions-item>
@@ -455,16 +461,29 @@ const USER_TYPE_BOT_ANCHOR = 2
 
 const userId = computed(() => String(route.query.id || '').trim())
 
-const apkPromotionChannelLabel = computed(() => {
-  const code = detail.value?.userExt?.apkPromotionChannel?.trim()
-  if (!code) {
-    return '-'
+const h5DownloadChannelNameLabel = computed(() => {
+  const name = (detail.value?.promotionAttribution?.promotionUrlChannelName ?? '').trim()
+  return name || '-'
+})
+
+const landingPageDownloadChannelNameLabel = computed(() => {
+  const name = (
+      detail.value?.promotionAttribution?.apkChannelName
+      ?? detail.value?.userExt?.apkPromotionChannelName
+      ?? ''
+  ).trim()
+  return name || '-'
+})
+
+const registerPromotionPlatformLabel = computed(() => {
+  const platform = (detail.value?.userExt?.registerPromotionPlatform ?? '').trim().toLowerCase()
+  if (platform === 'h5') {
+    return t('pages.userList.registerPromotionPlatformH5')
   }
-  const name = detail.value?.userExt?.apkPromotionChannelName?.trim()
-  if (name) {
-    return `${name} (${code})`
+  if (platform === 'app') {
+    return t('pages.userList.registerPromotionPlatformApp')
   }
-  return code
+  return platform || '-'
 })
 
 const showBotAnchorStatus = computed(() => detail.value?.profile?.userType === USER_TYPE_BOT_ANCHOR)

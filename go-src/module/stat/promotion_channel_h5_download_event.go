@@ -3,19 +3,13 @@ package stat
 import (
 	"time"
 
-	"xr-game-server/core/event"
 	"xr-game-server/gameevent"
 )
 
-func initPromotionChannelH5DownloadEvent() {
-	event.Sub(gameevent.H5DownloadTrackingEvent, onH5DownloadForPromotionChannel)
-}
+func initPromotionChannelH5DownloadEvent() {}
 
-func onH5DownloadForPromotionChannel(data any) {
-	enqueue(&statJob{Kind: jobPromotionChannelH5Download, Payload: data})
-}
-
-// EnqueuePromotionChannelH5DownloadApk lookupApkDownload 等命中推广渠道包时计入 H5 下载 APK 按钮点击.
+// EnqueuePromotionChannelH5DownloadApk lookupApkDownload 命中推广渠道包时计入 H5推广日统计 h5_download_apk_count.
+// 不与 reportH5Download 重复：埋点走 H5DownloadTrackingEvent 只计 tracking 表，渠道日统计仅本入口 +1.
 func EnqueuePromotionChannelH5DownloadApk(channelCode int, at time.Time) {
 	if channelCode <= 0 {
 		return

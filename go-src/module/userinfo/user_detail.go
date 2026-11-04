@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/apkpromotionchanneldao"
 	"xr-game-server/dao/channelpaydao"
+	"xr-game-server/dao/promotionchannelurldao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
@@ -19,6 +20,7 @@ import (
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/ipgeo"
+	"xr-game-server/module/promotionattribution"
 	"xr-game-server/module/upload"
 )
 
@@ -29,11 +31,13 @@ func QueryUserDetail(_ context.Context, req *accountdto.GetUserDetailReq) (*acco
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	userInfo := userinfodao.GetUserInfoFromDB(req.UserId)
+	userExt := userinfodao.GetUserExtFromDB(req.UserId)
 	return &accountdto.GetUserDetailRes{
 		Account:        toUserAccountDetailItem(account, userloginlocationdao.GetByUserId(req.UserId)),
 		Profile:        toUserProfileDetailItem(userInfo, req.UserId),
 		Wallet:         toUserWalletDetailItem(userInfo),
-		UserExt:        toUserExtDetailItem(userinfodao.GetUserExtFromDB(req.UserId)),
+		UserExt:        toUserExtDetailItem(userExt),
+		PromotionAttribution: toUserPromotionAttributionDetailItem(userExt),
 		CumulativeStat: toUserCumulativeStatDetailItem(userinfodao.GetUserCumulativeStatFromDB(req.UserId)),
 		LoginDevice:       toUserLoginDeviceDetailItem(userlogindevicedao.GetUserLoginDeviceFromDB(req.UserId)),
 		ChannelPayProfile: toUserChannelPayProfileDetailItem(channelpaydao.GetExisting(req.UserId)),
@@ -187,10 +191,61 @@ func toUserExtDetailItem(ext *userentity.UserExt) *accountdto.UserExtDetailItem 
 		Email:                     ext.Email,
 		ApkPromotionChannel:       strings.TrimSpace(ext.ApkPromotionChannel),
 		ApkPromotionChannelName:   resolveApkPromotionChannelName(ext.ApkPromotionChannel),
+		PromotionChannelCode:      ext.PromotionChannelCode,
+		RegisterPromotionPlatform: strings.TrimSpace(ext.RegisterPromotionPlatform),
 	}
 	if !ext.UpdatedAt.IsZero() {
 		updatedAt := ext.UpdatedAt
 		item.UpdatedAt = &updatedAt
+	}
+	return item
+}
+
+func toUserPromotionAttributionDetailItem(ext *userentity.UserExt) *accountdto.UserPromotionAttributionDetailItem {
+	if ext == nil || ext.ID == 0 {
+		return nil
+	}
+	apkCh := strings.TrimSpace(ext.ApkPromotionChannel)
+	promoCode := ext.PromotionChannelCode
+	if promoCode <= 0 && apkCh != "" {
+		if c, ok := promotionattribution.ResolvePromotionURLChannelCodeByApkCh(apkCh); ok {
+			promoCode = c
+		}
+	}
+	item := &accountdto.UserPromotionAttributionDetailItem{
+		PromotionChannelCode: promoCode,
+		ApkChannelCode:       apkCh,
+	}
+	if promoCode > 0 {
+		if urlRow := promotionchannelurldao.GetByChannelCode(promoCode); urlRow != nil {
+			item.PromotionUrlChannelName = strings.TrimSpace(urlRow.ChannelName)
+			item.H5AppChannelCode = strings.TrimSpace(urlRow.H5AppChannelCode)
+			item.PromotionLandingUrl = strings.TrimSpace(urlRow.URL)
+			item.PromotionUrlApkDownloadUrl = strings.TrimSpace(urlRow.ApkDownloadURL)
+		}
+	}
+	if apkCh != "" {
+		if apkRow := apkpromotionchanneldao.GetByChannelCode(apkCh); apkRow != nil {
+			item.ApkChannelName = strings.TrimSpace(apkRow.ChannelName)
+			item.ApkChannelApkDownloadUrl = strings.TrimSpace(apkRow.ApkDownloadURL)
+		}
+		if item.H5AppChannelCode == "" {
+			if urlRow := promotionchannelurldao.GetByH5AppChannelCode(apkCh); urlRow != nil {
+				item.H5AppChannelCode = strings.TrimSpace(urlRow.H5AppChannelCode)
+				if item.PromotionChannelCode <= 0 && urlRow.ChannelCode > 0 {
+					item.PromotionChannelCode = urlRow.ChannelCode
+				}
+				if item.PromotionUrlChannelName == "" {
+					item.PromotionUrlChannelName = strings.TrimSpace(urlRow.ChannelName)
+				}
+				if item.PromotionLandingUrl == "" {
+					item.PromotionLandingUrl = strings.TrimSpace(urlRow.URL)
+				}
+				if item.PromotionUrlApkDownloadUrl == "" {
+					item.PromotionUrlApkDownloadUrl = strings.TrimSpace(urlRow.ApkDownloadURL)
+				}
+			}
+		}
 	}
 	return item
 }

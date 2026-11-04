@@ -106,7 +106,15 @@
 - 登录：`SetLastLoginTime` 同步；日/周/月统计入队
 - 观众：`gameevent.ValidAudienceEvent`（`join_room` Pub）
 - 热重启：`PrepareRestart` 排空 + `hotrestart.RegisterStatQueueFlush` 与 syndb 同阶段刷盘
-- **推广渠道日统计 H5下载APK量**（2026-10-28）：`stat` 订 `H5DownloadTrackingEvent`；`reportH5Download` 请求体带 `channelCode>0` 且渠道已配置才 +1 `h5_download_apk_count`；CMS「推广渠道日统计」列 `h5DownloadApkCount`
+- **H5推广日统计 H5下载APK量**（2026-11-04）：`h5_download_apk_count` **仅** `lookupApkDownload`/`getApkDownloadUrl` 命中渠道包时 +1；`reportH5Download` 只计埋点 `h5_download`，避免同一次点击 +2
+
+## 本机 Windows 断网排查（hw 开发机，2026-11-04）
+
+- **现象**：上不了网；2026-11-04 13:49 系统日志 **Tcpip 4231**（临时 TCP 端口耗尽）；13:54 有线短暂断开；用户重启后恢复。
+- **自动采样**：登录后 `HKCU\...\Run` → `SaraLive-TcpConnWatch`，脚本 `pub-tool/run-tcp-watch-on-logon.ps1`（每 60s × 60min）。
+- **日志目录**：`C:\Users\hw\Logs\tcp-watch\`，文件 `tcp-yyyy-MM-dd-HHmmss.log`；手动：`pub-tool/watch-tcp-connections.ps1`。
+- **用户再报断网时**：先读该目录**事发时段**最新 log（看 `WARNING` / Top 进程，常见 **xray/v2rayN**）；并对照 **事件查看器 → 系统 → Tcpip 4231、DNS 1014**。
+- 计划任务因无管理员权限未创建；关闭自动采样：`Remove-ItemProperty HKCU:\...\Run -Name SaraLive-TcpConnWatch`。
 
 ## 货币流水 reason 多语言（2026-09-08）
 

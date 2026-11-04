@@ -72,7 +72,21 @@ type UserExtDetailItem struct {
 	Email                     string     `json:"email" dc:"绑定邮箱(user_exts.email)"`
 	ApkPromotionChannel       string     `json:"apkPromotionChannel" dc:"APK推广渠道编码(空为无)"`
 	ApkPromotionChannelName   string     `json:"apkPromotionChannelName" dc:"APK推广渠道名称(CMS配置)"`
+	PromotionChannelCode      int        `json:"promotionChannelCode" dc:"H5推广URL整数渠道码(0为无)"`
+	RegisterPromotionPlatform string     `json:"registerPromotionPlatform" dc:"注册客户端 h5/app"`
 	UpdatedAt                 *time.Time `json:"updatedAt"`
+}
+
+// UserPromotionAttributionDetailItem CMS 用户详情：推广归因(对应推广URL列表与APK渠道列表)
+type UserPromotionAttributionDetailItem struct {
+	PromotionChannelCode       int    `json:"promotionChannelCode" dc:"推广URL整数渠道码(ch)"`
+	PromotionUrlChannelName    string `json:"promotionUrlChannelName" dc:"推广URL列表-渠道名称"`
+	H5AppChannelCode           string `json:"h5AppChannelCode" dc:"推广URL列表-H5-App渠道码"`
+	PromotionLandingUrl        string `json:"promotionLandingUrl" dc:"H5推广落地页URL"`
+	PromotionUrlApkDownloadUrl string `json:"promotionUrlApkDownloadUrl" dc:"推广URL列表-渠道APK下载地址"`
+	ApkChannelCode             string `json:"apkChannelCode" dc:"App deviceInfo.apkCh"`
+	ApkChannelName             string `json:"apkChannelName" dc:"APK推广渠道列表-渠道名称"`
+	ApkChannelApkDownloadUrl   string `json:"apkChannelApkDownloadUrl" dc:"APK推广渠道列表-专用APK下载地址"`
 }
 
 // UserCumulativeStatDetailItem 累计统计(user_cumulative_stats)
@@ -131,5 +145,6 @@ type GetUserDetailRes struct {
 	CumulativeStat   *UserCumulativeStatDetailItem   `json:"cumulativeStat"`
 	LoginDevice      *UserLoginDeviceDetailItem      `json:"loginDevice"`
 	ChannelPayProfile *UserChannelPayProfileDetailItem `json:"channelPayProfile"`
-	WithdrawPayout   *UserWithdrawPayoutDetailItem   `json:"withdrawPayout"`
+	WithdrawPayout        *UserWithdrawPayoutDetailItem        `json:"withdrawPayout"`
+	PromotionAttribution  *UserPromotionAttributionDetailItem  `json:"promotionAttribution"`
 }

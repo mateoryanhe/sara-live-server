@@ -2,7 +2,7 @@ import {definePageMessagesFromEn} from './_define'
 
 const zh = {
   pageDesc:
-    '统计范围：注册时 deviceInfo.ch 有效且 CMS 存在对应推广 URL 渠道；含该用户的下单/充值与 H5 下载 APK 点击。App 注册请用 apkCh，不计入本表注册（除非同时上报 ch）。',
+    '统计范围：注册时 deviceInfo.ch 有效且 CMS 存在对应 H5推广渠道；含该用户的下单/充值。H5下载APK按钮点击量：每次 lookupApkDownload/getApkDownloadUrl 命中渠道包 +1（reportH5Download 仅埋点，不重复计入本列）。App 注册请用 apkCh，不计入本表注册（除非同时上报 ch）。',
   dateRange: '统计日期',
   startDate: '开始日期',
   endDate: '结束日期',
@@ -12,11 +12,11 @@ const zh = {
   channelCode: '渠道编码',
   channelCodePlaceholder: '全部留空',
   selectChannel: '选择',
-  channelPickerTitle: '选择推广渠道',
+  channelPickerTitle: '选择 H5推广渠道',
   channelPickerSearchPlaceholder: '搜索渠道名称或编码',
   channelPickerAll: '全部渠道（不限编码）',
   channelPickerSelect: '选用',
-  fetchChannelListFailed: '获取推广渠道列表失败',
+  fetchChannelListFailed: '获取 H5推广渠道列表失败',
   registerCount: '注册人数',
   h5DownloadApkCount: 'H5下载APK按钮点击量',
   orderCount: '下单笔数',
@@ -25,12 +25,12 @@ const zh = {
   rechargeSuccessAmount: '投放充值金额USD',
   dateRangeRequired: '请选择统计日期范围',
   channelCodeInvalid: '渠道编码须为正整数或留空',
-  fetchFailed: '获取推广渠道日统计失败',
+  fetchFailed: '获取 H5推广日统计失败',
 } as const
 
 export const promotionChannelDailyStatListMessages = definePageMessagesFromEn(zh, {
   pageDesc:
-    'Scope: registrations with valid deviceInfo.ch and a matching promotion URL channel, plus orders/recharges and H5 APK download clicks. App uses apkCh; URL register counts only when ch is sent.',
+    'Scope: registrations with valid deviceInfo.ch and matching H5 promotion channel, plus orders/recharges. h5DownloadApkCount: +1 per lookupApkDownload when channel APK hits (reportH5Download is tracking only). App uses apkCh; URL register counts only when ch is sent.',
   dateRange: 'Date range',
   startDate: 'Start',
   endDate: 'End',
@@ -40,11 +40,11 @@ export const promotionChannelDailyStatListMessages = definePageMessagesFromEn(zh
   channelCode: 'Channel code',
   channelCodePlaceholder: 'All if empty',
   selectChannel: 'Pick',
-  channelPickerTitle: 'Select promotion channel',
+  channelPickerTitle: 'Select H5 promotion channel',
   channelPickerSearchPlaceholder: 'Search by name or code',
   channelPickerAll: 'All channels (no filter)',
   channelPickerSelect: 'Use',
-  fetchChannelListFailed: 'Failed to load promotion channels',
+  fetchChannelListFailed: 'Failed to load H5 promotion channels',
   registerCount: 'Registrations',
   h5DownloadApkCount: 'H5 APK download button clicks',
   orderCount: 'Orders',
@@ -53,5 +53,5 @@ export const promotionChannelDailyStatListMessages = definePageMessagesFromEn(zh
   rechargeSuccessAmount: 'Campaign recharge USD',
   dateRangeRequired: 'Select a date range',
   channelCodeInvalid: 'Channel code must be a positive integer or empty',
-  fetchFailed: 'Failed to load promotion daily stats',
+  fetchFailed: 'Failed to load H5 promotion daily stats',
 })

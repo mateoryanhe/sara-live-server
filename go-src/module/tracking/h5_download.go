@@ -20,7 +20,7 @@ const (
 	EventKeyH5Download = "h5_download"
 )
 
-// ReportH5Download 上报 H5 下载点击(免登录,每次成功 +1;可带 channelCode 计入渠道日统计)
+// ReportH5Download 上报 H5 下载点击(免登录,每次成功 +1 埋点 h5_download; 不写入 H5推广日统计, 避免与 lookupApkDownload 重复 +1)
 func ReportH5Download(_ context.Context, req *trackingdto.ReportH5DownloadReq) (*trackingdto.ReportH5DownloadRes, error) {
 	channelCode := 0
 	if req != nil {

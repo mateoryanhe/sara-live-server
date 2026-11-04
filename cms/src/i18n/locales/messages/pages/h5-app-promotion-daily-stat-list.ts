@@ -2,7 +2,7 @@ import {definePageMessagesFromEn} from './_define'
 
 const zh = {
   pageDesc:
-    '统计范围：仅展示「推广渠道URL列表」中已配置的渠道编码；App 注册 apkCh 与 URL 的 H5-App 渠道码匹配后按 URL 渠道汇总。',
+    '统计范围：仅展示「H5推广渠道」中已配置的渠道编码；App 注册 apkCh 与 URL 的 H5-App 渠道码匹配后按 URL 渠道汇总。',
   dateRange: '日期范围',
   startDate: '开始日期',
   endDate: '结束日期',
@@ -17,7 +17,7 @@ const zh = {
   payUserCount: '支付人次',
   orderTotalAmount: '下单总额(USD)',
   rechargeSuccessAmount: '充值成功(USD)',
-  channelPickerTitle: '选择推广渠道(URL列表)',
+  channelPickerTitle: '选择 H5推广渠道',
   channelPickerSearchPlaceholder: '搜索渠道名称/编码',
   channelPickerAll: '全部渠道',
   channelPickerSelect: '选择',
@@ -28,7 +28,7 @@ const zh = {
 
 export const h5AppPromotionDailyStatListMessages = definePageMessagesFromEn(zh, {
   pageDesc:
-    'Only channels in Promotion Channel URL List; App apkCh matched to URL h5_app_channel_code, aggregated by URL channel code.',
+    'Only channels configured in H5 Promotion Channels; App apkCh matched to URL h5_app_channel_code, aggregated by URL channel code.',
   dateRange: 'Date range',
   startDate: 'Start',
   endDate: 'End',
@@ -43,7 +43,7 @@ export const h5AppPromotionDailyStatListMessages = definePageMessagesFromEn(zh, 
   payUserCount: 'Pay users',
   orderTotalAmount: 'Order total (USD)',
   rechargeSuccessAmount: 'Recharge (USD)',
-  channelPickerTitle: 'Select promotion URL channel',
+  channelPickerTitle: 'Select H5 promotion channel',
   channelPickerSearchPlaceholder: 'Search name/code',
   channelPickerAll: 'All channels',
   channelPickerSelect: 'Select',
