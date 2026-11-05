@@ -145,6 +145,17 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column
+            :label="t('pages.anchorList.liveSessionTotalIncome')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="140"
+        >
+          <template #default="{ row }">
+            <span v-if="row.liveStatus === 1" class="money-amount">{{ formatWalletBalance(row.liveSessionTotalIncome) }}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
        
        
        
@@ -178,17 +189,6 @@
             <el-tag :type="row.liveStatus === 1 ? 'success' : 'info'">
               {{ row.liveStatus === 1 ? t('common.live') : t('common.offline') }}
             </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-            :label="t('pages.anchorList.liveSessionTotalIncome')"
-            align="right"
-            label-class-name="header-nowrap"
-            min-width="140"
-        >
-          <template #default="{ row }">
-            <span v-if="row.liveStatus === 1" class="money-amount">{{ formatWalletBalance(row.liveSessionTotalIncome) }}</span>
-            <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column
