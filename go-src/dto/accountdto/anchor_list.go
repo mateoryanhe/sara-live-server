@@ -35,6 +35,7 @@ type AnchorListItem struct {
 	PrivateInviteType           uint8      `json:"privateInviteType" dc:"视频通话邀请类型(1=接受所有人,3=拒绝所有人)"`
 	Billing                     float64    `json:"billing" dc:"视频通话计费价格(钻石/分钟)"`
 	LiveStatus                  uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`
+	LiveSessionTotalIncome      float64    `json:"liveSessionTotalIncome" dc:"本场开播实时总收益(未开播为0)"`
 	TotalIncome                 float64    `json:"totalIncome" dc:"未结算总直播收益"`
 	TotalSocialIncome           float64    `json:"totalSocialIncome" dc:"未结算社交流水累计"`
 	TotalGameIncome             float64    `json:"totalGameIncome" dc:"未结算游戏流水累计(金币)"`

@@ -110,7 +110,7 @@ func Delete(_ context.Context, req *apkpromotionchanneldto.DeleteApkPromotionCha
 func normalizeApkH5AppChannelCode(raw, apkChannelCode string, excludeID uint64) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
-		return "", nil
+		raw = apkChannelCode
 	}
 	h5AppCode, ok := promotionattribution.NormalizeH5AppChannelCode(raw)
 	if !ok {
@@ -122,6 +122,11 @@ func normalizeApkH5AppChannelCode(raw, apkChannelCode string, excludeID uint64) 
 	}
 	if strings.TrimSpace(urlRow.H5AppChannelCode) != h5AppCode {
 		return "", errercode.CreateCode(errercode.InvalidParam)
+	}
+	if excludeID != 0 {
+		if ch, ok := promotionattribution.ValidatePair(h5AppCode, apkChannelCode); !ok || ch != urlRow.ChannelCode {
+			return "", errercode.CreateCode(errercode.InvalidParam)
+		}
 	}
 	// 复合唯一 (h5_app_channel_code, channel_code) 由 DB 约束; 先查同 APK 码是否被其它 h5 占用
 	if existing := apkpromotionchanneldao.GetByChannelCode(apkChannelCode); existing != nil && existing.ID != excludeID {

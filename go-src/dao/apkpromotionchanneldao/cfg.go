@@ -60,6 +60,20 @@ func GetFirstByH5AppChannelCode(h5AppCode string) *entity.ApkPromotionChannel {
 	return &row
 }
 
+// ListByH5AppChannelCode 落地页推广中所有使用该 H5-App 渠道码的行(复合唯一 h5+apk channel_code).
+func ListByH5AppChannelCode(h5AppCode string) []*entity.ApkPromotionChannel {
+	h5AppCode = strings.TrimSpace(h5AppCode)
+	if h5AppCode == "" {
+		return nil
+	}
+	var rows []*entity.ApkPromotionChannel
+	_ = g.DB().Model(string(entity.TbApkPromotionChannel)).
+		Where("h5_app_channel_code = ?", h5AppCode).
+		Order("channel_code asc").
+		Scan(&rows)
+	return rows
+}
+
 func Create(row *entity.ApkPromotionChannel) error {
 	_, err := g.DB().Model(string(entity.TbApkPromotionChannel)).Save(row)
 	return err

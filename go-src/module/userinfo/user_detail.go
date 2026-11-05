@@ -193,6 +193,7 @@ func toUserExtDetailItem(ext *userentity.UserExt) *accountdto.UserExtDetailItem 
 		ApkPromotionChannelName:   resolveApkPromotionChannelName(ext.ApkPromotionChannel),
 		PromotionChannelCode:      ext.PromotionChannelCode,
 		RegisterPromotionPlatform: strings.TrimSpace(ext.RegisterPromotionPlatform),
+		RegisterClientPlatform:    strings.TrimSpace(ext.RegisterClientPlatform),
 	}
 	if !ext.UpdatedAt.IsZero() {
 		updatedAt := ext.UpdatedAt

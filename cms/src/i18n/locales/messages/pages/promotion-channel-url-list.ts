@@ -8,7 +8,7 @@ const zh = {
   h5AppChannelCode: 'H5-App渠道码',
   h5AppChannelCodeRequired: '请输入 H5-App 渠道码',
   h5AppChannelCodePattern: '1–64 位字母、数字、下划线或连字符',
-  h5AppChannelCodeTip: '与「落地页推广」中的渠道码配对；App 登录上报 h5AppCh + apkCh 须与此一致',
+  h5AppChannelCodeTip: '须与「落地页推广」中相同 H5-App 渠道码 + 渠道编码成对；保存前须在落地页推广先配好该配对，且 H5-App 码不可随意改成未配对的值（如仅填 2）',
   shareUrl: '分享链接',
   shareBaseHostHint: '分享域名取自「前端部署 → H5直播部署」中的站点域名，链接格式：https://域名?ch=渠道编码（按实际上线域名与编码替换）',
   shareBaseHostEmpty: '未配置 H5 直播域名，请先在 H5直播部署 页保存站点域名后再新建渠道。',

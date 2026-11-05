@@ -11,6 +11,8 @@ import (
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/user"
+	"xr-game-server/core/httpserver"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/promotionattribution"
 )
 
@@ -126,6 +128,24 @@ func GetRegisterPromotionPlatform(userId uint64) string {
 		return ""
 	}
 	return strings.TrimSpace(GetUserExtByUserId(userId).RegisterPromotionPlatform)
+}
+
+// SaveRegisterClientPlatform 注册时按请求头 X-Platform 写入(android/ios/web),仅写一次.
+func SaveRegisterClientPlatform(ctx context.Context, userId uint64) string {
+	if userId == 0 {
+		return ""
+	}
+	platform := gameevent.NormalizeStatClientPlatform(httpserver.ClientPlatformFromContext(ctx))
+	if platform == "" {
+		return ""
+	}
+	ext := GetUserExtByUserId(userId)
+	if strings.TrimSpace(ext.RegisterClientPlatform) != "" {
+		return ext.RegisterClientPlatform
+	}
+	ext.SetRegisterClientPlatform(platform)
+	PublishUserExt(ext)
+	return platform
 }
 
 // SaveRegisterInfo 保存注册时的包名与版本号(可为空)

@@ -315,6 +315,21 @@ func roomLiveStatus(room *liveentity.LiveRoom) uint8 {
 	return 0
 }
 
+// currentLiveSessionTotalIncome 本场开播实时总收益(优先内存中的 live_record)
+func currentLiveSessionTotalIncome(room *liveentity.LiveRoom) float64 {
+	if room == nil || room.LiveRecordId == 0 {
+		return 0
+	}
+	liveRecord := liveroomdao.GetDataFromCache(room.LiveRecordId)
+	if liveRecord == nil {
+		liveRecord = liveroomdao.GetLiveRecordById(room.LiveRecordId)
+	}
+	if liveRecord == nil {
+		return 0
+	}
+	return liveRecord.TotalIncome
+}
+
 func isRegularAnchorRoom(room *liveentity.LiveRoom) bool {
 	user := userinfodao.GetUserInfoFromMemory(room.ID)
 	return user != nil && (user.UserType == userentity.UserTypeAnchor || user.UserType == userentity.UserTypeSeniorAnchor)
@@ -417,6 +432,7 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 		item.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
 	}
 	item.LiveStatus = roomLiveStatus(room)
+	item.LiveSessionTotalIncome = currentLiveSessionTotalIncome(room)
 	item.BanApplyTime = room.BanApplyTime
 	item.BanReason = room.BanReason
 	item.Ban = IsRoomBanned(room)

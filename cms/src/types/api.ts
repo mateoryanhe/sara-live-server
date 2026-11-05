@@ -466,6 +466,8 @@ export interface AnchorListItem {
     privateInviteType?: number
     billing?: number
     liveStatus?: number
+    /** 本场开播实时总收益(未开播为0) */
+    liveSessionTotalIncome?: number
     totalIncome?: number
     totalSocialIncome?: number
     totalGameIncome?: number
@@ -717,6 +719,7 @@ export interface UserExtDetailItem {
     apkPromotionChannelName?: string
     promotionChannelCode?: number
     registerPromotionPlatform?: string
+    registerClientPlatform?: string
     updatedAt?: string | null
 }
 

@@ -81,6 +81,7 @@ func FirebaseLogin(ctx context.Context, req *authdto.FirebaseLoginReq) (*authdto
 		ev := gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), req.DeviceInfo)
 		ev.RegisterAccountChannel = account.Channel
 		ev.RegisterPromotionPlatform = userinfodao.SaveRegisterPromotionPlatform(ctx, account.ID, account.Channel)
+		userinfodao.SaveRegisterClientPlatform(ctx, account.ID)
 		event.Pub(gameevent.RegisterEvent, ev)
 	}
 

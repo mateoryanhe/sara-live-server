@@ -2,7 +2,7 @@ import {definePageMessages} from './_define'
 
 const zh = {
   noticeTitle: '说明',
-  noticeLine1: '配置 Google Play RTDN 回调与验单参数。Pub/Sub Push 地址：POST /webhook/googlePlay/rtdn',
+  noticeLine1: '配置 Google Play RTDN 回调与验单参数。Sara Push：POST /webhook/googlePlay/rtdn ；Sofie Push：POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'App 创建订单后，发起 Google 支付时需将返回的 obfuscatedAccountId 传入 BillingFlowParams.setObfuscatedAccountId。',
   noticeLine3: '充值档位请在「运营 → 充值配置」中维护 Google 类型商品 SKU（productId）。发货成功后会自动 consume 消耗型商品。',
   serviceAccountJson: '服务账号 JSON',
@@ -18,7 +18,7 @@ const zh = {
 
 const en = {
   noticeTitle: 'Notice',
-  noticeLine1: 'Configure Google Play RTDN callback and purchase verification. Pub/Sub push URL: POST /webhook/googlePlay/rtdn',
+  noticeLine1: 'Configure Google Play RTDN. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'After creating an order, pass the returned obfuscatedAccountId to BillingFlowParams.setObfuscatedAccountId when starting Google payment.',
   noticeLine3: 'Maintain Google product SKUs (productId) under Operations → Recharge config. Consumable products are auto-consumed after successful delivery.',
   serviceAccountJson: 'Service account JSON',
@@ -34,7 +34,7 @@ const en = {
 
 const es = {
   noticeTitle: 'Aviso',
-  noticeLine1: 'Configura RTDN de Google Play y verificación. URL Pub/Sub: POST /webhook/googlePlay/rtdn',
+  noticeLine1: 'Configura RTDN Google Play. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'Tras crear pedido, pasa obfuscatedAccountId a BillingFlowParams.setObfuscatedAccountId al pagar.',
   noticeLine3: 'Mantén SKU Google (productId) en Operaciones → Config de recarga. Consumibles se consumen tras entrega.',
   serviceAccountJson: 'JSON cuenta de servicio',
@@ -50,7 +50,7 @@ const es = {
 
 const pt = {
   noticeTitle: 'Aviso',
-  noticeLine1: 'Configure RTDN Google Play e verificação. URL Pub/Sub: POST /webhook/googlePlay/rtdn',
+  noticeLine1: 'Configure RTDN Google Play. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'Após criar pedido, passe obfuscatedAccountId para BillingFlowParams.setObfuscatedAccountId no pagamento.',
   noticeLine3: 'Mantenha SKUs Google (productId) em Operações → Config de recarga. Consumíveis são consumidos após entrega.',
   serviceAccountJson: 'JSON conta de serviço',
@@ -66,7 +66,7 @@ const pt = {
 
 const hi = {
   noticeTitle: 'सूचना',
-  noticeLine1: 'Google Play RTDN कॉलबैक और सत्यापन कॉन्फ़िग करें। Pub/Sub push: POST /webhook/googlePlay/rtdn',
+  noticeLine1: 'Google Play RTDN। Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'ऑर्डर बनाने के बाद Google भुगतान में obfuscatedAccountId BillingFlowParams.setObfuscatedAccountId में पास करें।',
   noticeLine3: 'ऑपरेशन → रिचार्ज कॉन्फ़िग में Google SKU (productId) रखें। डिलीवरी के बाद consumable auto-consume।',
   serviceAccountJson: 'सेवा खाता JSON',
@@ -82,7 +82,7 @@ const hi = {
 
 const id = {
   noticeTitle: 'Catatan',
-  noticeLine1: 'Konfigurasi callback RTDN Google Play dan verifikasi. URL Pub/Sub: POST /webhook/googlePlay/rtdn',
+  noticeLine1: 'Konfigurasi RTDN Google Play. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'Setelah buat pesanan, kirim obfuscatedAccountId ke BillingFlowParams.setObfuscatedAccountId saat bayar.',
   noticeLine3: 'Kelola SKU Google (productId) di Operasi → Konfigurasi isi ulang. Produk consumable auto-consume setelah kirim.',
   serviceAccountJson: 'JSON akun layanan',

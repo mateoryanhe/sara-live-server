@@ -74,6 +74,7 @@ type UserExtDetailItem struct {
 	ApkPromotionChannelName   string     `json:"apkPromotionChannelName" dc:"APK推广渠道名称(CMS配置)"`
 	PromotionChannelCode      int        `json:"promotionChannelCode" dc:"H5推广URL整数渠道码(0为无)"`
 	RegisterPromotionPlatform string     `json:"registerPromotionPlatform" dc:"注册客户端 h5/app"`
+	RegisterClientPlatform    string     `json:"registerClientPlatform" dc:"注册时X-Platform(android/ios/web)"`
 	UpdatedAt                 *time.Time `json:"updatedAt"`
 }
 

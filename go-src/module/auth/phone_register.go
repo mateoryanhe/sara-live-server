@@ -66,6 +66,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	ev := gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, now, req.DeviceInfo)
 	ev.RegisterAccountChannel = account.Channel
 	ev.RegisterPromotionPlatform = userinfodao.SaveRegisterPromotionPlatform(ctx, account.ID, account.Channel)
+	userinfodao.SaveRegisterClientPlatform(ctx, account.ID)
 	event.Pub(gameevent.RegisterEvent, ev)
 	if req.InviteCode != "" {
 		inviterId := userinfo.ResolveInviteCodeToUserId(req.InviteCode)

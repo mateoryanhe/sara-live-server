@@ -79,6 +79,7 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 		ev := gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), deviceInfo)
 		ev.RegisterAccountChannel = channel
 		ev.RegisterPromotionPlatform = userinfodao.SaveRegisterPromotionPlatform(ctx, account.ID, channel)
+		userinfodao.SaveRegisterClientPlatform(ctx, account.ID)
 		event.Pub(gameevent.RegisterEvent, ev)
 	}
 

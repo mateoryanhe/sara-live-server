@@ -99,6 +99,9 @@
                   <el-descriptions-item :label="t('pages.userList.registerPromotionPlatform')">
                     {{ registerPromotionPlatformLabel }}
                   </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.registerClientPlatform')">
+                    {{ registerClientPlatformLabel }}
+                  </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.h5DownloadChannelName')">
                     {{ h5DownloadChannelNameLabel }}
                   </el-descriptions-item>
@@ -461,18 +464,36 @@ const USER_TYPE_BOT_ANCHOR = 2
 
 const userId = computed(() => String(route.query.id || '').trim())
 
+const h5DownloadChannelNameRaw = computed(() =>
+  (detail.value?.promotionAttribution?.promotionUrlChannelName ?? '').trim(),
+)
+
+const landingPageDownloadChannelNameRaw = computed(() =>
+  (
+    detail.value?.promotionAttribution?.apkChannelName
+    ?? detail.value?.userExt?.apkPromotionChannelName
+    ?? ''
+  ).trim(),
+)
+
+const bothPromotionDownloadChannelsEmpty = computed(
+  () => !h5DownloadChannelNameRaw.value && !landingPageDownloadChannelNameRaw.value,
+)
+
+const officialSiteChannelLabel = computed(() => t('pages.userList.officialSiteChannelName'))
+
 const h5DownloadChannelNameLabel = computed(() => {
-  const name = (detail.value?.promotionAttribution?.promotionUrlChannelName ?? '').trim()
-  return name || '-'
+  if (bothPromotionDownloadChannelsEmpty.value) {
+    return officialSiteChannelLabel.value
+  }
+  return h5DownloadChannelNameRaw.value || '-'
 })
 
 const landingPageDownloadChannelNameLabel = computed(() => {
-  const name = (
-      detail.value?.promotionAttribution?.apkChannelName
-      ?? detail.value?.userExt?.apkPromotionChannelName
-      ?? ''
-  ).trim()
-  return name || '-'
+  if (bothPromotionDownloadChannelsEmpty.value) {
+    return officialSiteChannelLabel.value
+  }
+  return landingPageDownloadChannelNameRaw.value || '-'
 })
 
 const registerPromotionPlatformLabel = computed(() => {
@@ -482,6 +503,20 @@ const registerPromotionPlatformLabel = computed(() => {
   }
   if (platform === 'app') {
     return t('pages.userList.registerPromotionPlatformApp')
+  }
+  return platform || '-'
+})
+
+const registerClientPlatformLabel = computed(() => {
+  const platform = (detail.value?.userExt?.registerClientPlatform ?? '').trim().toLowerCase()
+  if (platform === 'android') {
+    return t('pages.userList.registerClientPlatformAndroid')
+  }
+  if (platform === 'ios') {
+    return t('pages.userList.registerClientPlatformIos')
+  }
+  if (platform === 'web') {
+    return t('pages.userList.registerClientPlatformWeb')
   }
   return platform || '-'
 })

@@ -20,7 +20,7 @@
 |------|------|------|
 | `直播测试服` | ec2-user @ 54.241.124.37 | Go、MariaDB |
 | `直播正式服` | ec2-user @ **54.177.166.38**（2026-10 迁移；勿改回 52.9.70.64） | 正式 Go / CMS 部署 |
-| `直播审核服` | ec2-user @ 18.144.165.177 | 审核专用（~1GB RAM） |
+| `直播审核服` | ec2-user @ **18.144.161.229**（`~/.ssh/config` 别名；旧记 18.144.165.177 已失效） | 审核专用（~1GB RAM） |
 | `直播测试服-h5` | h5-live @ 54.241.124.37 | H5/SFTP |
 
 ### SSH 密钥与连接方式
@@ -254,6 +254,7 @@
 ## 充值渠道策略（2026-09-09）
 
 - **Google Play：必须保留，接入/重构第三方渠道时一律不动**
+- **Google Play RTDN webhook**（2026-11-04）：Sara `POST /webhook/googlePlay/rtdn`；Sofie 专用 `POST /webhook/sofie/googlePlay/rtdn`（同一处理逻辑；Pub/Sub Push 按 App 分开填域名+路径）。不进 Sofie `gen_sofie` 映射
 - 第三方渠道目标：**多国收单**（至少印尼、印度、菲律宾、马来西亚、南美等），非仅 IDR
 - **支付 SDK / 通道会频繁替换**：业务线与通道实现必须解耦（见下「可插拔 Provider」）
 - 统一业务流：建本地充值单 → Provider 出 `payUrl` → 异步 notify 验签 → `CompleteOrder` 发币
