@@ -3,9 +3,10 @@ package httpserver
 // RegAPIHandler 等裸 Handler 不会进入 GoFrame GetOpenApi(); 导出 App/Sofie 文档时在此补全 multipart 接口.
 
 const (
-	openAPISchemaLiveRoomDTO   = "xr-game-server.dto.liveroomdto."
-	openAPISchemaUserInfoDTO   = "xr-game-server.dto.userinfodto."
-	openAPISchemaShortVideoDTO = "xr-game-server.dto.shortvideodto."
+	openAPISchemaLiveRoomDTO    = "xr-game-server.dto.liveroomdto."
+	openAPISchemaUserInfoDTO    = "xr-game-server.dto.userinfodto."
+	openAPISchemaShortVideoDTO  = "xr-game-server.dto.shortvideodto."
+	openAPISchemaAnchorPhotoDTO = "xr-game-server.dto.anchorphotodto."
 )
 
 // MergeOpenApiRawHandlerRoutes 向 OpenAPI 文档补全裸 Handler 路由及对应 components.schemas.
@@ -21,6 +22,7 @@ func MergeOpenApiRawHandlerRoutes(doc map[string]any) error {
 	schemas := ensureOpenAPIComponentSchemas(doc)
 	mergeCreateLiveRoomOpenAPI(paths, schemas)
 	mergeUploadAvatarOpenAPI(paths, schemas)
+	mergeUploadAnchorPhotoOpenAPI(paths, schemas)
 	mergeAppPublishShortVideoOpenAPI(paths, schemas)
 	return nil
 }
@@ -45,17 +47,17 @@ func mergeCreateLiveRoomOpenAPI(paths, schemas map[string]any) {
 	schemas[reqName] = map[string]any{
 		"type": "object",
 		"properties": map[string]any{
-			"title":              openAPIStringProp("直播间标题"),
-			"cover":              openAPIBinaryProp("封面图片文件"),
-			"notice":             openAPIStringProp("公告"),
-			"category":           openAPIUintProp("分类(1=hot,2=game,5=语聊房,默认1)", "uint8"),
+			"title":                 openAPIStringProp("直播间标题"),
+			"cover":                 openAPIBinaryProp("封面图片文件"),
+			"notice":                openAPIStringProp("公告"),
+			"category":              openAPIUintProp("分类(1=hot,2=game,5=语聊房,默认1)", "uint8"),
 			"voiceChatMicMode":      openAPIUintProp("语聊上麦方式(1=自由,2=申请,3=房主单麦;category=5时有效,默认1)", "uint8"),
 			"voiceChatMicSeatCount": openAPIUintProp("语聊麦位总数(含主播位;category=5时有效,2~25,0或不传=默认25)", "uint8"),
 			"tagId":                 openAPIUintProp("直播间标签ID", "uint64"),
-			"gameCodes":          openAPIStringProp("推荐游戏编码(可多次传 gameCodes 或 gameCodes[];仅 category=2 有效)"),
-			"ticket":             openAPINumberProp("直播间来源视频通话门票价格(钻石)", "float64", 0),
-			"billing":            openAPINumberProp("视频通话价格(每分钟钻石)", "float64", nil),
-			"privateInviteType":  openAPIUintProp("视频通话邀请类型(1=接受所有人,3=拒绝所有人,0或不传时 category=1 默认3 其他默认1)", "uint8"),
+			"gameCodes":             openAPIStringProp("推荐游戏编码(可多次传 gameCodes 或 gameCodes[];仅 category=2 有效)"),
+			"ticket":                openAPINumberProp("直播间来源视频通话门票价格(钻石)", "float64", 0),
+			"billing":               openAPINumberProp("视频通话价格(每分钟钻石)", "float64", nil),
+			"privateInviteType":     openAPIUintProp("视频通话邀请类型(1=接受所有人,3=拒绝所有人,0或不传时 category=1 默认3 其他默认1)", "uint8"),
 		},
 	}
 	schemas[resName] = map[string]any{
@@ -80,7 +82,7 @@ func mergeUploadAvatarOpenAPI(paths, schemas map[string]any) {
 	reqName := openAPISchemaUserInfoDTO + "UploadAvatarReq"
 	resName := openAPISchemaUserInfoDTO + "UploadAvatarRes"
 	schemas[reqName] = map[string]any{
-		"type": "object",
+		"type":     "object",
 		"required": []any{"file"},
 		"properties": map[string]any{
 			"file": openAPIBinaryProp("头像图片文件"),
@@ -103,23 +105,59 @@ func mergeUploadAvatarOpenAPI(paths, schemas map[string]any) {
 	}
 }
 
+func mergeUploadAnchorPhotoOpenAPI(paths, schemas map[string]any) {
+	reqName := openAPISchemaAnchorPhotoDTO + "UploadPhotoReq"
+	resName := openAPISchemaAnchorPhotoDTO + "UploadPhotoRes"
+	schemas[reqName] = map[string]any{
+		"type":     "object",
+		"required": []any{"file"},
+		"properties": map[string]any{
+			"file": openAPIBinaryProp("相册照片文件(可重复多个同名 file 字段一次传多张)"),
+		},
+	}
+	schemas[resName] = map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"list": map[string]any{
+				"type": "array",
+				"items": map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"id":    openAPIStringProp("照片ID"),
+						"photo": openAPIStringProp("照片完整URL"),
+					},
+				},
+			},
+		},
+	}
+	paths["/anchorPhoto/upload"] = map[string]any{
+		"post": openAPIMultipartPostOp(
+			"上传主播相册照片(可多张)",
+			[]string{"主播相册"},
+			"服务端 MultipartReader 流式解析; form 字段名均为 file,可传多个; 每主播最多100张,超限整批失败.",
+			reqName,
+			resName,
+		),
+	}
+}
+
 func mergeAppPublishShortVideoOpenAPI(paths, schemas map[string]any) {
 	reqName := openAPISchemaShortVideoDTO + "AppPublishShortVideoReq"
 	resName := openAPISchemaShortVideoDTO + "AppPublishShortVideoRes"
 	schemas[reqName] = map[string]any{
-		"type": "object",
+		"type":     "object",
 		"required": []any{"file"},
 		"properties": map[string]any{
-			"file":              openAPIBinaryProp("短视频文件(必填,仅支持 mp4)"),
-			"previewFile":       openAPIBinaryProp("试看视频文件(可选,仅支持 mp4)"),
-			"cover":             openAPIBinaryProp("封面图片(可选)"),
-			"title":             openAPIStringProp("标题"),
-			"isPaid":            openAPIUintProp("是否付费", "uint8"),
-			"payDiamond":        openAPINumberProp("付费钻石", "float64", nil),
-			"categoryId":        openAPIIntProp("分类ID"),
-			"source":            openAPIUintProp("来源", "uint8"),
-			"duration":          openAPIUintProp("时长(秒)", "uint32"),
-			"freeWatchSeconds":  openAPIUintProp("免费试看秒数", "uint32"),
+			"file":             openAPIBinaryProp("短视频文件(必填,仅支持 mp4)"),
+			"previewFile":      openAPIBinaryProp("试看视频文件(可选,仅支持 mp4)"),
+			"cover":            openAPIBinaryProp("封面图片(可选)"),
+			"title":            openAPIStringProp("标题"),
+			"isPaid":           openAPIUintProp("是否付费", "uint8"),
+			"payDiamond":       openAPINumberProp("付费钻石", "float64", nil),
+			"categoryId":       openAPIIntProp("分类ID"),
+			"source":           openAPIUintProp("来源", "uint8"),
+			"duration":         openAPIUintProp("时长(秒)", "uint32"),
+			"freeWatchSeconds": openAPIUintProp("免费试看秒数", "uint32"),
 		},
 	}
 	if _, ok := schemas[resName]; !ok {

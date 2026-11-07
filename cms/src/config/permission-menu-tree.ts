@@ -360,6 +360,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('frontend-deploy', 'menu.FrontendDeployGroup', [
                 page('H5LiveDeployManagement'),
                 page('ChannelDownloadLandingDeployManagement'),
+                page('ShareActivityDeployManagement'),
                 page('CoinMerchantDeployManagement'),
                 page('ThirdPayDeployManagement'),
                 page('UserWithdrawDeployManagement'),

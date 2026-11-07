@@ -5,6 +5,11 @@ const zh = {
   noticeLine1: '配置 Google Play RTDN 回调与验单参数。Sara Push：POST /webhook/googlePlay/rtdn ；Sofie Push：POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'App 创建订单后，发起 Google 支付时需将返回的 obfuscatedAccountId 传入 BillingFlowParams.setObfuscatedAccountId。',
   noticeLine3: '充值档位请在「运营 → 充值配置」中维护 Google 类型商品 SKU（productId）。发货成功后会自动 consume 消耗型商品。',
+  packageName: 'Android 包名',
+  packageNamePlaceholder: '如 com.sofie.live',
+  packageNameTip: 'Android 应用包名（与 Play Console 一致）',
+  packageNameRequired: '请填写 Android 包名',
+  packageNameMaxLength: '包名最长 128 个字符',
   serviceAccountJson: '服务账号 JSON',
   serviceAccountJsonPlaceholder: '粘贴 Google Cloud 服务账号 JSON 全文',
   serviceAccountJsonTip: '需具备 Google Play Android Developer API 权限，并在 Play Console 关联该服务账号',
@@ -14,6 +19,11 @@ const zh = {
   fetchCfgFailed: '获取配置失败',
   saveSuccess: '保存成功',
   saveFailed: '保存失败',
+  syncToTargetConfirm: '确定将当前 Google Play 配置（包名 + 服务账号 JSON）同步到「数据同步」中的目标环境？目标环境会覆盖并立即刷新验单客户端。',
+  syncNeedSave: '请先保存配置后再同步到目标环境',
+  syncToTargetSuccess: '已同步到目标环境',
+  syncToTargetFailed: '同步到目标环境失败',
+  syncToTargetFailedCheckConfig: '同步失败，请检查「数据同步」中的目标地址与 Token',
 }
 
 const en = {
@@ -21,6 +31,11 @@ const en = {
   noticeLine1: 'Configure Google Play RTDN. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'After creating an order, pass the returned obfuscatedAccountId to BillingFlowParams.setObfuscatedAccountId when starting Google payment.',
   noticeLine3: 'Maintain Google product SKUs (productId) under Operations → Recharge config. Consumable products are auto-consumed after successful delivery.',
+  packageName: 'Android package name',
+  packageNamePlaceholder: 'e.g. com.sofie.live',
+  packageNameTip: 'Android app package name (same as Play Console)',
+  packageNameRequired: 'Please enter Android package name',
+  packageNameMaxLength: 'Package name max 128 characters',
   serviceAccountJson: 'Service account JSON',
   serviceAccountJsonPlaceholder: 'Paste full Google Cloud service account JSON',
   serviceAccountJsonTip: 'Requires Google Play Android Developer API access and linking in Play Console',
@@ -30,6 +45,11 @@ const en = {
   fetchCfgFailed: 'Failed to load config',
   saveSuccess: 'Saved successfully',
   saveFailed: 'Save failed',
+  syncToTargetConfirm: 'Sync current Google Play config (package name + service account JSON) to the target in Data Sync settings? Target will be overwritten and the verify client reset.',
+  syncNeedSave: 'Save config before syncing to target',
+  syncToTargetSuccess: 'Synced to target environment',
+  syncToTargetFailed: 'Failed to sync to target',
+  syncToTargetFailedCheckConfig: 'Sync failed; check target URL and token in Data Sync settings',
 }
 
 const es = {
@@ -37,6 +57,11 @@ const es = {
   noticeLine1: 'Configura RTDN Google Play. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'Tras crear pedido, pasa obfuscatedAccountId a BillingFlowParams.setObfuscatedAccountId al pagar.',
   noticeLine3: 'Mantén SKU Google (productId) en Operaciones → Config de recarga. Consumibles se consumen tras entrega.',
+  packageName: 'Nombre del paquete Android',
+  packageNamePlaceholder: 'p. ej. com.sofie.live',
+  packageNameTip: 'Nombre del paquete Android (igual que en Play Console)',
+  packageNameRequired: 'Introduce el nombre del paquete Android',
+  packageNameMaxLength: 'Paquete: máx. 128 caracteres',
   serviceAccountJson: 'JSON cuenta de servicio',
   serviceAccountJsonPlaceholder: 'Pega el JSON completo de la cuenta de servicio',
   serviceAccountJsonTip: 'Requiere API Google Play Android Developer y vinculación en Play Console',
@@ -46,6 +71,11 @@ const es = {
   fetchCfgFailed: 'Error al cargar la configuración',
   saveSuccess: 'Guardado correctamente',
   saveFailed: 'Error al guardar',
+  syncToTargetConfirm: '¿Sincronizar la config Google Play (paquete + JSON) al entorno destino? Se sobrescribirá y se reiniciará el cliente de verificación.',
+  syncNeedSave: 'Guarde la configuración antes de sincronizar al destino',
+  syncToTargetSuccess: 'Sincronizado al entorno destino',
+  syncToTargetFailed: 'Error al sincronizar al destino',
+  syncToTargetFailedCheckConfig: 'Error al sincronizar; revise URL destino y token en Sincronización de datos',
 }
 
 const pt = {
@@ -53,6 +83,11 @@ const pt = {
   noticeLine1: 'Configure RTDN Google Play. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'Após criar pedido, passe obfuscatedAccountId para BillingFlowParams.setObfuscatedAccountId no pagamento.',
   noticeLine3: 'Mantenha SKUs Google (productId) em Operações → Config de recarga. Consumíveis são consumidos após entrega.',
+  packageName: 'Nome do pacote Android',
+  packageNamePlaceholder: 'ex. com.sofie.live',
+  packageNameTip: 'Nome do pacote Android (igual ao Play Console)',
+  packageNameRequired: 'Informe o nome do pacote Android',
+  packageNameMaxLength: 'Pacote: máx. 128 caracteres',
   serviceAccountJson: 'JSON conta de serviço',
   serviceAccountJsonPlaceholder: 'Cole o JSON completo da conta de serviço Google Cloud',
   serviceAccountJsonTip: 'Requer API Google Play Android Developer e vínculo no Play Console',
@@ -62,6 +97,11 @@ const pt = {
   fetchCfgFailed: 'Falha ao carregar configuração',
   saveSuccess: 'Salvo com sucesso',
   saveFailed: 'Falha ao salvar',
+  syncToTargetConfirm: 'Sincronizar config Google Play (pacote + JSON) para o ambiente de destino? Será sobrescrito e o cliente de verificação reiniciado.',
+  syncNeedSave: 'Salve a configuração antes de sincronizar ao destino',
+  syncToTargetSuccess: 'Sincronizado ao ambiente de destino',
+  syncToTargetFailed: 'Falha ao sincronizar ao destino',
+  syncToTargetFailedCheckConfig: 'Falha ao sincronizar; verifique URL e token em Sincronização de dados',
 }
 
 const hi = {
@@ -69,6 +109,11 @@ const hi = {
   noticeLine1: 'Google Play RTDN। Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'ऑर्डर बनाने के बाद Google भुगतान में obfuscatedAccountId BillingFlowParams.setObfuscatedAccountId में पास करें।',
   noticeLine3: 'ऑपरेशन → रिचार्ज कॉन्फ़िग में Google SKU (productId) रखें। डिलीवरी के बाद consumable auto-consume।',
+  packageName: 'Android पैकेज नाम',
+  packageNamePlaceholder: 'जैसे com.sofie.live',
+  packageNameTip: 'Android ऐप पैकेज नाम (Play Console जैसा)',
+  packageNameRequired: 'Android पैकेज नाम दर्ज करें',
+  packageNameMaxLength: 'पैकेज अधिकतम 128 अक्षर',
   serviceAccountJson: 'सेवा खाता JSON',
   serviceAccountJsonPlaceholder: 'Google Cloud सेवा खाता JSON पूरा चिपकाएँ',
   serviceAccountJsonTip: 'Google Play Android Developer API और Play Console लिंक आवश्यक',
@@ -78,6 +123,11 @@ const hi = {
   fetchCfgFailed: 'कॉन्फ़िग लोड विफल',
   saveSuccess: 'सफलतापूर्वक सहेजा',
   saveFailed: 'सहेजना विफल',
+  syncToTargetConfirm: 'वर्तमान Google Play कॉन्फ़िग (पैकेज + JSON) लक्ष्य पर सिंक करें? लक्ष्य ओवरराइट होगा और verify क्लाइंट रीसेट।',
+  syncNeedSave: 'लक्ष्य पर सिंक से पहले कॉन्फ़िग सेव करें',
+  syncToTargetSuccess: 'लक्ष्य पर सिंक हो गया',
+  syncToTargetFailed: 'लक्ष्य पर सिंक विफल',
+  syncToTargetFailedCheckConfig: 'सिंक विफल; डेटा सिंक में URL और टोकन जाँचें',
 }
 
 const id = {
@@ -85,6 +135,11 @@ const id = {
   noticeLine1: 'Konfigurasi RTDN Google Play. Sara: POST /webhook/googlePlay/rtdn ; Sofie: POST /webhook/sofie/googlePlay/rtdn',
   noticeLine2: 'Setelah buat pesanan, kirim obfuscatedAccountId ke BillingFlowParams.setObfuscatedAccountId saat bayar.',
   noticeLine3: 'Kelola SKU Google (productId) di Operasi → Konfigurasi isi ulang. Produk consumable auto-consume setelah kirim.',
+  packageName: 'Nama paket Android',
+  packageNamePlaceholder: 'mis. com.sofie.live',
+  packageNameTip: 'Nama paket aplikasi Android (sama dengan Play Console)',
+  packageNameRequired: 'Masukkan nama paket Android',
+  packageNameMaxLength: 'Paket maksimal 128 karakter',
   serviceAccountJson: 'JSON akun layanan',
   serviceAccountJsonPlaceholder: 'Tempel JSON lengkap akun layanan Google Cloud',
   serviceAccountJsonTip: 'Butuh API Google Play Android Developer dan tautan di Play Console',
@@ -94,6 +149,11 @@ const id = {
   fetchCfgFailed: 'Gagal memuat konfigurasi',
   saveSuccess: 'Berhasil disimpan',
   saveFailed: 'Gagal menyimpan',
+  syncToTargetConfirm: 'Sinkronkan config Google Play (paket + JSON) ke lingkungan target? Target akan ditimpa dan klien verifikasi di-reset.',
+  syncNeedSave: 'Simpan config sebelum sinkron ke target',
+  syncToTargetSuccess: 'Tersinkron ke lingkungan target',
+  syncToTargetFailed: 'Gagal sinkron ke target',
+  syncToTargetFailedCheckConfig: 'Gagal sinkron; periksa URL target dan token di Sync Data',
 }
 
 export const googlePlayMessages = definePageMessages(zh, en, es, pt, hi, id)

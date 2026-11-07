@@ -4,6 +4,14 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
+          <el-button
+              v-if="can('sync')"
+              :loading="syncingToTarget"
+              type="warning"
+              @click="handleSyncToTarget"
+          >
+            {{ t('common.syncData') }}
+          </el-button>
         </div>
       </template>
 
@@ -20,6 +28,15 @@
       </el-alert>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="180px">
+        <el-form-item :label="t('pages.googlePlay.packageName')" prop="packageName">
+          <el-input
+              v-model="formData.packageName"
+              clearable
+              :placeholder="t('pages.googlePlay.packageNamePlaceholder')"
+          />
+          <span class="form-tip">{{ t('pages.googlePlay.packageNameTip') }}</span>
+        </el-form-item>
+
         <el-form-item :label="t('pages.googlePlay.serviceAccountJson')" prop="serviceAccountJson">
           <el-input
               v-model="formData.serviceAccountJson"
@@ -47,15 +64,21 @@
 import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
+import {dataSyncApi} from '@/api/modules/data-sync'
 import {googlePlayApi} from '@/api/modules/google-play'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
+import {usePagePermission} from '@/composables/usePagePermission'
 import type {GooglePlayCfg} from '@/types/api'
 
 const {t} = useI18n()
+const {can} = usePagePermission('GooglePlayCfgManagement')
 const loading = ref(false)
+const syncingToTarget = ref(false)
 const formRef = ref()
 
 const formData = reactive({
   id: '0',
+  packageName: '',
   serviceAccountJson: '',
 })
 
@@ -80,18 +103,24 @@ const validateServiceAccountJson = (_: unknown, value: string, callback: (e?: Er
 }
 
 const formRules = computed(() => ({
+  packageName: [
+    {required: true, message: t('pages.googlePlay.packageNameRequired'), trigger: 'blur'},
+    {max: 128, message: t('pages.googlePlay.packageNameMaxLength'), trigger: 'blur'},
+  ],
   serviceAccountJson: [{validator: validateServiceAccountJson, trigger: 'blur'}],
 }))
 
 const applyCfg = (cfg: GooglePlayCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
+    formData.packageName = ''
     formData.serviceAccountJson = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
   }
   formData.id = cfg.id || '0'
+  formData.packageName = cfg.packageName || ''
   formData.serviceAccountJson = cfg.serviceAccountJson || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
@@ -117,6 +146,7 @@ const handleSave = async () => {
     const response = await googlePlayApi.saveGooglePlayCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       enabled: true,
+      packageName: formData.packageName.trim(),
       serviceAccountJson: formData.serviceAccountJson.trim(),
     })
     if (response?.success) {
@@ -132,6 +162,35 @@ const handleSave = async () => {
     console.error('save google play cfg failed:', error)
   } finally {
     loading.value = false
+  }
+}
+
+const handleSyncToTarget = async () => {
+  if (!formData.id || formData.id === '0') {
+    ElMessage.warning(t('pages.googlePlay.syncNeedSave'))
+    return
+  }
+  try {
+    await confirmDataSync({
+      detail: t('pages.googlePlay.syncToTargetConfirm'),
+      title: t('common.syncData'),
+    })
+  } catch {
+    return
+  }
+  syncingToTarget.value = true
+  try {
+    const response = await dataSyncApi.syncGooglePlayCfg()
+    if (response?.success) {
+      ElMessage.success(response.message || t('pages.googlePlay.syncToTargetSuccess'))
+    } else {
+      ElMessage.error(t('pages.googlePlay.syncToTargetFailed'))
+    }
+  } catch (error) {
+    console.error('sync google play cfg to target failed:', error)
+    ElMessage.error(t('pages.googlePlay.syncToTargetFailedCheckConfig'))
+  } finally {
+    syncingToTarget.value = false
   }
 }
 

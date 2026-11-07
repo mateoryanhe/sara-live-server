@@ -106,7 +106,7 @@ func processGooglePlayPurchase(ctx context.Context, packageName, sku, purchaseTo
 		if fixedOrderId > 0 {
 			return errercode.CreateCode(errercode.InvalidParam)
 		}
-		logGooglePlayError(ctx, "google play purchase missing params sku=%s", sku)
+		logGooglePlayError(ctx, "google play purchase missing params pkg=%s sku=%s", packageName, sku)
 		return nil
 	}
 
@@ -181,14 +181,6 @@ func processGooglePlayPurchase(ctx context.Context, packageName, sku, purchaseTo
 		logGooglePlayError(ctx, "google play order user mismatch orderId=%d userId=%d", orderId, fixedUserId)
 		return errercode.CreateCode(errercode.RechargeOrderNonExist)
 	}
-	if orderPackage := strings.TrimSpace(order.PackageName); orderPackage != "" && orderPackage != packageName {
-		logGooglePlayError(ctx, "google play order package mismatch orderId=%d orderPkg=%s pkg=%s", orderId, orderPackage, packageName)
-		if fixedOrderId > 0 {
-			return errercode.CreateCode(errercode.InvalidParam)
-		}
-		return nil
-	}
-	packageName = resolveGooglePlayPackageName(order, packageName)
 	if order.Status != entity.RechargeOrderStatusPending {
 		if order.Status == entity.RechargeOrderStatusCompleted && order.ThirdOrderId == googleOrderId {
 			return maybeConsumeGooglePurchase(ctx, packageName, sku, purchaseToken, purchase)
@@ -235,16 +227,6 @@ func resolveGooglePlayOrderId(obfuscatedAccountId string) (uint64, error) {
 		return 0, errercode.CreateCode(errercode.InvalidParam)
 	}
 	return orderId, nil
-}
-
-func resolveGooglePlayPackageName(order *entity.RechargeOrder, rtdnPackageName string) string {
-	rtdnPackageName = strings.TrimSpace(rtdnPackageName)
-	if order != nil {
-		if orderPackage := strings.TrimSpace(order.PackageName); orderPackage != "" {
-			return orderPackage
-		}
-	}
-	return rtdnPackageName
 }
 
 func maybeConsumeGooglePurchase(ctx context.Context, packageName, sku, purchaseToken string, purchase *androidpublisher.ProductPurchase) error {

@@ -29,6 +29,11 @@ func loadGooglePlayCfgFromDB() *entity.GooglePlayCfg {
 	return &row
 }
 
+// LoadGooglePlayCfg 从数据库读取 Google Play 配置(数据同步用,不经缓存).
+func LoadGooglePlayCfg() *entity.GooglePlayCfg {
+	return loadGooglePlayCfgFromDB()
+}
+
 // SaveGooglePlayCfg 保存 Google Play 配置到数据库
 func SaveGooglePlayCfg(row *entity.GooglePlayCfg) error {
 	if row == nil {

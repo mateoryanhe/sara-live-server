@@ -150,7 +150,7 @@ func buildEmailVerifyHTMLBody(tpl emailVerifyTemplate, code string) string {
 <table role="presentation" width="100%%" cellspacing="0" cellpadding="0">
 <tr><td align="center" style="padding:8px 0 24px;">
 <div style="display:inline-block;padding:18px 28px;background-color:#ddf4ff;border:1px solid #54aeff;border-radius:8px;">
-<span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:32px;font-weight:700;letter-spacing:0.35em;color:#0969da;">%s</span>
+<span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:32px;font-weight:700;letter-spacing:0.12em;color:#0969da;">%s</span>
 </div>
 </td></tr>
 </table>

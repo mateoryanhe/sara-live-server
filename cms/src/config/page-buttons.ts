@@ -203,6 +203,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.save,
         {key: 'sync', label: '同步数据'},
     ],
+    GooglePlayCfgManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'sync', label: '同步数据'},
+    ],
     Dashboard: [
         BTN.view,
         {key: 'basicDataReset', label: '重置基础数据统计'},
@@ -472,6 +477,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     RechargeOrderList: [
         BTN.view,
         BTN.search,
+        BTN.export,
         {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'manualCreateOrder', label: '人工创建订单'},
         {key: 'manualRecharge', label: '人工补单'},
@@ -555,6 +561,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'deploy', label: '上传部署'},
     ],
     ChannelDownloadLandingDeployManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'deploy', label: '上传部署'},
+    ],
+    ShareActivityDeployManagement: [
         BTN.view,
         BTN.save,
         {key: 'deploy', label: '上传部署'},

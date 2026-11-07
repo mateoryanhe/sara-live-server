@@ -57,6 +57,7 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 		AudienceListRefreshSeconds:      NormalizeAudienceListRefreshSeconds(req.AudienceListRefreshSeconds),
 		OneToOneDailyFreeSeconds:        NormalizeOneToOneDailyFreeSeconds(req.OneToOneDailyFreeSeconds),
 		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(req.LiveRoomCallMinTotalRechargeUsd),
+		MaxAnchorPhotos:                 NormalizeMaxAnchorPhotos(req.MaxAnchorPhotos),
 	}
 	if existing != nil {
 		row.LuckyGiftRtp = existing.LuckyGiftRtp
@@ -109,6 +110,7 @@ func liveCfgItemFromMemory(meta *entity.LiveCfg) *livecfgdto.LiveCfgItem {
 		GameLiveRoomEnabled:             IsGameLiveRoomEnabled(),
 		VoiceChatLiveRoomEnabled:        IsVoiceChatLiveRoomEnabled(),
 		OneToOneLiveRoomEnabled:         IsOneToOneLiveRoomEnabled(),
+		MaxAnchorPhotos:                 GetMaxAnchorPhotos(),
 		CreatedAt:                       formatLiveCfgTime(meta.CreatedAt),
 		UpdatedAt:                       formatLiveCfgTime(meta.UpdatedAt),
 	}

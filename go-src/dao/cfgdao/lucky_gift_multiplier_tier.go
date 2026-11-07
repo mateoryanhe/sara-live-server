@@ -22,6 +22,36 @@ func LoadLuckyGiftMultiplierTiersByGiftID(giftID uint64) []*entity.LuckyGiftMult
 	return rows
 }
 
+// LoadLuckyGiftMultiplierTiersByGiftIDs 批量加载所选礼物的幸运返奖倍率挡位(数据同步用)
+func LoadLuckyGiftMultiplierTiersByGiftIDs(giftIDs []uint64) []*entity.LuckyGiftMultiplierTier {
+	ids := make([]uint64, 0, len(giftIDs))
+	seen := make(map[uint64]struct{}, len(giftIDs))
+	for _, id := range giftIDs {
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
+		return []*entity.LuckyGiftMultiplierTier{}
+	}
+	var rows []*entity.LuckyGiftMultiplierTier
+	if err := g.DB().Model(string(entity.TbLuckyGiftMultiplierTier)).
+		Where("gift_id IN (?)", ids).
+		Order("gift_id asc, sort asc, id asc").
+		Scan(&rows); err != nil {
+		return []*entity.LuckyGiftMultiplierTier{}
+	}
+	if rows == nil {
+		return []*entity.LuckyGiftMultiplierTier{}
+	}
+	return rows
+}
+
 func LoadAllLuckyGiftMultiplierTiers() []*entity.LuckyGiftMultiplierTier {
 	var rows []*entity.LuckyGiftMultiplierTier
 	if err := g.DB().Model(string(entity.TbLuckyGiftMultiplierTier)).

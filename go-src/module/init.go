@@ -1,6 +1,7 @@
 package module
 
 import (
+	"xr-game-server/dao/anchorphotodao"
 	"xr-game-server/module/accountcfg"
 	"xr-game-server/module/activity"
 	"xr-game-server/module/agora"
@@ -14,9 +15,9 @@ import (
 	"xr-game-server/module/banner"
 	"xr-game-server/module/botanchor"
 	"xr-game-server/module/call"
+	"xr-game-server/module/channeldownloadlandingdeploy"
 	"xr-game-server/module/coinmerchant"
 	"xr-game-server/module/coinmerchantdeploy"
-	"xr-game-server/module/channeldownloadlandingdeploy"
 	"xr-game-server/module/countryflagdeploy"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
@@ -33,8 +34,8 @@ import (
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/logquery"
 	"xr-game-server/module/message"
-	"xr-game-server/module/minuteactivity"
 	"xr-game-server/module/metapixel"
+	"xr-game-server/module/minuteactivity"
 	"xr-game-server/module/preload"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/privateroombilling"
@@ -43,17 +44,18 @@ import (
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/resourcemonitor"
 	"xr-game-server/module/richrank"
+	"xr-game-server/module/shareactivitydeploy"
 	"xr-game-server/module/shareappdownload"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/simulatorcpukeyword"
 	"xr-game-server/module/simulatordevicewhitelist"
 	"xr-game-server/module/stat"
-	"xr-game-server/module/tracking"
-	"xr-game-server/module/userwithdraw"
 	"xr-game-server/module/staticcachecfg"
+	"xr-game-server/module/tracking"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/usermaxid"
+	"xr-game-server/module/userwithdraw"
 	"xr-game-server/module/verification_code"
 	"xr-game-server/module/vip"
 	"xr-game-server/module/voicechatmicseattier"
@@ -88,6 +90,7 @@ func Init() {
 	h5livedeploy.Init()
 	promotionchannelurl.Init()
 	channeldownloadlandingdeploy.Init()
+	shareactivitydeploy.Init()
 	coinmerchantdeploy.Init()
 	countryflagdeploy.Init()
 	dbbackup.Init()
@@ -95,7 +98,11 @@ func Init() {
 	agora.Init()
 	call.Init()
 	livecfg.Init()
+	anchorphotodao.SetMaxPhotosProvider(func() int {
+		return int(livecfg.GetMaxAnchorPhotos())
+	})
 	gift.InitLuckyGiftMultiplier()
+	gift.InitReceivedGift()
 	verification_code.Init()
 	aliyunmoderation.Init()
 	privacypolicy.Init()

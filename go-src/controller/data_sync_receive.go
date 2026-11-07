@@ -62,6 +62,10 @@ func (c *DataSyncReceiveController) ReceiveSofiePrivacyPolicyCfg(ctx context.Con
 	return datasync.ReceiveSofiePrivacyPolicyCfg(ctx, req)
 }
 
+func (c *DataSyncReceiveController) ReceiveGooglePlayCfg(ctx context.Context, req *datasyncdto.ReceiveGooglePlayCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveGooglePlayCfg(ctx, req)
+}
+
 func (c *DataSyncReceiveController) ReceiveVoiceChatMicSeatTier(ctx context.Context, req *datasyncdto.ReceiveVoiceChatMicSeatTierReq) (*datasyncdto.ReceiveBatchRes, error) {
 	return datasync.ReceiveVoiceChatMicSeatTier(ctx, req)
 }

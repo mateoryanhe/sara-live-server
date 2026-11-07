@@ -180,7 +180,8 @@ func isSupportedExportType(exportType string) bool {
 		cmsexportdto.ExportTypeCurrencyLog,
 		cmsexportdto.ExportTypeGameBetLog,
 		cmsexportdto.ExportTypeGameWinLog,
-		cmsexportdto.ExportTypeShortVideoAuthorSettlementLog:
+		cmsexportdto.ExportTypeShortVideoAuthorSettlementLog,
+		cmsexportdto.ExportTypeRechargeOrder:
 		return true
 	default:
 		return false
@@ -260,6 +261,8 @@ func executeExportJob(ctx context.Context, exportType string, cmsUserId uint64, 
 		return exportGameWinLogCSV(ctx, payload, onProgress)
 	case cmsexportdto.ExportTypeShortVideoAuthorSettlementLog:
 		return exportShortVideoAuthorSettlementLogCSV(ctx, payload, onProgress)
+	case cmsexportdto.ExportTypeRechargeOrder:
+		return exportRechargeOrderCSV(ctx, payload, onProgress)
 	default:
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

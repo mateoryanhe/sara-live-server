@@ -46,6 +46,9 @@ type ReceiveGiftReq struct {
 	Rows       []*entity.LiveGift `json:"rows"`
 	Files      []*SyncFileItem    `json:"files"`
 	AssetsOnly bool               `json:"assetsOnly" dc:"仅更新 icon/animation 资源名,不覆盖其它配置字段"`
+	// LuckyGiftMultiplierTiers 所选礼物的幸运返奖倍率挡位(全量覆盖目标 gift_id; 非 AssetsOnly 时同步)。
+	// 新端始终传切片(无挡位则为 []); 旧端省略/null 时接收端不改目标挡位。
+	LuckyGiftMultiplierTiers []*entity.LuckyGiftMultiplierTier `json:"luckyGiftMultiplierTiers"`
 }
 
 type SyncRechargeCfgReq struct {

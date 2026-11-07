@@ -146,7 +146,7 @@ func (c *LiveRoomAppController) RoomList(ctx context.Context, req *liveroomdto.G
 	return liveroom.GetRoomList(ctx, req)
 }
 
-// OneToOneRoomList 分页查询1v1房间列表，按 WebSocket 在线状态过滤并将在线主播排在前面。
+// OneToOneRoomList 分页查询1v1房间列表；可按 WebSocket 在线过滤，排序为在线优先、同态下开播优先。
 func (c *LiveRoomAppController) OneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomListReq) (res *liveroomdto.GetOneToOneRoomListRes, err error) {
 	return liveroom.GetOneToOneRoomList(ctx, req)
 }

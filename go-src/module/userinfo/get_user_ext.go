@@ -37,6 +37,7 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		shortVideoLikeCount = authorStat.LikeCount
 		shortVideoTotalIncome = authorStat.TotalDiamondIncome
 	}
+	info := userinfodao.GetUserInfoByUserId(targetUserId)
 	return &userinfodto.GetUserExtRes{
 		UserId:                targetUserId,
 		Channel:               channel,
@@ -56,6 +57,7 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		ShortVideoViewCount:   shortVideoViewCount,
 		ShortVideoTotalIncome: shortVideoTotalIncome,
 		ShortVideoLikeCount:   shortVideoLikeCount,
+		ShareCode:             info.ShareCode,
 	}, nil
 }
 

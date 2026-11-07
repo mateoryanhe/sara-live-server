@@ -22,11 +22,8 @@ class LiveRoomGiftEffectJob {
   final String senderName;
   final DateTime enqueuedAt;
 
-  /// 优先动画；无动画时用 icon 做轻量特效。
-  String get playUrl {
-    if (effectUrl.isNotEmpty) return effectUrl;
-    return iconUrl;
-  }
+  /// 仅播礼物动画；无 animation 的礼物不进全屏特效（公屏仍展示 icon）。
+  String get playUrl => effectUrl;
 
   factory LiveRoomGiftEffectJob.fromPushMap(
     Map<String, dynamic> map,

@@ -2189,6 +2189,7 @@ export interface LiveCfg {
     gameLiveRoomEnabled: boolean
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean
+    maxAnchorPhotos: number
     createdAt: string
     updatedAt: string
 }
@@ -2208,6 +2209,7 @@ export interface SaveLiveCfgReq {
     gameLiveRoomEnabled: boolean
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean
+    maxAnchorPhotos: number
 }
 
 export interface SaveLiveCfgRes {
@@ -2498,6 +2500,7 @@ export interface GetGooglePlayCfgRes {
 export interface SaveGooglePlayCfgReq {
     id?: number
     enabled: boolean
+    packageName?: string
     serviceAccountJson: string
 }
 

@@ -12,6 +12,8 @@ const DefaultAudienceListRefreshSeconds uint32 = 300
 
 const DefaultOneToOneDailyFreeSeconds uint32 = 30
 
+const DefaultMaxAnchorPhotos uint32 = 100
+
 type liveCfgSnapshot struct {
 	PaidDanmakuPrice                float64
 	VideoCallTicketEnabled          bool
@@ -22,6 +24,7 @@ type liveCfgSnapshot struct {
 	GameLiveRoomEnabled             bool
 	VoiceChatLiveRoomEnabled        bool
 	OneToOneLiveRoomEnabled         bool
+	MaxAnchorPhotos                 uint32
 }
 
 var (
@@ -31,6 +34,7 @@ var (
 		AudienceListRefreshSeconds:      DefaultAudienceListRefreshSeconds,
 		OneToOneDailyFreeSeconds:        DefaultOneToOneDailyFreeSeconds,
 		LiveRoomCallMinTotalRechargeUsd: entity.LiveRoomCallMinTotalRechargeUSD,
+		MaxAnchorPhotos:                 DefaultMaxAnchorPhotos,
 	}
 )
 
@@ -64,15 +68,23 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 	}
 	return &liveCfgSnapshot{
 		PaidDanmakuPrice:                row.PaidDanmakuPrice,
-		VideoCallTicketEnabled:            row.VideoCallTicketEnabled,
-		AudienceListRefreshSeconds:        NormalizeAudienceListRefreshSeconds(row.AudienceListRefreshSeconds),
-		OneToOneDailyFreeSeconds:          NormalizeOneToOneDailyFreeSeconds(row.OneToOneDailyFreeSeconds),
+		VideoCallTicketEnabled:          row.VideoCallTicketEnabled,
+		AudienceListRefreshSeconds:      NormalizeAudienceListRefreshSeconds(row.AudienceListRefreshSeconds),
+		OneToOneDailyFreeSeconds:        NormalizeOneToOneDailyFreeSeconds(row.OneToOneDailyFreeSeconds),
 		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(row.LiveRoomCallMinTotalRechargeUsd),
 		ShowcaseLiveRoomEnabled:         row.ShowcaseLiveRoomEnabled,
 		GameLiveRoomEnabled:             row.GameLiveRoomEnabled,
 		VoiceChatLiveRoomEnabled:        row.VoiceChatLiveRoomEnabled,
 		OneToOneLiveRoomEnabled:         row.OneToOneLiveRoomEnabled,
+		MaxAnchorPhotos:                 NormalizeMaxAnchorPhotos(row.MaxAnchorPhotos),
 	}
+}
+
+func NormalizeMaxAnchorPhotos(v uint32) uint32 {
+	if v == 0 {
+		return DefaultMaxAnchorPhotos
+	}
+	return v
 }
 
 func NormalizeLiveRoomCallMinTotalRechargeUsd(v float64) float64 {
@@ -148,3 +160,7 @@ func IsOneToOneLiveRoomEnabled() bool {
 	return getLiveCfgCache().OneToOneLiveRoomEnabled
 }
 
+// GetMaxAnchorPhotos 主播相册照片上限；未配置或为 0 时默认 100。
+func GetMaxAnchorPhotos() uint32 {
+	return getLiveCfgCache().MaxAnchorPhotos
+}

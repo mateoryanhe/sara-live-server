@@ -51,26 +51,24 @@ func SaveUploadResourceCfg(ctx context.Context, req *uploaddto.SaveUploadResourc
 		S3SecretAccessKey:              strings.TrimSpace(req.S3SecretAccessKey),
 		S3KeyPrefix:                    strings.TrimSpace(req.S3KeyPrefix),
 	}
-	if row.ImageModerationEnabled {
-		if row.ImageModerationAccessKeyId == "" {
-			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
-		if existing == nil && row.ImageModerationAccessKeySecret == "" {
-			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
-		if existing != nil && row.ImageModerationAccessKeySecret == "" {
+	// 密钥留空表示「不改」：无论开关是否打开都保留库内旧值，避免关 S3/同步配置时把 secret 写成空
+	if existing != nil {
+		if row.ImageModerationAccessKeySecret == "" {
 			row.ImageModerationAccessKeySecret = existing.ImageModerationAccessKeySecret
+		}
+		if row.S3SecretAccessKey == "" {
+			row.S3SecretAccessKey = existing.S3SecretAccessKey
+		}
+	}
+	if row.ImageModerationEnabled {
+		if row.ImageModerationAccessKeyId == "" || row.ImageModerationAccessKeySecret == "" {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
 		}
 	}
 	if row.S3Enabled {
-		if row.S3PublicDomain == "" || row.S3Endpoint == "" || row.S3Bucket == "" || row.S3AccessKeyId == "" {
+		if row.S3PublicDomain == "" || row.S3Endpoint == "" || row.S3Bucket == "" ||
+			row.S3AccessKeyId == "" || row.S3SecretAccessKey == "" {
 			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
-		if existing == nil && row.S3SecretAccessKey == "" {
-			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
-		if existing != nil && row.S3SecretAccessKey == "" {
-			row.S3SecretAccessKey = existing.S3SecretAccessKey
 		}
 	}
 	if req.ID > 0 {

@@ -136,6 +136,10 @@
 | `play` | 下注记录 | 需要登录 | `POST /game/appGameBetList` | `POST /sofie/play/browseBets` |
 | `play` | 单场游戏消费榜 | 需要登录 | `POST /game/appGameConsumeRank` | `POST /sofie/play/browseRoundSpend` |
 | `present` | 礼物列表 | 需要登录 | `POST /gift/appGiftList` | `POST /sofie/present/browseCatalog` |
+| `present` | 主播收到过的礼物ID与数量 | 需要登录 | `POST /gift/receivedGiftIds` | `POST /sofie/present/browseReceivedIds` |
+| `gallery` | 主播相册列表 | 需要登录 | `POST /anchorPhoto/list` | `POST /sofie/gallery/browsePhotos` |
+| `gallery` | 上传主播相册照片 | 需要登录 | `POST /anchorPhoto/upload` | `POST /sofie/gallery/uploadPhoto` |
+| `gallery` | 删除主播相册照片 | 需要登录 | `POST /anchorPhoto/delete` | `POST /sofie/gallery/removePhoto` |
 | `topup` | 上报充值面板曝光 | 需要登录 | `POST /rechargeOrder/reportChargePanelEnter` | `POST /sofie/topup/notifyChargePanelEnter` |
 | `topup` | 创建充值订单 | 需要登录 | `POST /rechargeOrder/createRechargeOrder` | `POST /sofie/topup/openStoreOrder` |
 | `topup` | 渠道充值建单 | 需要登录 | `POST /rechargeOrder/createChannelRechargeOrder` | `POST /sofie/topup/openChannelOrder` |

@@ -66,7 +66,11 @@ func SyncGift(_ context.Context, req *datasyncdto.SyncGiftReq) (*datasyncdto.Syn
 	if err != nil {
 		return nil, err
 	}
-	payload := &datasyncdto.ReceiveGiftReq{Rows: rows, Files: files}
+	payload := &datasyncdto.ReceiveGiftReq{
+		Rows:                     rows,
+		Files:                    files,
+		LuckyGiftMultiplierTiers: cfgdao.LoadLuckyGiftMultiplierTiersByGiftIDs(req.IDs),
+	}
 	var receiveRes datasyncdto.ReceiveBatchRes
 	if err := postSyncReceive("/dataSync/receiveGift", payload, &receiveRes); err != nil {
 		return nil, err
@@ -113,6 +117,15 @@ func ReceiveGift(_ context.Context, req *datasyncdto.ReceiveGiftReq) (*datasyncd
 		rowCount, err = saveLiveGiftAssets(req.Rows)
 	} else {
 		rowCount, err = saveLiveGifts(req.Rows)
+		if err != nil {
+			return nil, err
+		}
+		// 非 nil 表示源端已带上挡位字段(含空切片=清空); nil 兼容旧源端,不改目标挡位
+		if req.LuckyGiftMultiplierTiers != nil {
+			if err = saveLuckyGiftMultiplierTiersForGifts(req.Rows, req.LuckyGiftMultiplierTiers); err != nil {
+				return nil, err
+			}
+		}
 	}
 	if err != nil {
 		return nil, err
@@ -308,6 +321,32 @@ func saveLiveGifts(rows []*entity.LiveGift) (int, error) {
 		rowCount++
 	}
 	return rowCount, nil
+}
+
+// saveLuckyGiftMultiplierTiersForGifts 按礼物 ID 全量覆盖幸运返奖倍率挡位(无配置则清空目标端该礼物挡位)
+func saveLuckyGiftMultiplierTiersForGifts(gifts []*entity.LiveGift, tiers []*entity.LuckyGiftMultiplierTier) error {
+	byGiftID := make(map[uint64][]*entity.LuckyGiftMultiplierTier)
+	for _, tier := range tiers {
+		if tier == nil || tier.GiftID == 0 {
+			continue
+		}
+		byGiftID[tier.GiftID] = append(byGiftID[tier.GiftID], tier)
+	}
+	seen := make(map[uint64]struct{})
+	for _, giftRow := range gifts {
+		if giftRow == nil || giftRow.ID == 0 {
+			continue
+		}
+		giftID := giftRow.ID
+		if _, ok := seen[giftID]; ok {
+			continue
+		}
+		seen[giftID] = struct{}{}
+		if err := cfgdao.ReplaceLuckyGiftMultiplierTiersByGiftID(giftID, byGiftID[giftID]); err != nil {
+			return fmt.Errorf("save lucky gift multiplier tiers giftId=%d: %w", giftID, err)
+		}
+	}
+	return nil
 }
 
 func saveLiveGiftAssets(rows []*entity.LiveGift) (int, error) {

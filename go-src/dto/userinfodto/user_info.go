@@ -62,6 +62,7 @@ type GetUserExtRes struct {
 	ShortVideoViewCount   uint64                `json:"shortVideoViewCount" dc:"累计短视频观看人数"`
 	ShortVideoTotalIncome float64               `json:"shortVideoTotalIncome" dc:"累计短视频收入总额(钻石)"`
 	ShortVideoLikeCount   uint64                `json:"shortVideoLikeCount" dc:"累计短视频点赞总数"`
+	ShareCode             string                `json:"shareCode" dc:"分享码(user_infos.share_code 原始值)"`
 }
 
 // UpdateGenderReq 修改性别

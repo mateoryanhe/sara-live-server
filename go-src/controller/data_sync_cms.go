@@ -80,6 +80,10 @@ func (c *DataSyncCMSController) SyncSofiePrivacyPolicyCfg(ctx context.Context, r
 	return datasync.SyncSofiePrivacyPolicyCfg(ctx, req)
 }
 
+func (c *DataSyncCMSController) SyncGooglePlayCfg(ctx context.Context, req *datasyncdto.SyncGooglePlayCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncGooglePlayCfg(ctx, req)
+}
+
 func (c *DataSyncCMSController) SyncVoiceChatMicSeatTier(ctx context.Context, req *datasyncdto.SyncVoiceChatMicSeatTierReq) (*datasyncdto.SyncBatchRes, error) {
 	return datasync.SyncVoiceChatMicSeatTier(ctx, req)
 }

@@ -165,6 +165,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '渠道下载落地页'},
         },
         {
+            path: 'share-activity-deploy',
+            name: 'ShareActivityDeployManagement',
+            component: () => import('@/views/config/share-activity-deploy.vue'),
+            meta: {title: '分享活动页'},
+        },
+        {
             path: 'coin-merchant-deploy',
             name: 'CoinMerchantDeployManagement',
             component: () => import('@/views/config/coin-merchant-deploy.vue'),

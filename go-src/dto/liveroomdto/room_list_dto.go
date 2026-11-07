@@ -72,7 +72,7 @@ type GetOneToOneRoomListRes struct {
 	Total    int                     `json:"total" dc:"总条数"`
 	Page     int                     `json:"page" dc:"当前页码"`
 	PageSize int                     `json:"pageSize" dc:"每页数量"`
-	List     []*OneToOneRoomListItem `json:"list" dc:"1v1房间列表(在线主播优先)"`
+	List     []*OneToOneRoomListItem `json:"list" dc:"1v1房间列表(在线优先,同态下开播优先)"`
 }
 
 // GetFollowedLiveRoomListReq App 分页查询当前用户关注的直播间列表

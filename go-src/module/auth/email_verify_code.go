@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/os/gcache"
+	"xr-game-server/core/xrlog"
 	"xr-game-server/errercode"
 )
 
@@ -25,6 +26,17 @@ var (
 
 func storeEmailVerifyCode(ctx context.Context, emailKey, code string) {
 	_ = emailVerifyCodeCache.Set(ctx, emailKey, code, emailVerifyCodeTTL)
+	// 只打尾 2 位，便于对照「邮件里的码」与缓存是否一致（不含完整验证码）
+	xrlog.DetailLog.Infof(ctx, "email verify code stored email=%s suffix=%s ttl=%s",
+		emailKey, emailCodeSuffix(code), emailVerifyCodeTTL)
+}
+
+func emailCodeSuffix(code string) string {
+	code = strings.TrimSpace(code)
+	if len(code) < 2 {
+		return code
+	}
+	return code[len(code)-2:]
 }
 
 func clearEmailVerifyFail(ctx context.Context, emailKey string) {
@@ -72,10 +84,14 @@ func VerifyEmailCode(ctx context.Context, email, code string) error {
 		return errercode.CreateCode(errercode.SysError)
 	}
 	if v == nil || v.IsNil() {
+		xrlog.DetailLog.Warningf(ctx, "email verify miss email=%s inputSuffix=%s reason=expired_or_empty",
+			emailKey, emailCodeSuffix(code))
 		return markEmailVerifyFailure(ctx, emailKey, errercode.VerifyCodeExpired)
 	}
 	stored := strings.TrimSpace(v.String())
 	if stored != code {
+		xrlog.DetailLog.Warningf(ctx, "email verify mismatch email=%s storedSuffix=%s inputSuffix=%s storedLen=%d inputLen=%d",
+			emailKey, emailCodeSuffix(stored), emailCodeSuffix(code), len(stored), len(code))
 		return markEmailVerifyFailure(ctx, emailKey, errercode.VerifyCodeInvalid)
 	}
 	clearEmailVerifyFail(ctx, emailKey)

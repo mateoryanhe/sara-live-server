@@ -34,6 +34,8 @@ func Init() {
 	initLiveGuildTransferInfo()
 	initLiveAnchorTransferInfo()
 	InitLiveGift()
+	initAnchorReceivedGift()
+	initAnchorPhoto()
 	initHomeBanner()
 	initVipCfg()
 	initAgoraCfg()

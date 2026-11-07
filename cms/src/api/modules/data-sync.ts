@@ -73,6 +73,10 @@ export const dataSyncApi = {
         return request.post<SyncBatchRes>('/dataSync/syncSofiePrivacyPolicyCfg', {})
     },
 
+    syncGooglePlayCfg: () => {
+        return request.post<SyncBatchRes>('/dataSync/syncGooglePlayCfg', {})
+    },
+
     syncVoiceChatMicSeatTier: () => {
         return request.post<SyncBatchRes>('/dataSync/syncVoiceChatMicSeatTier', {})
     },

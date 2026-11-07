@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"xr-game-server/core/httpserver"
-	"xr-game-server/module/domainsite"
 	"xr-game-server/core/xrpool"
+	"xr-game-server/module/domainsite"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -92,6 +92,7 @@ func Init() {
 	initDomainSiteRegistryCMSController()            // 域名静态目录注册表热刷新(CMS)
 	initGiftController()                             // 礼物配置(CMS)
 	initGiftAppController()                          // 礼物列表(App)
+	initAnchorPhotoAppController()                   // 主播相册(App)
 	initBannerController()                           // 首页Banner(CMS)
 	initActivityMessageController()                  // 活动消息(CMS)
 	initBannerAppController()                        // 首页Banner(App)
@@ -129,7 +130,8 @@ func Init() {
 	initMessageAppController()                       // 私信(App)
 	initUploadController()                           // CMS文件上传
 	initH5LiveDeployCMSController()                  // H5直播静态资源部署(CMS)
-	initChannelDownloadLandingDeployCMSController() // 渠道下载落地页静态资源部署(CMS)
+	initChannelDownloadLandingDeployCMSController()  // 渠道下载落地页静态资源部署(CMS)
+	initShareActivityDeployCMSController()           // 分享活动页静态资源部署(CMS)
 	initCoinMerchantDeployCMSController()            // 币商H5静态资源部署(CMS)
 	initCountryFlagDeployCMSController()             // 国旗资源部署(CMS)
 	initThirdPayDeployCMSController()                // 第三方支付静态资源部署(CMS)

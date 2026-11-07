@@ -181,6 +181,7 @@
 - **客户端缓存分层（2026-09-10，约定）**：两类分开，勿混用
   - **API 接口数据**：业务 KV（`CacheKey`：`user:{id}:…` / `global:…`）；内存 L1 + 可选磁盘 L2（Hive/文件 JSON 等，设计待定）；推送/登出要打穿失效
   - **文件资源**（图片、礼物动画等 URL 文件）：**统一用同一套文件缓存插件**（`flutter_cache_manager`；图片可用 `cached_network_image` 等基于它的封装，共用/配置同一 CacheManager 实例，勿再拆第二套磁盘文件缓存）
+- **礼物全屏特效（2026-11-05）**：测服礼物 mp4 **几乎全是腾讯 VAP**（mp4 内含 `vapc` JSON：`rgbFrame`/`aFrame`）。必须用 `flutter_vap_player` 播放；勿用普通 `video_player` 整帧播放（会把 Alpha 灰模也显示出来）。无 `animation` 的礼物**不进全屏队列**（公屏仍可显示 icon）。预览页：`GET /gift/assetPreview`
 - **App 统一事件总线（2026-09-10）**：`AppBus`（`lib/core/bus/`）；`AppLifecycleBusEvent`（`started`/`paused`/`resumed`）+ `WsBusEvent`；`started` sticky。冷启动：`BusinessObjectCache.bindAppLifecycle` 订 `started` → `clearAll()`（L1+L2）；`AppScope.create` 在 publish `started` 前也会 `await clearAll()`。勿再拆 PushBus/AppEventBus
 - 注意：本机 `HTTP_PROXY` 若无协议，sdkmanager 会挂；VS 未装不影响 Android APK
 
@@ -231,6 +232,25 @@
 - 表 `coin_merchant_deploy_cfgs.deploy_secret`；`coinmerchantdeploy.Init` → `SetCoinMerchantDeploySecretProvider`
 - App 组中间件 `MiddlewareH5Crypto`：`X-H5-Client=1` 用 H5 密钥；`X-Coin-Merchant-Client=1` 用币商密钥；算法同 AES-256-GCM + base64；无对应 Header 则明文
 - 角色需授权页 `CoinMerchantDeployManagement`
+
+## 分享活动页部署（2026-11-06）
+
+- CMS：`/config/share-activity-deploy`（仿渠道下载落地页：域名映射 + zip 上传解压）
+- `siteKey=share-activity`，静态前缀 **`/share-activity`**，默认目录 `/home/ec2-user/cdn/share-activity`
+- 表 `share_activity_deploy_cfgs`；角色授权页 `ShareActivityDeployManagement`
+
+## 主播收到礼物ID（2026-11-06）
+
+- 表 `anchor_received_gifts`（复合主键 `anchorId_giftId`，去重 + `count` 累计件数）；订阅 `RevenueEventEvent`（仅普通/幸运礼物，按流水 `count` 累加）
+- 内存 ListCache 按主播缓存行列表，最多 **2000** 种礼物；满后不再记新礼物ID，已有的继续累加数量；App 只读缓存
+- App：`POST /gift/receivedGiftIds`（Sofie：`/sofie/present/browseReceivedIds`），入参 `anchorId`，出参 `list[{giftId,count}]`
+
+## 主播相册（2026-11-06）
+
+- 表 `anchor_photos`（snowflake id + soft delete，syndb）；ListCache 按主播缓存
+- 上限：`live_cfgs.max_anchor_photos`（CMS 直播配置，默认 **100**，仅服务端校验；暂不下发 App `/cfg`）
+- App：`POST /anchorPhoto/list`、`/upload`（可多 `file`）、`/delete`（`photoIds` 批量）
+- Sofie：`/sofie/gallery/browsePhotos`、`uploadPhoto`、`removePhoto`
 
 - CMS：`/config/upload-resource` **云桶开关**（S3 兼容，面向 CF R2）
 - 字段：`s3Enabled` / **`s3PublicDomain`（云桶访问域名，App 拼文件 URL）** / `s3Endpoint`（R2 S3 API）/ `s3Bucket` / AK·SK / `s3KeyPrefix`（如 `test`、`prod`）；Region 固定代码内 `auto`，CMS 不展示

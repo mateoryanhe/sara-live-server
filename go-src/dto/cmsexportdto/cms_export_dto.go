@@ -25,6 +25,7 @@ const (
 	ExportTypeGameBetLog                       = "gameBetLog"
 	ExportTypeGameWinLog                       = "gameWinLog"
 	ExportTypeShortVideoAuthorSettlementLog    = "shortVideoAuthorSettlementLog"
+	ExportTypeRechargeOrder                    = "rechargeOrder"
 )
 
 type CMSExportResult struct {
@@ -269,4 +270,15 @@ type CMSExportShortVideoAuthorSettlementLogPayload struct {
 	UserId    string `json:"userId"`
 	StartTime int64  `json:"startTime"`
 	EndTime   int64  `json:"endTime"`
+}
+
+type CMSExportRechargeOrderPayload struct {
+	CMSExportHeadersPayload
+	OrderId      string            `json:"orderId"`
+	UserId       string            `json:"userId"`
+	StatusFilter int               `json:"statusFilter"`
+	StartTime    int64             `json:"startTime"`
+	EndTime      int64             `json:"endTime"`
+	StatusLabels map[string]string `json:"statusLabels"`
+	SourceLabels map[string]string `json:"sourceLabels"`
 }

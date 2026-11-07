@@ -66,6 +66,11 @@ func Init() {
 		{Path: "/browsePackages", Handler: jsonHandler((&controller.CoinMerchantRechargeCfgAppController{}).CoinMerchantRechargeCfgList)},
 		{Path: "/browsePayRegions", Handler: jsonHandler((&controller.CoinMerchantRechargeCfgAppController{}).PaymentRegionList)},
 	})
+	httpserver.RegAppRouteGroup("/sofie/gallery", []httpserver.AppRoute{
+		{Path: "/browsePhotos", Handler: jsonHandler((&controller.AnchorPhotoAppController{}).List)},
+		{Path: "/uploadPhoto", Handler: controller.HandleUploadAnchorPhoto},
+		{Path: "/removePhoto", Handler: jsonHandler((&controller.AnchorPhotoAppController{}).Delete)},
+	})
 	httpserver.RegNonAuthAppRouteGroup("/sofie/googleAuth", []httpserver.AppRoute{
 		{Path: "/fetchClientCfg", Handler: jsonHandler((&controller.FirebaseAppController{}).GetClientCfgForApp)},
 	})
@@ -125,6 +130,7 @@ func Init() {
 	})
 	httpserver.RegAppRouteGroup("/sofie/present", []httpserver.AppRoute{
 		{Path: "/browseCatalog", Handler: jsonHandler((&controller.GiftAppController{}).GiftList)},
+		{Path: "/browseReceivedIds", Handler: jsonHandler((&controller.GiftAppController{}).ReceivedGiftIds)},
 	})
 	httpserver.RegAppRouteGroup("/sofie/profile", []httpserver.AppRoute{
 		{Path: "/fetchMine", Handler: jsonHandler((&controller.UserInfoController{}).Get)},

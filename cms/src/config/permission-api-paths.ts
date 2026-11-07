@@ -235,6 +235,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     RechargeOrderList: '/rechargeOrder/rechargeOrderList',
     'RechargeOrderList:view': '/rechargeOrder/rechargeOrderList',
     'RechargeOrderList:search': '/rechargeOrder/rechargeOrderList',
+    'RechargeOrderList:export': '/cmsExport/submitJob',
     'RechargeOrderList:viewUserDetail': '/account/getUserDetail',
     'RechargeOrderList:manualCreateOrder': '/rechargeOrder/manualCreateOrder',
     'RechargeOrderList:createOrderByRechargeCfg': '/rechargeOrder/manualCreateOrder',
@@ -734,6 +735,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     GooglePlayCfgManagement: '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:view': '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:save': '/googlePlay/saveGooglePlayCfg',
+    'GooglePlayCfgManagement:sync': '/dataSync/syncGooglePlayCfg',
 
     FirebaseCfgManagement: '/firebase/getFirebaseCfg',
     'FirebaseCfgManagement:view': '/firebase/getFirebaseCfg',
@@ -791,6 +793,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'ChannelDownloadLandingDeployManagement:view': '/channelDownloadLandingDeploy/getChannelDownloadLandingDeployInfo',
     'ChannelDownloadLandingDeployManagement:save': '/channelDownloadLandingDeploy/saveChannelDownloadLandingDeployCfg',
     'ChannelDownloadLandingDeployManagement:deploy': '/channelDownloadLandingDeploy/deployZip',
+
+    ShareActivityDeployManagement: '/shareActivityDeploy/getShareActivityDeployInfo',
+    'ShareActivityDeployManagement:view': '/shareActivityDeploy/getShareActivityDeployInfo',
+    'ShareActivityDeployManagement:save': '/shareActivityDeploy/saveShareActivityDeployCfg',
+    'ShareActivityDeployManagement:deploy': '/shareActivityDeploy/deployZip',
 
     CoinMerchantDeployManagement: '/coinMerchantDeploy/getCoinMerchantDeployInfo',
     'CoinMerchantDeployManagement:view': '/coinMerchantDeploy/getCoinMerchantDeployInfo',

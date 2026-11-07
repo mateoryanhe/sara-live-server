@@ -44,3 +44,18 @@ func TestToLiveCfgSnapshotAudienceListRefreshValue(t *testing.T) {
 		t.Fatalf("stored refresh seconds = %d, want 60", got)
 	}
 }
+
+func TestToLiveCfgSnapshotMaxAnchorPhotosDefault(t *testing.T) {
+	if toLiveCfgSnapshot(nil).MaxAnchorPhotos != DefaultMaxAnchorPhotos {
+		t.Fatal("missing live config must default max anchor photos to 100")
+	}
+	if toLiveCfgSnapshot(&liveentity.LiveCfg{}).MaxAnchorPhotos != DefaultMaxAnchorPhotos {
+		t.Fatal("zero stored max anchor photos must default to 100")
+	}
+}
+
+func TestToLiveCfgSnapshotMaxAnchorPhotosValue(t *testing.T) {
+	if got := toLiveCfgSnapshot(&liveentity.LiveCfg{MaxAnchorPhotos: 50}).MaxAnchorPhotos; got != 50 {
+		t.Fatalf("stored max anchor photos = %d, want 50", got)
+	}
+}

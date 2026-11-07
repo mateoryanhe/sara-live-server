@@ -35,10 +35,11 @@ class LiveRoomGiftEffectPlayer extends ChangeNotifier {
   void enqueueFromPush(Map<String, dynamic> map, int roomId) {
     if (_boundRoomId != null && _boundRoomId != roomId) return;
     final job = LiveRoomGiftEffectJob.fromPushMap(map, roomId, apiBaseUrl);
-    if (job.playUrl.isEmpty) return;
+    // 无 giftAnim 不播全屏（避免把 icon 当特效；测服如柠檬茶/魔法棒）。
+    if (job.effectUrl.isEmpty) return;
     _queue.add(job);
     unawaited(GiftEffectCache.instance.prefetch(job.playUrl));
-    if (job.effectUrl.isNotEmpty && job.iconUrl.isNotEmpty) {
+    if (job.iconUrl.isNotEmpty) {
       unawaited(GiftEffectCache.instance.prefetch(job.iconUrl));
     }
     _ensurePumpTimer();

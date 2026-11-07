@@ -164,6 +164,11 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/cmsExport/submitJob"}
 	case "/cmsExport/deleteExport":
 		return []string{"/cmsExport/submitJob"}
+	case "/logQuery/getJob":
+		// 与 cmsExport 一致: 有 submitJob 即可轮询任务 / 删导出临时文件
+		return []string{"/logQuery/submitJob"}
+	case "/logQuery/deleteExport":
+		return []string{"/logQuery/submitJob"}
 	case "/cmsuser/createGuildCMSUser":
 		return []string{"/role/roleList"}
 	case "/role/roleList":

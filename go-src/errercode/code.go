@@ -265,6 +265,10 @@ const (
 	VoiceChatMicSeatTierNonExist XRCode = 192
 	// VoiceChatMicSeatTierSeatCountExist 语聊麦位挡位麦位数已存在
 	VoiceChatMicSeatTierSeatCountExist XRCode = 193
+	// AnchorPhotoLimit 主播相册照片数量已达上限
+	AnchorPhotoLimit XRCode = 194
+	// AnchorPhotoNonExist 主播相册照片不存在
+	AnchorPhotoNonExist XRCode = 195
 )
 
 type XError struct {

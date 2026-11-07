@@ -147,6 +147,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   HostTlsMappingManagement: 'Host TLS Mapping',
   H5LiveDeployManagement: 'H5 Live Deploy',
   ChannelDownloadLandingDeployManagement: 'Channel download landing',
+  ShareActivityDeployManagement: 'Share activity page',
   CoinMerchantDeployManagement: 'Dealer H5 Deploy',
   CountryFlagDeployManagement: 'Country Flag Deploy',
   ThirdPayDeployManagement: 'Third-Party Pay Deploy',

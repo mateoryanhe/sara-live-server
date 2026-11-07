@@ -28,6 +28,7 @@ dependencies:
   agora_rtc_engine: ^6.5.0
   permission_handler: ^11.3.1
   video_player: ^2.9.2
+  flutter_vap_player: ^2.2.0
 
 dev_dependencies:
   flutter_test:

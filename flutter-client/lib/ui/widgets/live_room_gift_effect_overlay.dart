@@ -3,14 +3,19 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_vap_player/flutter_vap_player.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/cache/image_disk_cache.dart';
 import '../../data/gift/gift_media_url.dart';
+import '../../data/gift/gift_vap_config.dart';
 import '../../feature/show_live/live_room_gift_effect_player.dart';
 import 'gift_split_alpha_video.dart';
 
 /// 全屏礼物特效层（队列当前项播完需调 [onFinished]）。
+///
+/// 测服礼物 mp4 几乎全是腾讯 VAP（含 `vapc`）；用 [flutter_vap_player] 按
+/// rgbFrame/aFrame 做透明合成。无 vapc 时回退 video_player。
 class LiveRoomGiftEffectOverlay extends StatefulWidget {
   const LiveRoomGiftEffectOverlay({
     super.key,
@@ -26,7 +31,11 @@ class LiveRoomGiftEffectOverlay extends StatefulWidget {
 
 class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
   VideoPlayerController? _video;
+  VapPlayerController? _vap;
+  StreamSubscription<VapEvent>? _vapEvents;
   Timer? _imageTimer;
+  GiftVapConfig? _vapCfg;
+  int _playGen = 0;
 
   @override
   void initState() {
@@ -38,7 +47,7 @@ class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
   @override
   void dispose() {
     widget.player.removeListener(_onPlayer);
-    _disposeVideo();
+    _disposePlayers();
     _imageTimer?.cancel();
     super.dispose();
   }
@@ -53,12 +62,13 @@ class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
     final state = widget.player.current;
     _imageTimer?.cancel();
     _imageTimer = null;
-    _disposeVideo();
+    _disposePlayers();
     if (state == null) return;
 
+    final gen = ++_playGen;
     switch (state.mediaKind) {
       case GiftEffectMediaKind.video:
-        unawaited(_playVideo(state.localPath));
+        unawaited(_playVideoOrVap(state.localPath, gen));
       case GiftEffectMediaKind.image:
         _imageTimer = Timer(const Duration(milliseconds: 2600), _finish);
       case GiftEffectMediaKind.unknown:
@@ -66,12 +76,58 @@ class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
     }
   }
 
-  Future<void> _playVideo(String path) async {
+  Future<void> _playVideoOrVap(String path, int gen) async {
+    final vapCfg = await GiftVapConfig.tryParseFile(path);
+    if (!mounted || gen != _playGen || widget.player.current == null) return;
+
+    if (vapCfg != null) {
+      await _playVap(path, vapCfg, gen);
+      return;
+    }
+    await _playPlainVideo(path, gen);
+  }
+
+  Future<void> _playVap(String path, GiftVapConfig cfg, int gen) async {
+    final controller = VapPlayerController.file(
+      File(path),
+      options: const VapPlayerOptions(
+        viewType: VapViewType.textureView,
+        repeatCount: 0,
+        mute: true,
+        scaleType: VapScaleType.fitCenter,
+      ),
+    );
+    _vap = controller;
+    _vapCfg = cfg;
+    _vapEvents = controller.events.listen((event) {
+      switch (event) {
+        case VapCompletedEvent():
+          _finish();
+        case VapErrorEvent():
+          _finish();
+        default:
+          break;
+      }
+    });
+    try {
+      await controller.initialize();
+      if (!mounted || gen != _playGen || widget.player.current == null) {
+        await controller.dispose();
+        return;
+      }
+      setState(() {});
+      await controller.play();
+    } catch (_) {
+      _finish();
+    }
+  }
+
+  Future<void> _playPlainVideo(String path, int gen) async {
     final controller = VideoPlayerController.file(File(path));
     _video = controller;
     try {
       await controller.initialize();
-      if (!mounted || widget.player.current == null) {
+      if (!mounted || gen != _playGen || widget.player.current == null) {
         await controller.dispose();
         return;
       }
@@ -93,7 +149,12 @@ class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
     }
   }
 
-  void _disposeVideo() {
+  void _disposePlayers() {
+    _vapEvents?.cancel();
+    _vapEvents = null;
+    unawaited(_vap?.dispose());
+    _vap = null;
+    _vapCfg = null;
     _video?.removeListener(_onVideoTick);
     unawaited(_video?.dispose());
     _video = null;
@@ -102,7 +163,7 @@ class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
   void _finish() {
     _imageTimer?.cancel();
     _imageTimer = null;
-    _disposeVideo();
+    _disposePlayers();
     widget.player.completeCurrent();
   }
 
@@ -114,16 +175,28 @@ class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
     final job = state.job;
     final label = job.giftName.isNotEmpty ? job.giftName : 'Gift';
     final sender = job.senderName.isNotEmpty ? job.senderName : '';
+    final vap = _vap;
+    final video = _video;
 
     return IgnorePointer(
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (state.mediaKind == GiftEffectMediaKind.video &&
-              _video != null &&
-              _video!.value.isInitialized)
+          if (vap != null && vap.value.isInitialized)
             Positioned.fill(
-              child: GiftSplitAlphaVideo(controller: _video!),
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: (_vapCfg?.outAspectRatio ??
+                      (vap.value.size.width > 0 && vap.value.size.height > 0
+                          ? vap.value.size.width / vap.value.size.height
+                          : 9 / 16)),
+                  child: VapPlayer(vap),
+                ),
+              ),
+            )
+          else if (video != null && video.value.isInitialized)
+            Positioned.fill(
+              child: GiftSplitAlphaVideo(controller: video),
             )
           else if (state.mediaKind == GiftEffectMediaKind.image &&
               state.localPath.isNotEmpty)
@@ -146,7 +219,9 @@ class _LiveRoomGiftEffectOverlayState extends State<LiveRoomGiftEffectOverlay> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 child: Text(
-                  sender.isNotEmpty ? '$sender · $label ×${job.count}' : '$label ×${job.count}',
+                  sender.isNotEmpty
+                      ? '$sender · $label ×${job.count}'
+                      : '$label ×${job.count}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,

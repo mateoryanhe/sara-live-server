@@ -509,8 +509,18 @@ func selectOneToOneRooms(rooms []*liveentity.LiveRoom, statusFilter int) ([]*liv
 		filtered = append(filtered, room)
 	}
 
+	// 排序: WebSocket 在线优先;同为在线/离线时,开播(LiveRecordId>0)优先;其余保持稳定相对序
 	sort.SliceStable(filtered, func(i, j int) bool {
-		return onlineByRoomID[filtered[i].ID] && !onlineByRoomID[filtered[j].ID]
+		ri, rj := filtered[i], filtered[j]
+		oi, oj := onlineByRoomID[ri.ID], onlineByRoomID[rj.ID]
+		if oi != oj {
+			return oi
+		}
+		li, lj := ri.LiveRecordId > 0, rj.LiveRecordId > 0
+		if li != lj {
+			return li
+		}
+		return false
 	})
 	return filtered, onlineByRoomID
 }
@@ -541,7 +551,7 @@ func buildOneToOneRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoo
 	return list
 }
 
-// GetOneToOneRoomList App 分页查询1v1房间，在线状态来自 WebSocket，在线主播优先。
+// GetOneToOneRoomList App 分页查询1v1房间；WebSocket 在线优先，同态下开播优先。
 func GetOneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomListReq) (*liveroomdto.GetOneToOneRoomListRes, error) {
 	userID := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)

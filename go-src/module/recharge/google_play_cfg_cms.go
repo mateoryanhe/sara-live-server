@@ -28,8 +28,9 @@ func GetGooglePlayCfg(_ context.Context, _ *googleplaydto.GetGooglePlayCfgReq) (
 
 func SaveGooglePlayCfg(_ context.Context, req *googleplaydto.SaveGooglePlayCfgReq) (*googleplaydto.SaveGooglePlayCfgRes, error) {
 	serviceAccountJson := strings.TrimSpace(req.ServiceAccountJson)
+	packageName := strings.TrimSpace(req.PackageName)
 	if req.Enabled {
-		if serviceAccountJson == "" {
+		if serviceAccountJson == "" || packageName == "" {
 			return nil, errercode.CreateCode(errercode.InvalidParam)
 		}
 		if !json.Valid([]byte(serviceAccountJson)) {
@@ -40,6 +41,7 @@ func SaveGooglePlayCfg(_ context.Context, req *googleplaydto.SaveGooglePlayCfgRe
 	existing := cfgdao.GetGooglePlayCfgFromMemory()
 	row := &entity.GooglePlayCfg{
 		Enabled:            req.Enabled,
+		PackageName:        packageName,
 		ServiceAccountJson: serviceAccountJson,
 	}
 	if req.ID > 0 {

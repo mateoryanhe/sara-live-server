@@ -8,12 +8,12 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/sysdto"
+	"xr-game-server/dto/userwithdrawdeploydto"
 	"xr-game-server/module/accountcfg"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/upload"
-	"xr-game-server/dto/userwithdrawdeploydto"
 	"xr-game-server/module/wallet"
 )
 

@@ -62,6 +62,18 @@
               />
               <span class="form-tip">{{ t('pages.liveConfig.oneToOneDailyFreeSecondsTip') }}</span>
             </el-form-item>
+
+            <el-form-item :label="t('pages.liveConfig.maxAnchorPhotos')" prop="maxAnchorPhotos">
+              <el-input-number
+                  v-model="formData.maxAnchorPhotos"
+                  :min="1"
+                  :precision="0"
+                  :step="1"
+                  controls-position="right"
+                  style="width: 220px"
+              />
+              <span class="form-tip">{{ t('pages.liveConfig.maxAnchorPhotosTip') }}</span>
+            </el-form-item>
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.liveConfig.tabStartLive')" name="startLive">
@@ -124,6 +136,7 @@ const formData = reactive({
 	audienceListRefreshSeconds: 300,
 	oneToOneDailyFreeSeconds: 30,
   liveRoomCallMinTotalRechargeUsd: 10,
+  maxAnchorPhotos: 100,
 })
 
 const metaInfo = reactive({
@@ -144,6 +157,10 @@ const formRules = computed(() => ({
     {required: true, message: t('pages.liveConfig.liveRoomCallMinTotalRechargeUsdRequired'), trigger: 'blur'},
     {type: 'number', min: 0, message: t('pages.liveConfig.liveRoomCallMinTotalRechargeUsdMin'), trigger: 'blur'},
   ],
+  maxAnchorPhotos: [
+    {required: true, message: t('pages.liveConfig.maxAnchorPhotosRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.liveConfig.maxAnchorPhotosMin'), trigger: 'blur'},
+  ],
 }))
 
 const applyCfg = (cfg: LiveCfg | null | undefined) => {
@@ -158,6 +175,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.audienceListRefreshSeconds = 300
 	formData.oneToOneDailyFreeSeconds = 30
   formData.liveRoomCallMinTotalRechargeUsd = 10
+  formData.maxAnchorPhotos = 100
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -172,6 +190,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
 	formData.oneToOneDailyFreeSeconds = cfg.oneToOneDailyFreeSeconds ?? 30
   formData.liveRoomCallMinTotalRechargeUsd = truncateNumber(cfg.liveRoomCallMinTotalRechargeUsd ?? 10)
+  formData.maxAnchorPhotos = cfg.maxAnchorPhotos || 100
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -204,6 +223,7 @@ const handleSave = async () => {
 	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,
 	  oneToOneDailyFreeSeconds: formData.oneToOneDailyFreeSeconds,
       liveRoomCallMinTotalRechargeUsd: formData.liveRoomCallMinTotalRechargeUsd,
+      maxAnchorPhotos: formData.maxAnchorPhotos,
     })
     if (response?.success) {
       ElMessage.success(t('common.saveConfig'))
