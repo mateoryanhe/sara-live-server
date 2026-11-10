@@ -19,6 +19,18 @@ export const liveRoutes: RouteRecordRaw = {
             meta: {title: '礼物编辑', hidden: true, parentPermission: 'GiftManagement'},
         },
         {
+            path: 'gift/lucky-gift-pool-cfg',
+            name: 'LuckyGiftPoolCfgManagement',
+            component: () => import('@/views/live/gift/lucky-gift-pool-cfg.vue'),
+            meta: {title: '幸运礼物奖池配置'},
+        },
+        {
+            path: 'gift/lucky-gift-pool-pending-balance',
+            name: 'LuckyGiftPoolPendingBalanceList',
+            component: () => import('@/views/live/gift/lucky-gift-pool-pending-balance-list.vue'),
+            meta: {title: '奖池临时入账'},
+        },
+        {
             path: 'agora-cfg',
             name: 'AgoraCfgManagement',
             component: () => import('@/views/live/agora-cfg.vue'),

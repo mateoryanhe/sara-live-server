@@ -44,10 +44,12 @@ type LiveGift struct {
 	Status      uint8      `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
 	PublishedAt *time.Time `gorm:"comment:发布时间" json:"publishedAt"`
 	Description  string  `gorm:"size:255;default:'';comment:描述" json:"description"`
-	LuckyGiftRtp float64 `gorm:"type:decimal(10,4);default:0;comment:幸运礼物RTP(百分比,0-100,仅category_type=1)" json:"luckyGiftRtp"`
+	LuckyGiftRtp float64 `gorm:"type:decimal(10,4);default:0;comment:幸运礼物中奖概率RTP(%,0-100,仅category_type=1)" json:"luckyGiftRtp"`
 }
 
 func InitLiveGift() {
 	migrate.AutoMigrate(&LiveGift{})
 	initLuckyGiftMultiplierTier()
+	initLuckyGiftPoolCfg()
+	initLuckyGiftPoolPendingBalance()
 }

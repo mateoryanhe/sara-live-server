@@ -2,6 +2,7 @@ package module
 
 import (
 	"xr-game-server/dao/anchorphotodao"
+	"xr-game-server/dao/anchorvideodao"
 	"xr-game-server/module/accountcfg"
 	"xr-game-server/module/activity"
 	"xr-game-server/module/agora"
@@ -33,6 +34,7 @@ import (
 	"xr-game-server/module/liverevenuesharecfg"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/logquery"
+	"xr-game-server/module/luckygiftpoolcfg"
 	"xr-game-server/module/message"
 	"xr-game-server/module/metapixel"
 	"xr-game-server/module/minuteactivity"
@@ -47,6 +49,7 @@ import (
 	"xr-game-server/module/shareactivitydeploy"
 	"xr-game-server/module/shareappdownload"
 	"xr-game-server/module/shortvideo"
+	"xr-game-server/module/simulatorblacklistlog"
 	"xr-game-server/module/simulatorcpukeyword"
 	"xr-game-server/module/simulatordevicewhitelist"
 	"xr-game-server/module/stat"
@@ -101,7 +104,11 @@ func Init() {
 	anchorphotodao.SetMaxPhotosProvider(func() int {
 		return int(livecfg.GetMaxAnchorPhotos())
 	})
+	anchorvideodao.SetMaxVideosProvider(func() int {
+		return int(livecfg.GetMaxAnchorVideos())
+	})
 	gift.InitLuckyGiftMultiplier()
+	luckygiftpoolcfg.Init()
 	gift.InitReceivedGift()
 	verification_code.Init()
 	aliyunmoderation.Init()
@@ -113,6 +120,7 @@ func Init() {
 	activity.Init()
 	simulatorcpukeyword.Init()
 	simulatordevicewhitelist.Init()
+	simulatorblacklistlog.Init()
 	customerservice.Init()
 	anchornosalarysharecfg.Init()
 	liverevenuesharecfg.Init()

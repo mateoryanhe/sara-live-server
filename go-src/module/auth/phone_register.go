@@ -21,7 +21,9 @@ import (
 )
 
 func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *authdto.PhoneRegisterRes, err error) {
-	if err = ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
+	if err = ensureSimulatorLoginAllowed(ctx, req.DeviceInfo, &SimulatorDenyLogOpt{
+		LoginType: SimulatorLoginTypePhoneReg,
+	}); err != nil {
 		return nil, err
 	}
 	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)

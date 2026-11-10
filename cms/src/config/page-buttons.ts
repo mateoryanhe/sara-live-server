@@ -75,6 +75,7 @@ const READONLY_PAGES = new Set([
     'GameBetLogListManagement',
     'ResourceMonitor',
     'ProcessDownLogListManagement',
+    'SimulatorBlacklistLogListManagement',
     'UserFeedbackRecordManagement',
     'UserReportRecordManagement',
     'ServerLogExplorer',
@@ -90,6 +91,7 @@ const READONLY_NO_EXPORT_PAGES = new Set([
     'CoinMerchantGuildIncomeSettlementLogList',
     'PromotionChannelDailyStatManagement',
     'PromotionInviteLogListManagement',
+    'SimulatorBlacklistLogListManagement',
 ])
 
 const CONFIG_PAGES = new Set([
@@ -223,6 +225,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     UserList: [
         BTN.view,
         BTN.search,
+        BTN.export,
         {key: 'viewDetail', label: '查看详情'},
         {key: 'viewAnchorDetail', label: '查看主播详情'},
         {key: 'setAnchor', label: '设为主播'},
@@ -347,6 +350,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'syncAssets', label: '同步图标&动画'},
     ],
     LuckyGiftMultiplierCfgManagement: DEFAULT_CONFIG_BUTTONS,
+    LuckyGiftPoolCfgManagement: DEFAULT_CONFIG_BUTTONS,
+    LuckyGiftPoolPendingBalanceList: [BTN.view, BTN.search],
     GuildManagement: [
         BTN.view,
         BTN.search,
@@ -465,6 +470,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     RechargeCfgManagement: [
         ...DEFAULT_CRUD_BUTTONS,
+        {key: 'onShelf', label: '上架'},
+        {key: 'offShelf', label: '下架'},
         {key: 'sync', label: '同步数据'},
     ],
     CoinMerchantRechargeCfgManagement: [...DEFAULT_CRUD_BUTTONS],

@@ -239,6 +239,18 @@
 - `siteKey=share-activity`，静态前缀 **`/share-activity`**，默认目录 `/home/ec2-user/cdn/share-activity`
 - 表 `share_activity_deploy_cfgs`；角色授权页 `ShareActivityDeployManagement`
 
+## 幸运礼物奖池配置与开奖（2026-11-09）
+
+- 表 `lucky_gift_pool_cfgs`（单行）：`pool_balance`（默认 **1000 万**）、`contribute_percent`（进池比例%）、`win_probability`（中奖概率%）
+- 全局 5 挡倍率权重：`lucky_gift_multiplier_tiers.gift_id=0`（与单礼物挡位同表）
+- 临时入账表 `lucky_gift_pool_pending_balances`：`amount` + `status`(0未处理/2处理中/1已处理)；冷启结算窗口与 PrepareRestart 排空时**不直加** `pool_balance`
+- CMS：`/live/gift/lucky-gift-pool-cfg`（`LuckyGiftPoolCfgManagement`）；API `/luckyGiftPoolCfg/get|save`
+- **入库**：奖池行与倍率挡位均走 **syndb SetXxx / New**；CMS 保存后 `FlushUntilIdle` 再刷内存；开奖扣/加池只 `SetPoolBalance` 入队（不每次强刷盘）
+- **开奖串行队列** `luckygiftpoolcfg`：送礼 `count` 次各自抽完再合并；单次流程=按比例进池 → 中奖概率 → 仅「类型合法且返奖≤奖池」挡位参与权重随机 → 玩家中奖扣池；钱包加钻失败则 `EnqueueRefundPayout` 退回扣池
+- **冷启**：`event.ColdStart`（非热重启子进程 HTTP 就绪时发；热重启子进程仅 `HotStart`）。启动至延时合并完成前强制不中奖，进池写 pending；`ColdStart`/`HotStart` 后 **10s** 延时定时器入队合并 pending→`pool_balance`（Claim 防双加，队列串行）
+- **PrepareRestart**：停收 + 排空队列按不中奖处理，进池写 pending
+- 开奖参数以全局奖池配置为准（不再用单礼物 RTP/挡位做池内判奖）
+
 ## 主播收到礼物ID（2026-11-06）
 
 - 表 `anchor_received_gifts`（复合主键 `anchorId_giftId`，去重 + `count` 累计件数）；订阅 `RevenueEventEvent`（仅普通/幸运礼物，按流水 `count` 累加）
@@ -251,6 +263,11 @@
 - 上限：`live_cfgs.max_anchor_photos`（CMS 直播配置，默认 **100**，仅服务端校验；暂不下发 App `/cfg`）
 - App：`POST /anchorPhoto/list`、`/upload`（可多 `file`）、`/delete`（`photoIds` 批量）
 - Sofie：`/sofie/gallery/browsePhotos`、`uploadPhoto`、`removePhoto`
+
+## 主播相册视频上限（2026-11-09）
+
+- `live_cfgs.max_anchor_videos`（CMS「直播配置」同页，默认 **100**，0/空按默认）；`anchorvideodao.SetMaxVideosProvider(livecfg.GetMaxAnchorVideos)`
+- 仅服务端上传校验；dao 兜底默认亦改为 100（原 50）
 
 - CMS：`/config/upload-resource` **云桶开关**（S3 兼容，面向 CF R2）
 - 字段：`s3Enabled` / **`s3PublicDomain`（云桶访问域名，App 拼文件 URL）** / `s3Endpoint`（R2 S3 API）/ `s3Bucket` / AK·SK / `s3KeyPrefix`（如 `test`、`prod`）；Region 固定代码内 `auto`，CMS 不展示
@@ -380,4 +397,21 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 
 - 枚举：`go-src/constants/country/haipay_app_id.go`；测试 25238 起全币种，正式目前仅 USD `7810` / MYR `7730` / IDR `7724` / 收银台 `7545`
 - CMS **系统配置 → HaiPay** 开关 `useProdAppID`（`haipay_cfgs`，**默认开启正式**）；关闭=测试，开启=正式；代收/代付/查单按此选择
+
+## CMS 用户列表异步导出（2026-11-10）
+
+- `ExportTypeUserList` / `UserList:export` → `/cmsExport/submitJob`；复用当前筛选（key/时间/白名单/主播）
+- Go：`module/cmsexport/user_list.go` 分页调 `userinfo.QueryUserInfo`；CMS：`user-list.vue` + `utils/user-list-csv.ts`
+- 发版后非超管角色需在权限里勾选「导出」
+
+## Banner 跳转链接拼接 token（2026-11-10）
+
+- App `appBannerList` / Sofie `browseHome`：**所有**上架 Banner 的 `link` 只追加 `token`（`xrtoken.GetAppToken(userId)` 已有票）；不拼 `shareCode`/`shareTx`；已去掉 CMS「分享类型」
+
+## CMS 模拟器黑名单日志（2026-11-10）
+
+- 事件 `SimulatorLoginDeniedEvent`：设备码快捷登录 / App 邮箱登录因模拟器拦截时 `event.Pub`，`simulatorblacklistlog` 订阅后 syndb 写入 `simulator_blacklist_logs`
+- 字段：IP、设备码、注册时间(已有账号 CreatedAt)、登录方式、邮箱、账号ID、CPU/设备信息、拦截时间
+- CMS：用户管理 → `SimulatorBlacklistLogListManagement` `/user/simulator-blacklist-log`；列表 API `/simulatorBlacklistLog/listSimulatorBlacklistLog`
+- 发版后需给角色勾选该菜单权限；冷启/热启后 AutoMigrate 建表
 

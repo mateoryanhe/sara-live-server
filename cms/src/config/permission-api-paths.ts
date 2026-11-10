@@ -66,6 +66,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     UserList: '/account/getUserInfo',
     'UserList:view': '/account/getUserInfo',
     'UserList:search': '/account/getUserInfo',
+    'UserList:export': '/cmsExport/submitJob',
     'UserList:viewDetail': '/account/getUserDetail',
     'UserList:viewAnchorDetail': '/account/getAnchorDetail',
     'UserList:setAnchor': '/account/setAnchor',
@@ -385,6 +386,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'RechargeCfgManagement:create': '/rechargeCfg/createRechargeCfg',
     'RechargeCfgManagement:edit': '/rechargeCfg/updateRechargeCfg',
     'RechargeCfgManagement:delete': '/rechargeCfg/deleteRechargeCfg',
+    'RechargeCfgManagement:onShelf': '/rechargeCfg/onShelfRechargeCfg',
+    'RechargeCfgManagement:offShelf': '/rechargeCfg/offShelfRechargeCfg',
     'RechargeCfgManagement:sync': '/dataSync/syncRechargeCfg',
     CoinMerchantRechargeCfgManagement: '/coinMerchantRechargeCfg/coinMerchantRechargeCfgList',
     'CoinMerchantRechargeCfgManagement:view': '/coinMerchantRechargeCfg/coinMerchantRechargeCfgList',
@@ -444,6 +447,14 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GiftManagement:sort': '/gift/updateGift',
     'GiftManagement:sync': '/dataSync/syncGift',
     'GiftManagement:syncAssets': '/dataSync/syncGiftAssets',
+
+    LuckyGiftPoolCfgManagement: '/luckyGiftPoolCfg/getLuckyGiftPoolCfg',
+    'LuckyGiftPoolCfgManagement:view': '/luckyGiftPoolCfg/getLuckyGiftPoolCfg',
+    'LuckyGiftPoolCfgManagement:save': '/luckyGiftPoolCfg/saveLuckyGiftPoolCfg',
+
+    LuckyGiftPoolPendingBalanceList: '/luckyGiftPoolCfg/listPendingBalance',
+    'LuckyGiftPoolPendingBalanceList:view': '/luckyGiftPoolCfg/listPendingBalance',
+    'LuckyGiftPoolPendingBalanceList:search': '/luckyGiftPoolCfg/listPendingBalance',
 
     AgoraCfgManagement: '/agora/getAgoraCfg',
     'AgoraCfgManagement:view': '/agora/getAgoraCfg',
@@ -654,6 +665,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'SimulatorDeviceWhitelistManagement:create': '/simulatorDeviceWhitelist/createSimulatorDeviceWhitelist',
     'SimulatorDeviceWhitelistManagement:edit': '/simulatorDeviceWhitelist/updateSimulatorDeviceWhitelist',
     'SimulatorDeviceWhitelistManagement:delete': '/simulatorDeviceWhitelist/deleteSimulatorDeviceWhitelist',
+
+    SimulatorBlacklistLogListManagement: '/simulatorBlacklistLog/listSimulatorBlacklistLog',
+    'SimulatorBlacklistLogListManagement:view': '/simulatorBlacklistLog/listSimulatorBlacklistLog',
+    'SimulatorBlacklistLogListManagement:search': '/simulatorBlacklistLog/listSimulatorBlacklistLog',
 
     AnchorSalarySocialShareCfgManagement: '/anchorSalarySocialShareCfg/anchorSalarySocialShareCfgList',
     'AnchorSalarySocialShareCfgManagement:view': '/anchorSalarySocialShareCfg/anchorSalarySocialShareCfgList',

@@ -7,6 +7,7 @@ const (
 	openAPISchemaUserInfoDTO    = "xr-game-server.dto.userinfodto."
 	openAPISchemaShortVideoDTO  = "xr-game-server.dto.shortvideodto."
 	openAPISchemaAnchorPhotoDTO = "xr-game-server.dto.anchorphotodto."
+	openAPISchemaAnchorVideoDTO = "xr-game-server.dto.anchorvideodto."
 )
 
 // MergeOpenApiRawHandlerRoutes 向 OpenAPI 文档补全裸 Handler 路由及对应 components.schemas.
@@ -23,6 +24,7 @@ func MergeOpenApiRawHandlerRoutes(doc map[string]any) error {
 	mergeCreateLiveRoomOpenAPI(paths, schemas)
 	mergeUploadAvatarOpenAPI(paths, schemas)
 	mergeUploadAnchorPhotoOpenAPI(paths, schemas)
+	mergeUploadAnchorVideoOpenAPI(paths, schemas)
 	mergeAppPublishShortVideoOpenAPI(paths, schemas)
 	return nil
 }
@@ -135,6 +137,42 @@ func mergeUploadAnchorPhotoOpenAPI(paths, schemas map[string]any) {
 			"上传主播相册照片(可多张)",
 			[]string{"主播相册"},
 			"服务端 MultipartReader 流式解析; form 字段名均为 file,可传多个; 每主播最多100张,超限整批失败.",
+			reqName,
+			resName,
+		),
+	}
+}
+
+func mergeUploadAnchorVideoOpenAPI(paths, schemas map[string]any) {
+	reqName := openAPISchemaAnchorVideoDTO + "UploadVideoReq"
+	resName := openAPISchemaAnchorVideoDTO + "UploadVideoRes"
+	schemas[reqName] = map[string]any{
+		"type":     "object",
+		"required": []any{"file"},
+		"properties": map[string]any{
+			"file": openAPIBinaryProp("相册视频文件(mp4;可重复多个同名 file 字段一次传多个)"),
+		},
+	}
+	schemas[resName] = map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"list": map[string]any{
+				"type": "array",
+				"items": map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"id":    openAPIStringProp("视频ID"),
+						"video": openAPIStringProp("视频完整URL"),
+					},
+				},
+			},
+		},
+	}
+	paths["/anchorVideo/upload"] = map[string]any{
+		"post": openAPIMultipartPostOp(
+			"上传主播相册视频(可多个)",
+			[]string{"主播视频"},
+			"服务端 MultipartReader 流式解析; form 字段名均为 file,可传多个; 仅 mp4; 每主播最多50个,超限整批失败.",
 			reqName,
 			resName,
 		),

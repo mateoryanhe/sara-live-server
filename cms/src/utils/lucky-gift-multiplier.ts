@@ -28,3 +28,22 @@ export function createDefaultLuckyGiftMultiplierTiers(): LuckyGiftMultiplierTier
 export function newLuckyGiftMultiplierTierKey() {
   return `tier-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
+
+/** 挡位权重占比(%)；总权重为 0 时返回 0 */
+export function luckyGiftTierWeightSharePercent(
+  tiers: Array<Pick<LuckyGiftMultiplierTier, 'weight'> | null | undefined>,
+  weight: number,
+): number {
+  const total = (tiers || []).reduce((sum, tier) => {
+    const w = Number(tier?.weight)
+    return sum + (Number.isFinite(w) && w > 0 ? w : 0)
+  }, 0)
+  if (total <= 0) {
+    return 0
+  }
+  const w = Number(weight)
+  if (!Number.isFinite(w) || w <= 0) {
+    return 0
+  }
+  return (w / total) * 100
+}

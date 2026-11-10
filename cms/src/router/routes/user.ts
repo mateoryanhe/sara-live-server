@@ -91,6 +91,12 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '模拟器白名单'},
         },
         {
+            path: 'simulator-blacklist-log',
+            name: 'SimulatorBlacklistLogListManagement',
+            component: () => import('@/views/user/simulator-blacklist-log-list.vue'),
+            meta: {title: '模拟器黑名单日志'},
+        },
+        {
             path: 'currency-log/gold-log-list',
             name: 'GoldCurrencyLogList',
             component: () => import('@/views/user/currency-log/gold-log-list.vue'),

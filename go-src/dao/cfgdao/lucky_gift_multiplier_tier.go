@@ -1,17 +1,11 @@
 package cfgdao
 
 import (
-	"time"
-
 	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/core/snowflake"
 	"xr-game-server/entity/live"
 )
 
 func LoadLuckyGiftMultiplierTiersByGiftID(giftID uint64) []*entity.LuckyGiftMultiplierTier {
-	if giftID == 0 {
-		return nil
-	}
 	var rows []*entity.LuckyGiftMultiplierTier
 	if err := g.DB().Model(string(entity.TbLuckyGiftMultiplierTier)).
 		Where("gift_id = ?", giftID).
@@ -20,6 +14,11 @@ func LoadLuckyGiftMultiplierTiersByGiftID(giftID uint64) []*entity.LuckyGiftMult
 		return nil
 	}
 	return rows
+}
+
+// LoadGlobalLuckyGiftMultiplierTiers 全局默认倍率挡位(gift_id=0)
+func LoadGlobalLuckyGiftMultiplierTiers() []*entity.LuckyGiftMultiplierTier {
+	return LoadLuckyGiftMultiplierTiersByGiftID(entity.GlobalLuckyGiftMultiplierGiftID)
 }
 
 // LoadLuckyGiftMultiplierTiersByGiftIDs 批量加载所选礼物的幸运返奖倍率挡位(数据同步用)
@@ -63,39 +62,29 @@ func LoadAllLuckyGiftMultiplierTiers() []*entity.LuckyGiftMultiplierTier {
 	return rows
 }
 
-// ReplaceLuckyGiftMultiplierTiersByGiftID 删除该礼物旧挡位后全量写入
+// ReplaceLuckyGiftMultiplierTiersByGiftID 同步删除旧挡位后，用 syndb New 全量写入
 func ReplaceLuckyGiftMultiplierTiersByGiftID(giftID uint64, rows []*entity.LuckyGiftMultiplierTier) error {
-	if giftID == 0 {
-		return nil
-	}
-	if _, err := g.DB().Model(string(entity.TbLuckyGiftMultiplierTier)).Where("gift_id = ?", giftID).Delete(); err != nil {
+	if err := DeleteLuckyGiftMultiplierTiersByGiftID(giftID); err != nil {
 		return err
 	}
 	if len(rows) == 0 {
 		return nil
 	}
-	now := time.Now()
-	for _, row := range rows {
+	for i, row := range rows {
 		if row == nil {
 			continue
 		}
-		row.GiftID = giftID
-		if row.ID == 0 {
-			row.ID = snowflake.GetId()
-		}
-		if row.CreatedAt.IsZero() {
-			row.CreatedAt = now
-		}
-		row.UpdatedAt = now
+		_ = entity.NewLuckyGiftMultiplierTier(giftID, row.Multiplier, row.Weight, row.Type, i)
 	}
-	_, err := g.DB().Model(string(entity.TbLuckyGiftMultiplierTier)).Data(rows).Batch(len(rows)).Insert()
-	return err
+	return nil
+}
+
+// ReplaceGlobalLuckyGiftMultiplierTiers 覆盖全局默认倍率挡位(gift_id=0)
+func ReplaceGlobalLuckyGiftMultiplierTiers(rows []*entity.LuckyGiftMultiplierTier) error {
+	return ReplaceLuckyGiftMultiplierTiersByGiftID(entity.GlobalLuckyGiftMultiplierGiftID, rows)
 }
 
 func DeleteLuckyGiftMultiplierTiersByGiftID(giftID uint64) error {
-	if giftID == 0 {
-		return nil
-	}
 	_, err := g.DB().Model(string(entity.TbLuckyGiftMultiplierTier)).Where("gift_id = ?", giftID).Delete()
 	return err
 }

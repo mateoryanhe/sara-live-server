@@ -1142,6 +1142,30 @@ export interface SimulatorDeviceWhitelistQuery extends PageQuery {
     key?: string
 }
 
+export interface CMSSimulatorBlacklistLogItem {
+    id: string
+    ip: string
+    deviceId: string
+    cpuModel: string
+    deviceType: string
+    deviceModel: string
+    osVersion: string
+    appVersion: string
+    packageName: string
+    loginType: string
+    email: string
+    accountId: string
+    registerAt: string
+    createdAt: string
+}
+
+export interface CMSSimulatorBlacklistLogListQuery extends PageQuery {
+    key?: string
+    loginType?: string
+    startTime?: number
+    endTime?: number
+}
+
 export interface GetAccountCfgRes {
     cfg?: AccountCfg | null
 }
@@ -2190,6 +2214,7 @@ export interface LiveCfg {
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean
     maxAnchorPhotos: number
+    maxAnchorVideos: number
     createdAt: string
     updatedAt: string
 }
@@ -2210,6 +2235,7 @@ export interface SaveLiveCfgReq {
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean
     maxAnchorPhotos: number
+    maxAnchorVideos: number
 }
 
 export interface SaveLiveCfgRes {
@@ -2459,6 +2485,48 @@ export interface SaveLuckyGiftSettlementCfgReq {
 export interface SaveLuckyGiftSettlementCfgRes {
     success: boolean
     id: string
+}
+
+export interface LuckyGiftPoolMultiplierTier {
+    id?: string
+    multiplier: number
+    weight: number
+    type: 'low' | 'medium' | 'high'
+}
+
+export interface LuckyGiftPoolCfg {
+    id: string
+    poolBalance: number
+    contributePercent: number
+    winProbability: number
+    tiers: LuckyGiftPoolMultiplierTier[]
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetLuckyGiftPoolCfgRes {
+    cfg: LuckyGiftPoolCfg | null
+}
+
+export interface SaveLuckyGiftPoolCfgReq {
+    id?: string
+    poolBalance: number
+    contributePercent: number
+    winProbability: number
+    tiers: LuckyGiftPoolMultiplierTier[]
+}
+
+export interface SaveLuckyGiftPoolCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface LuckyGiftPoolPendingBalanceItem {
+    id: string
+    amount: number
+    status: number
+    createdAt: string
+    updatedAt: string
 }
 
 export interface LiveRevenueShareCfg {

@@ -113,6 +113,33 @@ func InitCmsToken(authId uint64, token string, val time.Time) {
 	cmsCache.Set(gctx.New(), authId, token, expire)
 }
 
+// GetAppToken 按用户ID取当前 App Token(缓存优先,未命中走 DB loader;负缓存/无则空).
+// 只读已有 token,不会 AddAppToken 换发新票.
+func GetAppToken(authId uint64) string {
+	if authId == 0 {
+		return ""
+	}
+	ctx := gctx.New()
+	cacheToken, err := appCache.Get(ctx, authId)
+	if err == nil && !cacheToken.IsNil() {
+		cached := cacheToken.String()
+		if isAppTokenNegativeCache(cached) {
+			return ""
+		}
+		return cached
+	}
+	if loadAppToken == nil {
+		return ""
+	}
+	dbToken, expireAt, ok := loadAppToken(authId)
+	if !ok {
+		setAppTokenNegativeCache(authId)
+		return ""
+	}
+	InitAppToken(authId, dbToken, expireAt)
+	return dbToken
+}
+
 func HasAppToken(authId uint64, token string) bool {
 	if authId == 0 || token == "" {
 		return false

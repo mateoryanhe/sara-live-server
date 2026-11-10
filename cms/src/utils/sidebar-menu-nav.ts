@@ -17,6 +17,7 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
         || path.startsWith('/operation/recharge/')
         || path.startsWith('/operation/vip/')
         || path === '/user/simulator-device-whitelist'
+        || path === '/user/simulator-blacklist-log'
         || path.startsWith('/user/currency-log/')
     ) {
         add('/user/account')

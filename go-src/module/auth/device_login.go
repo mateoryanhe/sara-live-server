@@ -32,7 +32,15 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if checkSimulator {
-		if err := ensureSimulatorLoginAllowed(deviceInfo); err != nil {
+		deviceId := ""
+		if deviceInfo != nil {
+			deviceId = strings.TrimSpace(deviceInfo.DeviceId)
+		}
+		if err := ensureSimulatorLoginAllowed(ctx, deviceInfo, &SimulatorDenyLogOpt{
+			LoginType:  SimulatorLoginTypeDevice,
+			OpenIdHint: deviceId,
+			Channel:    channel,
+		}); err != nil {
 			return nil, err
 		}
 	}

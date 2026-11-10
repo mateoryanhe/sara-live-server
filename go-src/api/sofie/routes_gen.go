@@ -70,6 +70,9 @@ func Init() {
 		{Path: "/browsePhotos", Handler: jsonHandler((&controller.AnchorPhotoAppController{}).List)},
 		{Path: "/uploadPhoto", Handler: controller.HandleUploadAnchorPhoto},
 		{Path: "/removePhoto", Handler: jsonHandler((&controller.AnchorPhotoAppController{}).Delete)},
+		{Path: "/browseVideos", Handler: jsonHandler((&controller.AnchorVideoAppController{}).List)},
+		{Path: "/uploadVideo", Handler: controller.HandleUploadAnchorVideo},
+		{Path: "/removeVideo", Handler: jsonHandler((&controller.AnchorVideoAppController{}).Delete)},
 	})
 	httpserver.RegNonAuthAppRouteGroup("/sofie/googleAuth", []httpserver.AppRoute{
 		{Path: "/fetchClientCfg", Handler: jsonHandler((&controller.FirebaseAppController{}).GetClientCfgForApp)},

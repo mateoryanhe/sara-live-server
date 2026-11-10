@@ -95,6 +95,8 @@ func init() {
 		VoiceChatMicSeatTierSeatCountExist: "Tier jumlah kursi mic voice chat sudah ada",
 		AnchorPhotoLimit:                   "Batas album foto host tercapai",
 		AnchorPhotoNonExist:                "Foto album host tidak ditemukan",
+		AnchorVideoLimit:                   "Batas album video host tercapai",
+		AnchorVideoNonExist:                "Video album host tidak ditemukan",
 		CallOrderNonExist:                  "Pesanan panggilan tidak ditemukan",
 		CallOrderStateInvalid:              "Status pesanan panggilan tidak mengizinkan operasi ini",
 		BotAnchorNonExist:                  "Anchor bot tidak ditemukan",

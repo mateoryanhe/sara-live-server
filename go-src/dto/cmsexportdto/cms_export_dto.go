@@ -26,6 +26,7 @@ const (
 	ExportTypeGameWinLog                       = "gameWinLog"
 	ExportTypeShortVideoAuthorSettlementLog    = "shortVideoAuthorSettlementLog"
 	ExportTypeRechargeOrder                    = "rechargeOrder"
+	ExportTypeUserList                         = "userList"
 )
 
 type CMSExportResult struct {
@@ -281,4 +282,17 @@ type CMSExportRechargeOrderPayload struct {
 	EndTime      int64             `json:"endTime"`
 	StatusLabels map[string]string `json:"statusLabels"`
 	SourceLabels map[string]string `json:"sourceLabels"`
+}
+
+type CMSExportUserListPayload struct {
+	CMSExportHeadersPayload
+	Key               string            `json:"key"`
+	StartTime         string            `json:"startTime"`
+	EndTime           string            `json:"endTime"`
+	RechargeWhitelist *int              `json:"rechargeWhitelist"`
+	IsAnchor          *int              `json:"isAnchor"`
+	UserTypeLabels    map[string]string `json:"userTypeLabels"`
+	YesNoLabels       map[string]string `json:"yesNoLabels"`
+	BanLabels         map[string]string `json:"banLabels"`
+	CancelLabels      map[string]string `json:"cancelLabels"`
 }

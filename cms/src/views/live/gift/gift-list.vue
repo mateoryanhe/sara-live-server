@@ -251,6 +251,60 @@ const searchForm = reactive<SearchForm>({
   statusFilter: 0
 })
 
+const GIFT_LIST_FILTER_KEY = 'cms:gift-list:filters'
+
+type GiftListFilterState = {
+  name: string
+  categoryType: number | undefined
+  statusFilter: number
+  currentPage: number
+  pageSize: number
+}
+
+const persistFilters = () => {
+  const state: GiftListFilterState = {
+    name: searchForm.name,
+    categoryType: searchForm.categoryType,
+    statusFilter: searchForm.statusFilter,
+    currentPage: currentPage.value,
+    pageSize: pageSize.value,
+  }
+  try {
+    sessionStorage.setItem(GIFT_LIST_FILTER_KEY, JSON.stringify(state))
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+const restoreFilters = () => {
+  try {
+    const raw = sessionStorage.getItem(GIFT_LIST_FILTER_KEY)
+    if (!raw) {
+      return
+    }
+    const state = JSON.parse(raw) as Partial<GiftListFilterState>
+    searchForm.name = typeof state.name === 'string' ? state.name : ''
+    searchForm.categoryType = typeof state.categoryType === 'number' ? state.categoryType : undefined
+    searchForm.statusFilter = typeof state.statusFilter === 'number' ? state.statusFilter : 0
+    if (typeof state.currentPage === 'number' && state.currentPage > 0) {
+      currentPage.value = state.currentPage
+    }
+    if (typeof state.pageSize === 'number' && state.pageSize > 0) {
+      pageSize.value = state.pageSize
+    }
+  } catch {
+    // ignore bad cache
+  }
+}
+
+const clearPersistedFilters = () => {
+  try {
+    sessionStorage.removeItem(GIFT_LIST_FILTER_KEY)
+  } catch {
+    // ignore
+  }
+}
+
 const fetchGiftList = async () => {
   loading.value = true
   try {
@@ -263,6 +317,7 @@ const fetchGiftList = async () => {
     })
     tableData.value = response.data
     total.value = response.total
+    persistFilters()
   } catch (error) {
     console.error('fetch gift list failed:', error)
     ElMessage.error(t('pages.giftList.fetchFailed'))
@@ -287,10 +342,12 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
+  persistFilters()
   router.push({name: 'GiftManagementEdit', params: {id: 'new'}})
 }
 
 const handleEdit = (row: Gift) => {
+  persistFilters()
   router.push({
     name: 'GiftManagementEdit',
     params: {id: row.id},
@@ -357,6 +414,7 @@ const resetSearch = () => {
   searchForm.categoryType = undefined
   searchForm.statusFilter = 0
   currentPage.value = 1
+  clearPersistedFilters()
   fetchGiftList()
 }
 
@@ -435,6 +493,7 @@ const handleSyncAssets = async () => {
 }
 
 onMounted(() => {
+  restoreFilters()
   fetchGiftList()
 })
 </script>

@@ -8,7 +8,13 @@
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">{{ t('pages.rechargeCfgList.addCfg') }}</el-button>
+          <el-button
+              v-if="hasButtonPermission('RechargeCfgManagement', 'create')"
+              type="primary"
+              @click="handleAdd"
+          >
+            {{ t('pages.rechargeCfgList.addCfg') }}
+          </el-button>
           <el-button
               v-if="hasButtonPermission('RechargeCfgManagement', 'sync')"
               :disabled="selectedRows.length === 0"
@@ -81,9 +87,15 @@
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
           <el-table-column fixed="right" :label="t('common.actions')" width="260">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
               <el-button
-                  v-if="row.status !== 1"
+                  v-if="hasButtonPermission('RechargeCfgManagement', 'edit')"
+                  size="small"
+                  @click="handleEdit(row)"
+              >
+                {{ t('common.edit') }}
+              </el-button>
+              <el-button
+                  v-if="hasButtonPermission('RechargeCfgManagement', 'onShelf') && row.status !== 1"
                   size="small"
                   type="success"
                   @click="handleOnShelf(row)"
@@ -91,14 +103,21 @@
                 {{ t('common.onShelf') }}
               </el-button>
               <el-button
-                  v-else
+                  v-if="hasButtonPermission('RechargeCfgManagement', 'offShelf') && row.status === 1"
                   size="small"
                   type="warning"
                   @click="handleOffShelf(row)"
               >
                 {{ t('common.offShelf') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
+              <el-button
+                  v-if="hasButtonPermission('RechargeCfgManagement', 'delete')"
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(row)"
+              >
+                {{ t('common.delete') }}
+              </el-button>
             </template>
           </el-table-column>
         </el-table>

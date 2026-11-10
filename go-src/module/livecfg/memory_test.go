@@ -59,3 +59,18 @@ func TestToLiveCfgSnapshotMaxAnchorPhotosValue(t *testing.T) {
 		t.Fatalf("stored max anchor photos = %d, want 50", got)
 	}
 }
+
+func TestToLiveCfgSnapshotMaxAnchorVideosDefault(t *testing.T) {
+	if toLiveCfgSnapshot(nil).MaxAnchorVideos != DefaultMaxAnchorVideos {
+		t.Fatal("missing live config must default max anchor videos to 100")
+	}
+	if toLiveCfgSnapshot(&liveentity.LiveCfg{}).MaxAnchorVideos != DefaultMaxAnchorVideos {
+		t.Fatal("zero stored max anchor videos must default to 100")
+	}
+}
+
+func TestToLiveCfgSnapshotMaxAnchorVideosValue(t *testing.T) {
+	if got := toLiveCfgSnapshot(&liveentity.LiveCfg{MaxAnchorVideos: 50}).MaxAnchorVideos; got != 50 {
+		t.Fatalf("stored max anchor videos = %d, want 50", got)
+	}
+}

@@ -11,7 +11,7 @@ type AppBannerItem struct {
 	ID        string `json:"id"`
 	Title     string `json:"title"`
 	Image     string `json:"image"`
-	Link      string `json:"link"`
+	Link      string `json:"link" dc:"跳转链接;下发时追加token(当前用户App票)"`
 	Scene     uint8  `json:"scene"`
 	Direction uint8  `json:"direction"`
 	Sort      int    `json:"sort"`

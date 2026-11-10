@@ -18,7 +18,9 @@ import (
 // CoinMerchantLogin 币商用户名+密码登录(仅 CoinMerchantChannel,CMS 创建账号,不自动注册).
 // password 由客户端 MD5 后上报,与库中哈希直接比对(CMS 建号/重置时服务端 MD5 入库).
 func CoinMerchantLogin(ctx context.Context, req *authdto.CoinMerchantLoginReq) (*authdto.CoinMerchantLoginRes, error) {
-	if err := ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
+	if err := ensureSimulatorLoginAllowed(ctx, req.DeviceInfo, &SimulatorDenyLogOpt{
+		LoginType: SimulatorLoginTypeCoinMerchant,
+	}); err != nil {
 		return nil, err
 	}
 	username := strings.TrimSpace(req.Username)

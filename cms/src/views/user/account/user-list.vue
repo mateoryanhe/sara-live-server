@@ -53,11 +53,12 @@
           <el-form-item>
             <el-button v-if="can('search')" type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
             <el-button v-if="can('search')" @click="handleReset">{{ t('common.reset') }}</el-button>
+            <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
           </el-form-item>
         </el-form>
       </div>
       <div class="table-scroll">
-        <el-table v-loading="loading" :data="userList" style="width: 100%">
+        <el-table v-loading="loading || exporting" :data="userList" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
           <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
           <el-table-column label="ID" prop="id" min-width="240">
             <template #default="scope">
@@ -512,10 +513,20 @@ import ChannelRechargeTestDialog from '@/components/ChannelRechargeTestDialog.vu
 import {formatWalletBalance, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useWalletCurrencyReset} from '@/composables/useWalletCurrencyReset'
+import {useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_USER_LIST} from '@/utils/cms-async-export'
+import {
+  buildUserListBanLabels,
+  buildUserListCancelLabels,
+  buildUserListCsvHeaders,
+  buildUserListUserTypeLabels,
+  buildUserListYesNoLabels,
+} from '@/utils/user-list-csv'
 import {formatServerDateTime as formatDate, formatServerNowPlusDays} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const {can} = usePagePermission('UserList')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const {resetWalletCurrency, walletBalanceNumber} = useWalletCurrencyReset()
 const canViewDetail = computed(() => can('viewDetail'))
 const canViewAnchorDetail = computed(() => can('viewAnchorDetail'))
@@ -826,6 +837,34 @@ const fetchUserList = async (silent = false) => {
 const handleSearch = () => {
   pagination.pageIndex = 1
   fetchUserList()
+}
+
+const buildExportFilterParams = () => {
+  const params: Record<string, unknown> = {
+    key: searchForm.key,
+    startTime: searchForm.startTime,
+    endTime: searchForm.endTime,
+    userTypeLabels: buildUserListUserTypeLabels(t),
+    yesNoLabels: buildUserListYesNoLabels(t),
+    banLabels: buildUserListBanLabels(t),
+    cancelLabels: buildUserListCancelLabels(t),
+    headers: buildUserListCsvHeaders(t),
+  }
+  if (searchForm.rechargeWhitelist !== undefined && searchForm.rechargeWhitelist !== null) {
+    params.rechargeWhitelist = searchForm.rechargeWhitelist
+  }
+  if (searchForm.isAnchor !== undefined && searchForm.isAnchor !== null) {
+    params.isAnchor = searchForm.isAnchor
+  }
+  return params
+}
+
+const handleExport = async () => {
+  await runExport(
+    CMS_EXPORT_TYPE_USER_LIST,
+    buildExportFilterParams(),
+    `user-list-${Date.now()}.csv`,
+  )
 }
 
 const handleReset = () => {

@@ -4,6 +4,8 @@ import {userListMessages} from '../user-list'
 
 import {giftListMessages} from './gift-list'
 import {luckyGiftMultiplierCfgMessages} from './lucky-gift-multiplier-cfg'
+import {luckyGiftPoolCfgMessages} from './lucky-gift-pool-cfg'
+import {luckyGiftPoolPendingBalanceMessages} from './lucky-gift-pool-pending-balance'
 import {vipCfgListMessages} from './vip-cfg-list'
 import {anchorListMessages} from './anchor-list'
 import {liveRoomRecycleBinMessages} from './live-room-recycle-bin'
@@ -81,6 +83,7 @@ import {promotionChannelDailyStatListMessages} from './promotion-channel-daily-s
 import {promotionInviteLogListMessages} from './promotion-invite-log-list'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {simulatorDeviceWhitelistListMessages} from './simulator-device-whitelist-list'
+import {simulatorBlacklistLogMessages} from './simulator-blacklist-log'
 import {anchorSalarySocialShareCfgListMessages} from './anchor-salary-social-share-cfg-list'
 import {anchorNoSalaryShareCfgMessages} from './anchor-no-salary-share-cfg'
 import {anchorGameShareCfgListMessages} from './anchor-game-share-cfg-list'
@@ -137,6 +140,8 @@ const pageMessageBuilders = [
   ['userList', userListMessages],
   ['giftList', giftListMessages],
   ['luckyGiftMultiplierCfg', luckyGiftMultiplierCfgMessages],
+  ['luckyGiftPoolCfg', luckyGiftPoolCfgMessages],
+  ['luckyGiftPoolPendingBalance', luckyGiftPoolPendingBalanceMessages],
   ['vipCfgList', vipCfgListMessages],
   ['anchorList', anchorListMessages],
   ['liveRoomRecycleBin', liveRoomRecycleBinMessages],
@@ -215,6 +220,7 @@ const pageMessageBuilders = [
   ['promotionInviteLogList', promotionInviteLogListMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['simulatorDeviceWhitelistList', simulatorDeviceWhitelistListMessages],
+  ['simulatorBlacklistLog', simulatorBlacklistLogMessages],
   ['anchorSalarySocialShareCfgList', anchorSalarySocialShareCfgListMessages],
   ['anchorNoSalaryShareCfg', anchorNoSalaryShareCfgMessages],
   ['anchorGameShareCfgList', anchorGameShareCfgListMessages],

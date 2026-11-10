@@ -3,12 +3,23 @@ package gift
 import (
 	"context"
 	"strconv"
+	"time"
 
+	"xr-game-server/core/syndb"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/giftdto"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 )
+
+const luckyGiftTierSyndbFlushTimeout = 3 * time.Second
+
+func flushLuckyGiftTierSyndb() error {
+	if !syndb.FlushUntilIdle(luckyGiftTierSyndbFlushTimeout) {
+		return errercode.CreateCode(errercode.SysError)
+	}
+	return nil
+}
 
 func GetGiftLuckyCfg(_ context.Context, req *giftdto.GetGiftLuckyCfgReq) (*giftdto.GetGiftLuckyCfgRes, error) {
 	g := cfgdao.GetGiftById(req.GiftID)
@@ -29,11 +40,19 @@ func saveGiftLuckyConfig(giftID uint64, categoryType uint8, rtp float64, tiers [
 		}
 		return nil
 	}
+	// 未提交挡位：保留历史单礼物配置(若有)；开奖以全局奖池为准
+	if len(tiers) == 0 {
+		return nil
+	}
 	rows, err := luckyGiftMultiplierRowsFromDTO(tiers)
 	if err != nil {
 		return err
 	}
-	return cfgdao.ReplaceLuckyGiftMultiplierTiersByGiftID(giftID, rows)
+	// 删旧 + syndb New 写入，刷盘后再由 invalidateGiftCache 重载内存
+	if err := cfgdao.ReplaceLuckyGiftMultiplierTiersByGiftID(giftID, rows); err != nil {
+		return err
+	}
+	return flushLuckyGiftTierSyndb()
 }
 
 func luckyGiftMultiplierRowsFromDTO(list []*giftdto.LuckyGiftMultiplierTierItem) ([]*liveentity.LuckyGiftMultiplierTier, error) {

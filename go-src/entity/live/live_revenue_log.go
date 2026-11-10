@@ -48,7 +48,7 @@ type LiveRevenueLog struct {
 	UnitPrice    float64   `gorm:"default:0;comment:单价(钻石,礼物场景有效)" json:"unitPrice"`
 	TotalAmount                 float64 `gorm:"default:0;comment:流水金额(钻石,付款方消耗)" json:"totalAmount"`
 	Status                      uint8   `gorm:"index:idx_lrl_status_created,priority:1;index:idx_lrl_room_status_created,priority:2;index:idx_lrl_biz_sender_type_status,priority:4;default:0;comment:状态(0正常,1已退款)" json:"status"`
-	LuckyGiftRtp                float64 `gorm:"type:decimal(10,4);default:0;comment:幸运礼物RTP快照(%)" json:"luckyGiftRtp"`
+	LuckyGiftRtp                float64 `gorm:"type:decimal(10,4);default:0;comment:幸运礼物中奖概率RTP快照(%)" json:"luckyGiftRtp"`
 	LuckyGiftMultiplier         uint32  `gorm:"default:0;comment:幸运礼物返奖倍数" json:"luckyGiftMultiplier"`
 	LuckyGiftPayout             float64 `gorm:"default:0;comment:幸运礼物返奖钻石" json:"luckyGiftPayout"`
 	LuckyGiftSettlementAmount   float64 `gorm:"default:0;comment:幸运礼物折算后计入主播礼物流水" json:"luckyGiftSettlementAmount"`

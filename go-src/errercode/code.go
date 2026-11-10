@@ -269,6 +269,10 @@ const (
 	AnchorPhotoLimit XRCode = 194
 	// AnchorPhotoNonExist 主播相册照片不存在
 	AnchorPhotoNonExist XRCode = 195
+	// AnchorVideoLimit 主播相册视频数量已达上限
+	AnchorVideoLimit XRCode = 196
+	// AnchorVideoNonExist 主播相册视频不存在
+	AnchorVideoNonExist XRCode = 197
 )
 
 type XError struct {

@@ -140,6 +140,9 @@
 | `gallery` | 主播相册列表 | 需要登录 | `POST /anchorPhoto/list` | `POST /sofie/gallery/browsePhotos` |
 | `gallery` | 上传主播相册照片 | 需要登录 | `POST /anchorPhoto/upload` | `POST /sofie/gallery/uploadPhoto` |
 | `gallery` | 删除主播相册照片 | 需要登录 | `POST /anchorPhoto/delete` | `POST /sofie/gallery/removePhoto` |
+| `gallery` | 主播视频列表 | 需要登录 | `POST /anchorVideo/list` | `POST /sofie/gallery/browseVideos` |
+| `gallery` | 上传主播相册视频 | 需要登录 | `POST /anchorVideo/upload` | `POST /sofie/gallery/uploadVideo` |
+| `gallery` | 删除主播相册视频 | 需要登录 | `POST /anchorVideo/delete` | `POST /sofie/gallery/removeVideo` |
 | `topup` | 上报充值面板曝光 | 需要登录 | `POST /rechargeOrder/reportChargePanelEnter` | `POST /sofie/topup/notifyChargePanelEnter` |
 | `topup` | 创建充值订单 | 需要登录 | `POST /rechargeOrder/createRechargeOrder` | `POST /sofie/topup/openStoreOrder` |
 | `topup` | 渠道充值建单 | 需要登录 | `POST /rechargeOrder/createChannelRechargeOrder` | `POST /sofie/topup/openChannelOrder` |

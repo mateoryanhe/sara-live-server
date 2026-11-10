@@ -299,7 +299,7 @@ type LiveRoomChatPushResp struct {
 
 // LiveRoomGiftPushReq cmd=8 直播间送礼
 type LiveRoomGiftPushReq struct {
-	g.Meta `path:"/liveRoomGift" method:"post" summary:"推送 cmd=8 直播间送礼广播(房间内全体在线用户)" description:"直播间送礼广播(房间内全体在线用户)" tags:"推送-直播间"`
+	g.Meta `path:"/liveRoomGift" method:"post" summary:"推送 cmd=8 直播间送礼广播(房间内全体在线用户)" description:"直播间送礼广播(房间内全体在线用户); 幸运礼物中奖时(含 low/medium/high)附带返奖字段" tags:"推送-直播间"`
 }
 
 type LiveRoomGiftPushResp struct {

@@ -123,7 +123,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('SimulatorDeviceWhitelistManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('SimulatorDeviceWhitelistManagement') || hasMenuPermission('SimulatorBlacklistLogListManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -160,6 +160,12 @@ const hasMenuPermission = (moduleName: string) => {
               <Monitor/>
             </el-icon>
             <span>{{ t('menu.SimulatorDeviceWhitelistManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('SimulatorBlacklistLogListManagement')" index="/user/simulator-blacklist-log">
+            <el-icon>
+              <Monitor/>
+            </el-icon>
+            <span>{{ t('menu.SimulatorBlacklistLogListManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GoldCurrencyLogList')" index="/user/currency-log/gold-log-list">
             <el-icon>
@@ -357,7 +363,7 @@ const hasMenuPermission = (moduleName: string) => {
             </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement') || hasMenuPermission('VoiceChatMicSeatTierManagement')"
+            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('LuckyGiftPoolCfgManagement') || hasMenuPermission('LuckyGiftPoolPendingBalanceList') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement') || hasMenuPermission('VoiceChatMicSeatTierManagement')"
             index="/live">
           <template #title>
             <el-icon>
@@ -370,6 +376,18 @@ const hasMenuPermission = (moduleName: string) => {
               <Present/>
             </el-icon>
             <span>{{ t('menu.GiftManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('LuckyGiftPoolCfgManagement')" index="/live/gift/lucky-gift-pool-cfg">
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>{{ t('menu.LuckyGiftPoolCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('LuckyGiftPoolPendingBalanceList')" index="/live/gift/lucky-gift-pool-pending-balance">
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>{{ t('menu.LuckyGiftPoolPendingBalanceList') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('AgoraCfgManagement')" index="/live/agora-cfg">
             <el-icon>

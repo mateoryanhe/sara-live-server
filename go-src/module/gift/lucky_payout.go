@@ -16,22 +16,20 @@ type LuckyGiftDrawResult struct {
 	TierType string
 }
 
-// ResolveLuckyGiftPayout 幸运礼物返奖：先 RTP 判中奖，中奖再抽倍数(含 CMS 挡位 type)
+// ResolveLuckyGiftPayout 幸运礼物单次判奖(走奖池串行队列，等价 count=1)。
 func ResolveLuckyGiftPayout(giftID uint64, totalCost float64) LuckyGiftDrawResult {
-	rtp := GetLuckyGiftRtpByGiftID(giftID)
-	return resolveLuckyGiftPayoutWithRtp(giftID, totalCost, rtp)
-}
-
-func resolveLuckyGiftPayoutWithRtp(giftID uint64, totalCost float64, rtp float64) LuckyGiftDrawResult {
-	if !RollLuckyGiftWin(rtp) {
-		return LuckyGiftDrawResult{Rtp: rtp}
+	batch := ResolveLuckyGiftPayoutBatch(giftID, totalCost, 1)
+	if batch.TotalPayout <= 0 {
+		return LuckyGiftDrawResult{Rtp: batch.Rtp}
 	}
-	multiplier, tierType := DrawLuckyGiftMultiplierWithTier(giftID)
-	payout := CalcLuckyGiftPayoutDiamonds(totalCost, multiplier)
+	tierType := batch.HighestWinTier
+	if tierType == "" {
+		tierType = batch.PushRouteTierType()
+	}
 	return LuckyGiftDrawResult{
-		Rtp:        rtp,
-		Multiplier: multiplier,
-		Payout:     payout,
+		Rtp:        batch.Rtp,
+		Multiplier: batch.MaxWinMultiplier,
+		Payout:     batch.TotalPayout,
 		TierType:   tierType,
 	}
 }
@@ -42,7 +40,8 @@ func DrawLuckyGiftMultiplier(giftID uint64) uint32 {
 	return multiplier
 }
 
-// DrawLuckyGiftMultiplierWithTier 抽取返奖倍数及 CMS 配置的挡位 type(low/medium/high)
+// DrawLuckyGiftMultiplierWithTier 在已中奖前提下，按挡位 Weight 加权随机抽一档。
+// 命中概率 = 该档 Weight / 全部有效 Weight 之和；Weight 越大越容易抽中。
 func DrawLuckyGiftMultiplierWithTier(giftID uint64) (uint32, string) {
 	tiers := GetLuckyGiftMultiplierTiersByGiftID(giftID)
 	if len(tiers) == 0 {

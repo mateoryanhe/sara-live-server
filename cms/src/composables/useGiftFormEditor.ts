@@ -1,4 +1,4 @@
-import {computed, ref, watch} from 'vue'
+import {computed, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {giftApi, uploadApi} from '@/api'
@@ -15,10 +15,6 @@ import {
   GIFT_CATEGORY_NORMAL,
   isKnownGiftCategoryType,
 } from '@/utils/gift-category'
-import {
-  createDefaultLuckyGiftMultiplierTiers,
-  type LuckyGiftMultiplierTier,
-} from '@/utils/lucky-gift-multiplier'
 
 export interface GiftForm {
   id: string
@@ -32,8 +28,6 @@ export interface GiftForm {
   animation: string
   price: number
   categoryType: number
-  luckyGiftRtp: number
-  luckyGiftMultiplierTiers: LuckyGiftMultiplierTier[]
   sort: number
   description: string
 }
@@ -51,23 +45,9 @@ export function defaultGiftForm(): GiftForm {
     animation: '',
     price: 0,
     categoryType: GIFT_CATEGORY_NORMAL,
-    luckyGiftRtp: 0,
-    luckyGiftMultiplierTiers: createDefaultLuckyGiftMultiplierTiers(),
     sort: 0,
     description: '',
   }
-}
-
-const mapApiTiersToForm = (tiers: {multiplier: number; weight: number; type: string}[]) => {
-  if (!tiers?.length) {
-    return createDefaultLuckyGiftMultiplierTiers()
-  }
-  return tiers.map((tier, index) => ({
-    key: `tier-${index}`,
-    multiplier: tier.multiplier,
-    weight: tier.weight,
-    type: tier.type as LuckyGiftMultiplierTier['type'],
-  }))
 }
 
 export function useGiftFormEditor() {
@@ -143,15 +123,6 @@ export function useGiftFormEditor() {
     }
     formRef.value?.validateField(field).catch(() => undefined)
   }
-
-  watch(
-    () => currentRow.value.categoryType,
-    (categoryType) => {
-      if (categoryType === GIFT_CATEGORY_LUCKY && currentRow.value.luckyGiftMultiplierTiers.length === 0) {
-        currentRow.value.luckyGiftMultiplierTiers = createDefaultLuckyGiftMultiplierTiers()
-      }
-    },
-  )
 
   const allowedAnimationExt = [
     '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.apng',
@@ -232,18 +203,6 @@ export function useGiftFormEditor() {
     const iconName = row.iconName || ''
     const animationName = row.animationName || ''
     const categoryType = isKnownGiftCategoryType(row.categoryType) ? row.categoryType : GIFT_CATEGORY_NORMAL
-    let luckyGiftRtp = truncateNumber(row.luckyGiftRtp ?? 0)
-    let luckyGiftMultiplierTiers = createDefaultLuckyGiftMultiplierTiers()
-    if (categoryType === GIFT_CATEGORY_LUCKY) {
-      try {
-        const luckyCfg = await giftApi.getGiftLuckyCfg(row.id)
-        luckyGiftRtp = truncateNumber(luckyCfg.luckyGiftRtp ?? 0)
-        luckyGiftMultiplierTiers = mapApiTiersToForm(luckyCfg.tiers)
-      } catch (error) {
-        console.error('load gift lucky cfg failed:', error)
-        ElMessage.warning(t('pages.giftList.luckyCfgLoadFailed'))
-      }
-    }
     currentRow.value = {
       id: row.id,
       name: row.name,
@@ -256,8 +215,6 @@ export function useGiftFormEditor() {
       animation: animationName,
       price: truncateNumber(row.price),
       categoryType,
-      luckyGiftRtp,
-      luckyGiftMultiplierTiers,
       sort: Number(row.sort) || 0,
       description: row.description,
     }
@@ -304,26 +261,6 @@ export function useGiftFormEditor() {
     activeTab.value = 'basic'
   }
 
-  const buildLuckyPayload = () => {
-    if (currentRow.value.categoryType !== GIFT_CATEGORY_LUCKY) {
-      return {}
-    }
-    for (const tier of currentRow.value.luckyGiftMultiplierTiers) {
-      if (!tier.multiplier || tier.multiplier <= 0 || !tier.weight || tier.weight <= 0) {
-        ElMessage.warning(t('pages.giftList.luckyTierInvalid'))
-        return null
-      }
-    }
-    return {
-      luckyGiftRtp: currentRow.value.luckyGiftRtp,
-      luckyGiftMultiplierTiers: currentRow.value.luckyGiftMultiplierTiers.map((tier) => ({
-        multiplier: tier.multiplier,
-        weight: tier.weight,
-        type: tier.type,
-      })),
-    }
-  }
-
   const saveGift = async (): Promise<boolean> => {
     if (!formRef.value) {
       return false
@@ -334,19 +271,15 @@ export function useGiftFormEditor() {
       ElMessage.warning(t('pages.giftList.formInvalid'))
       return false
     }
-    const luckyPayload = buildLuckyPayload()
-    if (luckyPayload === null) {
-      activeTab.value = 'multiplier'
-      return false
-    }
     saving.value = true
     try {
       const {id, name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, categoryType, sort, description} =
         currentRow.value
+      // 中奖概率/倍率挡位改由「幸运礼物奖池配置」全局管理，礼物编辑不再提交
       if (id) {
-        await giftApi.updateGift({id, name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, categoryType, sort, description, ...luckyPayload})
+        await giftApi.updateGift({id, name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, categoryType, sort, description})
       } else {
-        await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, categoryType, sort, description, ...luckyPayload})
+        await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, categoryType, sort, description})
       }
       ElMessage.success(id ? t('common.updateSuccess') : t('common.createSuccess'))
       return true

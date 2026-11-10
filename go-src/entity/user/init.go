@@ -14,6 +14,7 @@ func Init() {
 	initUserAttributionReport()
 	initUserFeedbackRecord()
 	initUserReportRecord()
+	initSimulatorBlacklistLog()
 	initRandomNickname()
 	initWalletExchangeCfg()
 	initCustomerServiceCfg()

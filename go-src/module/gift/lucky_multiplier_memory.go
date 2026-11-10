@@ -67,7 +67,7 @@ func GetLuckyGiftMultiplierTiersByGiftID(giftID uint64) []*liveentity.LuckyGiftM
 	return out
 }
 
-// GetLuckyGiftRtpByGiftID 某幸运礼物 RTP(百分比); 非幸运或未配置为 0
+// GetLuckyGiftRtpByGiftID 某幸运礼物中奖概率 RTP(%); 非幸运或未配置为 0
 func GetLuckyGiftRtpByGiftID(giftID uint64) float64 {
 	if giftID == 0 {
 		return 0

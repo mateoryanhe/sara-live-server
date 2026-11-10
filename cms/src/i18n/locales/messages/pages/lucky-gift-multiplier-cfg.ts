@@ -1,10 +1,10 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
-  pageHint: '配置幸运礼物返奖倍率挡位；保存后写入数据库并刷新服务端内存缓存。',
+  pageHint: '配置幸运礼物返奖倍率挡位（仅 RTP 中奖后参与抽取）；权重越大越易抽中。保存后写入数据库并刷新服务端内存缓存。',
   multiplier: '返奖倍率',
   weight: '权重',
-  weightHint: '整数，越大越容易抽中该挡位',
+  weightHint: '中奖后按权重抽档：命中概率=本档权重/总权重，越大越易中',
   multiplierType: '倍率类型',
   typeLow: '低',
   typeMedium: '中',
@@ -23,10 +23,10 @@ const zh = {
 } as const
 
 export const luckyGiftMultiplierCfgMessages = definePageMessagesFromEn(zh, {
-  pageHint: 'Configure lucky-gift payout multiplier tiers. Saves to the database and refreshes server cache.',
+  pageHint: 'Configure lucky-gift multiplier tiers (drawn only after an RTP win). Higher weight = more likely. Saves to DB and refreshes cache.',
   multiplier: 'Multiplier',
   weight: 'Weight',
-  weightHint: 'Integer; higher means more likely to hit this tier',
+  weightHint: 'After a win, pick by weight: chance = weight / total weight; higher is more likely',
   multiplierType: 'Tier type',
   typeLow: 'Low',
   typeMedium: 'Medium',

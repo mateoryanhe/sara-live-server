@@ -16,7 +16,8 @@ const (
 	AppToken               Type = "AppToken"
 	CmsToken               Type = "CmsToken"
 	PrepareRestart         Type = "PrepareRestart"
-	HotStart               Type = "HotStart" // HTTP 就绪后的热启动(定时任务等在此挂载)
+	HotStart               Type = "HotStart"  // HTTP 就绪后的热启动(定时任务等在此挂载;热重启子进程也会发)
+	ColdStart              Type = "ColdStart" // 非热重启子进程的冷启动就绪(与 HotStart 同时点,仅 !gproc.IsChild)
 	LiveRoomAudienceJoined Type = "LiveRoomAudienceJoined"
 )
 

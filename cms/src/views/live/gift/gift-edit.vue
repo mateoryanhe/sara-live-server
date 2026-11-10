@@ -126,47 +126,6 @@
                 </el-form-item>
               </div>
             </el-tab-pane>
-
-            <el-tab-pane :label="t('pages.giftList.tabRtp')" name="rtp" :disabled="!isLuckyGift">
-              <div class="tab-pane-body">
-                <el-alert
-                    v-if="!isLuckyGift"
-                    :closable="false"
-                    :title="t('pages.giftList.luckyTabsDisabledTip')"
-                    show-icon
-                    type="info"
-                />
-                <template v-else>
-                  <el-form-item :label="t('pages.giftList.luckyGiftRtp')" prop="luckyGiftRtp">
-                    <el-input-number
-                        v-model="currentRow.luckyGiftRtp"
-                        :max="100"
-                        :min="0"
-                        :precision="NUMBER_INPUT_DECIMALS"
-                        :step="0.0001"
-                        controls-position="right"
-                        style="width: 220px"
-                    />
-                    <span class="form-tip-inline">{{ t('pages.giftList.luckyGiftRtpTip') }}</span>
-                  </el-form-item>
-                </template>
-              </div>
-            </el-tab-pane>
-
-            <el-tab-pane :label="t('pages.giftList.tabMultiplier')" name="multiplier" :disabled="!isLuckyGift">
-              <div class="tab-pane-body">
-                <el-alert
-                    v-if="!isLuckyGift"
-                    :closable="false"
-                    :title="t('pages.giftList.luckyTabsDisabledTip')"
-                    show-icon
-                    type="info"
-                />
-                <el-form-item v-else :label="t('pages.giftList.luckyMultiplierTiers')">
-                  <LuckyGiftTierEditor v-model="currentRow.luckyGiftMultiplierTiers"/>
-                </el-form-item>
-              </div>
-            </el-tab-pane>
           </el-tabs>
         </el-form>
 
@@ -180,14 +139,12 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onBeforeUnmount, onMounted, watch} from 'vue'
+import {computed, onBeforeUnmount, onMounted} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {Document, Plus} from '@element-plus/icons-vue'
 import type {UploadRequestOptions} from 'element-plus'
-import LuckyGiftTierEditor from '@/components/gift/LuckyGiftTierEditor.vue'
 import {useGiftFormEditor} from '@/composables/useGiftFormEditor'
-import type {Gift} from '@/types/api.ts'
 import {NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 
 const {t} = useI18n()
@@ -207,7 +164,6 @@ const {
   activeTab,
   formRef,
   currentRow,
-  isLuckyGift,
   iconUploading,
   animationUploading,
   iconPreviewUrl,
@@ -220,17 +176,10 @@ const {
   doUpload,
   clearAsset,
   initCreateForm,
-  applyGiftRowToForm,
   loadGiftById,
   saveGift,
   dispose,
 } = useGiftFormEditor()
-
-watch(isLuckyGift, (lucky) => {
-  if (!lucky && (activeTab.value === 'rtp' || activeTab.value === 'multiplier')) {
-    activeTab.value = 'basic'
-  }
-})
 
 const goBack = () => {
   router.push({name: 'GiftManagement'})
@@ -300,12 +249,6 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-}
-
-.form-tip-inline {
-  margin-left: 12px;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
 }
 
 .asset-upload-wrap {

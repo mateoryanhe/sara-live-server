@@ -174,6 +174,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('RechargeCfgManagement'),
             page('VipCfgManagement'),
             page('SimulatorDeviceWhitelistManagement'),
+            page('SimulatorBlacklistLogListManagement'),
             page('GoldCurrencyLogList'),
             page('DiamondCurrencyLogList'),
         ],
@@ -233,6 +234,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         titleKey: 'menu.LiveManagement',
         children: [
             page('GiftManagement'),
+            page('LuckyGiftPoolCfgManagement'),
+            page('LuckyGiftPoolPendingBalanceList'),
             page('AgoraCfgManagement'),
             page('PrivateRoomBillingManagement'),
             page('LiveCfgManagement'),

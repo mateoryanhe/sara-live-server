@@ -4,7 +4,9 @@ import (
 	"context"
 	"strconv"
 	"strings"
+
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/bannerdto"
 	"xr-game-server/entity/live"
@@ -25,7 +27,29 @@ func GetAppBannerList(ctx context.Context, req *bannerdto.AppBannerListReq) (*ba
 	scene := normalizeBannerScene(req.Scene)
 	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
 	list := filterAppBannerListByPackage(getAppBannerList(scene), packageName)
+	list = applyShareQueryLinks(ctx, list)
 	return &bannerdto.AppBannerListRes{List: list}, nil
+}
+
+// applyShareQueryLinks 所有 Banner 按当前用户拼 token; 必须拷贝条目,避免改脏内存缓存.
+func applyShareQueryLinks(ctx context.Context, list []*bannerdto.AppBannerItem) []*bannerdto.AppBannerItem {
+	if len(list) == 0 {
+		return list
+	}
+	appToken := ""
+	if userId := httpserver.GetAuthId(ctx); userId > 0 {
+		appToken = xrtoken.GetAppToken(userId)
+	}
+	out := make([]*bannerdto.AppBannerItem, 0, len(list))
+	for _, item := range list {
+		if item == nil {
+			continue
+		}
+		cloned := *item
+		cloned.Link = appendShareParamsToLink(item.Link, appToken)
+		out = append(out, &cloned)
+	}
+	return out
 }
 
 func normalizeBannerScene(scene uint8) uint8 {

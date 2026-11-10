@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	liveentity "xr-game-server/entity/live"
+	"xr-game-server/module/luckygiftpoolcfg"
 )
 
 // LuckyGiftTierMultiplierLine 同一挡位内某一倍数的累加
@@ -30,17 +31,34 @@ type LuckyGiftBatchResult struct {
 	Low, Medium, High *LuckyGiftTierWinSummary
 }
 
-// ResolveLuckyGiftPayoutBatch 按单价独立判奖 count 次并累加各挡位返奖
+// ResolveLuckyGiftPayoutBatch 经奖池串行队列：count 次独立抽奖后合并。
+// 每次：按比例进池 → 中奖概率判定 → 合法挡位(返奖不超过奖池)权重抽档 → 扣池。
+// giftID 保留兼容调用方；开奖参数以全局奖池配置为准。
 func ResolveLuckyGiftPayoutBatch(giftID uint64, unitPrice float64, count int) LuckyGiftBatchResult {
+	_ = giftID
 	if count <= 0 {
 		return LuckyGiftBatchResult{}
 	}
-	rtp := GetLuckyGiftRtpByGiftID(giftID)
-	draws := make([]LuckyGiftDrawResult, 0, count)
-	for i := 0; i < count; i++ {
-		draws = append(draws, resolveLuckyGiftPayoutWithRtp(giftID, unitPrice, rtp))
+	raw := luckygiftpoolcfg.EnqueueBatchDraw(unitPrice, count)
+	winProb := luckygiftpoolcfg.WinProbability()
+	draws := make([]LuckyGiftDrawResult, 0, len(raw))
+	for _, d := range raw {
+		if d.WinProbability > 0 {
+			winProb = d.WinProbability
+		}
+		draws = append(draws, LuckyGiftDrawResult{
+			Rtp:        d.WinProbability,
+			Multiplier: d.Multiplier,
+			Payout:     d.Payout,
+			TierType:   d.TierType,
+		})
 	}
-	return AggregateLuckyGiftDraws(rtp, draws)
+	return AggregateLuckyGiftDraws(winProb, draws)
+}
+
+// RefundLuckyGiftPoolPayout 钱包加钻失败时退回已扣奖池金额
+func RefundLuckyGiftPoolPayout(amount float64) {
+	luckygiftpoolcfg.EnqueueRefundPayout(amount)
 }
 
 // AggregateLuckyGiftDraws 将多次判奖累加为挡位汇总(供测试与组装)

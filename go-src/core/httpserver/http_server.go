@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gproc"
 	"github.com/gogf/gf/v2/util/gconv"
 	"xr-game-server/core/event"
 	"xr-game-server/core/hotrestart"
@@ -58,6 +59,9 @@ func waitHTTPServerReadyAndLogStartupEnd() {
 	}
 	startup.LogEnd(ctx)
 	event.Pub(event.HotStart, nil)
+	if !gproc.IsChild() {
+		event.Pub(event.ColdStart, nil)
+	}
 	hotrestart.NotifyChildStartupComplete()
 }
 

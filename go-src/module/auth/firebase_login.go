@@ -22,7 +22,9 @@ func FirebaseLogin(ctx context.Context, req *authdto.FirebaseLoginReq) (*authdto
 	if req == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if err := ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
+	if err := ensureSimulatorLoginAllowed(ctx, req.DeviceInfo, &SimulatorDenyLogOpt{
+		LoginType: SimulatorLoginTypeFirebase,
+	}); err != nil {
 		return nil, err
 	}
 	uid, err := verifyFirebaseUID(ctx, req.IdToken)

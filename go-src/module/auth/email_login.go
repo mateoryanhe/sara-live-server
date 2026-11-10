@@ -20,10 +20,15 @@ import (
 // EmailLogin 邮箱+验证码登录.
 // 优先: EmailChannel 账号 → 已绑定该邮箱的未注销账号 → 新建 EmailChannel 账号.
 func EmailLogin(ctx context.Context, req *authdto.EmailLoginReq) (*authdto.EmailLoginRes, error) {
-	if err := ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
+	email := normalizeEmailKey(req.Email)
+	if err := ensureSimulatorLoginAllowed(ctx, req.DeviceInfo, &SimulatorDenyLogOpt{
+		LoginType:  SimulatorLoginTypeEmail,
+		OpenIdHint: email,
+		Channel:    EmailChannel,
+		Email:      email,
+	}); err != nil {
 		return nil, err
 	}
-	email := normalizeEmailKey(req.Email)
 	if email == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

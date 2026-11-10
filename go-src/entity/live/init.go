@@ -36,6 +36,7 @@ func Init() {
 	InitLiveGift()
 	initAnchorReceivedGift()
 	initAnchorPhoto()
+	initAnchorVideo()
 	initHomeBanner()
 	initVipCfg()
 	initAgoraCfg()

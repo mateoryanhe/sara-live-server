@@ -22,6 +22,11 @@
           <el-input-number v-model="row.weight" :min="1" :precision="0" :step="1" controls-position="right"/>
         </template>
       </el-table-column>
+      <el-table-column :label="t('pages.giftList.luckyWeightShare')" min-width="96">
+        <template #default="{ row }">
+          {{ formatWeightShare(row.weight) }}
+        </template>
+      </el-table-column>
       <el-table-column :label="t('pages.luckyGiftMultiplierCfg.multiplierType')" min-width="120">
         <template #default="{ row }">
           <el-select v-model="row.type" style="width: 100%">
@@ -51,6 +56,7 @@
 import {useI18n} from 'vue-i18n'
 import {
   createDefaultLuckyGiftMultiplierTiers,
+  luckyGiftTierWeightSharePercent,
   newLuckyGiftMultiplierTierKey,
   type LuckyGiftMultiplierTier,
 } from '@/utils/lucky-gift-multiplier'
@@ -87,6 +93,11 @@ const removeTier = (index: number) => {
 
 const resetDefault = () => {
   patch(createDefaultLuckyGiftMultiplierTiers())
+}
+
+const formatWeightShare = (weight: number) => {
+  const pct = luckyGiftTierWeightSharePercent(props.modelValue, weight)
+  return `${pct.toFixed(1)}%`
 }
 </script>
 
