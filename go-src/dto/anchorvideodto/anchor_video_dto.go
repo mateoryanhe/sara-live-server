@@ -44,7 +44,7 @@ type UnlockVideoRes struct {
 type UploadVideoReq struct {
 	g.Meta      `path:"/upload" method:"post" mime:"multipart/form-data" summary:"上传主播相册视频(单个)" tags:"主播视频"`
 	File        *ghttp.UploadFile `json:"file" type:"file" v:"required#请选择视频" dc:"视频文件(mp4,仅1个)"`
-	Price       float64           `json:"price" v:"required#请选择价格" dc:"钻石价格(须为已上架价格挡位)"`
+	Price       float64           `json:"price" v:"required#请选择价格" dc:"钻石价格(0=免费)"`
 	Description string            `json:"description" dc:"描述(可空,最多200字)"`
 }
 
@@ -60,7 +60,7 @@ type UploadVideoRes struct {
 type UpdateVideoReq struct {
 	g.Meta      `path:"/update" method:"post" summary:"修改主播相册视频价格或描述" tags:"主播视频"`
 	VideoId     uint64  `json:"videoId,string" v:"required#视频ID不能为空" dc:"相册视频ID"`
-	Price       float64 `json:"price" dc:"钻石价格(0=免费;>0须为已上架价格挡位)"`
+	Price       float64 `json:"price" dc:"钻石价格(0=免费)"`
 	Description string  `json:"description" dc:"描述(可空,最多200字)"`
 }
 

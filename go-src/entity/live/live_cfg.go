@@ -24,6 +24,7 @@ type LiveCfg struct {
 	OneToOneLiveRoomEnabled         bool    `gorm:"default:0;comment:App是否展示1v1房间页面/入口" json:"oneToOneLiveRoomEnabled"`
 	MaxAnchorPhotos                 uint32  `gorm:"default:100;comment:主播相册照片上限" json:"maxAnchorPhotos"`
 	MaxAnchorVideos                 uint32  `gorm:"default:100;comment:主播相册视频上限" json:"maxAnchorVideos"`
+	MaxAnchorVideoFileSizeMB        uint32  `gorm:"default:100;comment:主播相册单个视频大小上限(MB)" json:"maxAnchorVideoFileSizeMB"`
 }
 
 func initLiveCfg() {

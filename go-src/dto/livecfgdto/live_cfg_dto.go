@@ -19,6 +19,7 @@ type LiveCfgItem struct {
 	OneToOneLiveRoomEnabled         bool    `json:"oneToOneLiveRoomEnabled" dc:"App是否展示1v1房间页面/入口"`
 	MaxAnchorPhotos                 uint32  `json:"maxAnchorPhotos" dc:"主播相册照片上限,默认100"`
 	MaxAnchorVideos                 uint32  `json:"maxAnchorVideos" dc:"主播相册视频上限,默认100"`
+	MaxAnchorVideoFileSizeMB        uint32  `json:"maxAnchorVideoFileSizeMB" dc:"主播相册单个视频大小上限(MB),默认100,/cfg下发"`
 	CreatedAt                       string  `json:"createdAt"`
 	UpdatedAt                       string  `json:"updatedAt"`
 }
@@ -41,6 +42,7 @@ type SaveLiveCfgReq struct {
 	OneToOneLiveRoomEnabled         *bool   `json:"oneToOneLiveRoomEnabled" dc:"App是否展示1v1页面/入口;不传时保留原值,首次保存默认关闭"`
 	MaxAnchorPhotos                 uint32  `json:"maxAnchorPhotos" v:"required|min:1#相册照片上限不能为空|相册照片上限至少为1" dc:"主播相册照片上限,默认100"`
 	MaxAnchorVideos                 uint32  `json:"maxAnchorVideos" v:"required|min:1#相册视频上限不能为空|相册视频上限至少为1" dc:"主播相册视频上限,默认100"`
+	MaxAnchorVideoFileSizeMB        uint32  `json:"maxAnchorVideoFileSizeMB" v:"required|min:1#相册视频大小上限不能为空|相册视频大小上限至少为1MB" dc:"主播相册单个视频大小上限(MB),默认100"`
 }
 
 type SaveLiveCfgRes struct {

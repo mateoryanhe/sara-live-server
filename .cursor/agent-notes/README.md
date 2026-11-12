@@ -316,6 +316,12 @@
 - `live_cfgs.max_anchor_videos`（CMS「直播配置」同页，默认 **100**，0/空按默认）；`anchorvideodao.SetMaxVideosProvider(livecfg.GetMaxAnchorVideos)`
 - 仅服务端上传校验；dao 兜底默认亦改为 100（原 50）
 
+## 主播相册视频大小上限（2026-11-12）
+
+- `live_cfgs.max_anchor_video_file_size_mb`（CMS「直播配置」基础配置，默认 **100** MB，0/空按默认）
+- App：`GET/POST /sysInfo/cfg`（Sofie `/sofie/boot/loadConfig`）下发 `maxAnchorVideoFileSizeMB`
+- 上传：`/anchorVideo/upload` 流式校验用 `livecfg.GetMaxAnchorVideoFileSizeBytes()`
+
 ## 主播相册短视频价格挡位（2026-11-12）
 
 - 表 `anchor_video_price_tiers`（首次启动 AutoMigrate）；CMS「直播管理 → 主播相册短视频价格」`AnchorVideoPriceTierManagement`
@@ -325,7 +331,7 @@
 
 ## 主播相册视频上传（2026-11-12）
 
-- **仅单个** `file`（multipart）；必填 `price`（须命中已上架价格挡位，校验走价格内存）、可选 `description`（可空，最多 200 字）
+- **仅单个** `file`（multipart）；必填 `price`（`0`=免费，`>0` 自定义钻石价，**不校验**价格挡位）、可选 `description`（可空，最多 200 字）
 - 表字段：`anchor_videos.price` / `description`；列表/上传应答带出 `id`
 - 旧 App：`POST /anchorVideo/upload`；Sofie：`/sofie/gallery/uploadVideo`
 
@@ -333,7 +339,7 @@
 
 - 列表：`POST /anchorVideo/list` **读主播列表缓存**（miss 从库加载最多 **1000**），再 `pageIndex/pageSize` 分页
 - 上传新增 / **修改** / 删除：刷新该主播列表缓存（`PublishList`；删除后再 `RefreshVideoListCache` 对齐库）
-- 修改：`POST /anchorVideo/update`（Sofie `/sofie/gallery/updateVideo`），入参 `videoId`/`price`/`description`；`price=0` 免费，`>0` 须命中已上架挡位
+- 修改：`POST /anchorVideo/update`（Sofie `/sofie/gallery/updateVideo`），入参 `videoId`/`price`/`description`；`price=0` 免费，`>0` 自定义钻石价（不校验挡位）
 - 列表项：`id` / `price` / `description` / **`paid`**（`price==0` 免费默认 true；主播本人 true；否则查购买记录）
 - 购买缓存：**key=`userId_anchorId`**，val=付费记录列表；`unlock` 成功后刷新
 - 表 `anchor_video_purchases`；App `POST /anchorVideo/unlock`（Sofie `/sofie/gallery/unlockVideo`）

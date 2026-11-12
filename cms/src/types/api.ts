@@ -2238,6 +2238,7 @@ export interface LiveCfg {
     oneToOneLiveRoomEnabled: boolean
     maxAnchorPhotos: number
     maxAnchorVideos: number
+    maxAnchorVideoFileSizeMB: number
     createdAt: string
     updatedAt: string
 }
@@ -2259,6 +2260,7 @@ export interface SaveLiveCfgReq {
     oneToOneLiveRoomEnabled: boolean
     maxAnchorPhotos: number
     maxAnchorVideos: number
+    maxAnchorVideoFileSizeMB: number
 }
 
 export interface SaveLiveCfgRes {

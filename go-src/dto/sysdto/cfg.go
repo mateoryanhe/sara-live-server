@@ -21,6 +21,7 @@ type SysCfgResp struct {
 	GameLiveRoomEnabled        bool    `json:"gameLiveRoomEnabled" dc:"App是否展示游戏直播间入口(category=2)，/cfg下发"`
 	VoiceChatLiveRoomEnabled   bool    `json:"voiceChatLiveRoomEnabled" dc:"App是否展示语聊房入口(category=5)，/cfg下发"`
 	OneToOneLiveRoomEnabled    bool    `json:"oneToOneLiveRoomEnabled" dc:"App是否展示1v1房间页面/入口，/cfg下发"`
+	MaxAnchorVideoFileSizeMB   uint32  `json:"maxAnchorVideoFileSizeMB" dc:"主播相册单个视频大小上限(MB),默认100"`
 	PrivacyPolicyUrl           string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`
 	TermsOfServiceUrl          string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
 	CreatorTermsUrl            string  `json:"creatorTermsUrl" dc:"短视频创作者上传合规条款URL"`

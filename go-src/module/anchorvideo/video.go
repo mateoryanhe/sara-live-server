@@ -13,7 +13,6 @@ import (
 	"xr-game-server/dto/anchorvideodto"
 	entity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
-	"xr-game-server/module/anchorvideopricetier"
 	"xr-game-server/module/upload"
 )
 
@@ -94,13 +93,13 @@ func isVideoPaidForViewer(viewerId uint64, row *entity.AnchorVideo, purchased ma
 	return ok
 }
 
-// AddVideoFromStoredFile 写入单个相册视频;price 须命中已上架价格挡位(读价格缓存);description 可空.
+// AddVideoFromStoredFile 写入单个相册视频;price=0 免费,>0 为自定义钻石价;description 可空.
 func AddVideoFromStoredFile(ctx context.Context, storedName string, price float64, description string) (*anchorvideodto.UploadVideoRes, error) {
 	storedName = strings.TrimSpace(storedName)
 	if storedName == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if price <= common.Zero || !anchorvideopricetier.IsOnShelfPrice(price) {
+	if price < common.Zero {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	description = strings.TrimSpace(description)
@@ -137,9 +136,6 @@ func UpdateVideo(ctx context.Context, req *anchorvideodto.UpdateVideoReq) (*anch
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if req.Price < common.Zero {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-	if req.Price > common.Zero && !anchorvideopricetier.IsOnShelfPrice(req.Price) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	description := strings.TrimSpace(req.Description)

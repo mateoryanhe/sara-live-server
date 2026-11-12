@@ -15,12 +15,12 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/module/anchorvideo"
 	"xr-game-server/module/anchorvideopricetier"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/upload"
 )
 
 const (
-	AnchorVideoAppUrl          = "/anchorVideo"
-	defaultAnchorVideoMaxBytes = 100 * 1024 * 1024 // 100MB
+	AnchorVideoAppUrl = "/anchorVideo"
 )
 
 type AnchorVideoAppController struct{}
@@ -98,7 +98,7 @@ func parseUploadAnchorVideoMultipartWithUploader(ctx context.Context, r *ghttp.R
 				part.Close()
 				return form, errercode.CreateCode(errercode.InvalidParam) // 仅允许单个视频
 			}
-			storedName, upErr := uploader(ctx, part, defaultAnchorVideoMaxBytes)
+			storedName, upErr := uploader(ctx, part, livecfg.GetMaxAnchorVideoFileSizeBytes())
 			part.Close()
 			if upErr != nil {
 				return form, mapAnchorVideoMultipartErr(upErr)

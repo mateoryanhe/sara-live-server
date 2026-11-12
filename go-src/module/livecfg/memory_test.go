@@ -69,6 +69,30 @@ func TestToLiveCfgSnapshotMaxAnchorVideosDefault(t *testing.T) {
 	}
 }
 
+func TestToLiveCfgSnapshotMaxAnchorVideoFileSizeMBDefault(t *testing.T) {
+	if toLiveCfgSnapshot(nil).MaxAnchorVideoFileSizeMB != DefaultMaxAnchorVideoFileSizeMB {
+		t.Fatal("missing live config must default max anchor video file size to 100MB")
+	}
+	if toLiveCfgSnapshot(&liveentity.LiveCfg{}).MaxAnchorVideoFileSizeMB != DefaultMaxAnchorVideoFileSizeMB {
+		t.Fatal("zero max anchor video file size must default to 100MB")
+	}
+}
+
+func TestToLiveCfgSnapshotMaxAnchorVideoFileSizeMBValue(t *testing.T) {
+	if got := toLiveCfgSnapshot(&liveentity.LiveCfg{MaxAnchorVideoFileSizeMB: 50}).MaxAnchorVideoFileSizeMB; got != 50 {
+		t.Fatalf("got %d, want 50", got)
+	}
+}
+
+func TestNormalizeMaxAnchorVideoFileSizeMB(t *testing.T) {
+	if NormalizeMaxAnchorVideoFileSizeMB(0) != DefaultMaxAnchorVideoFileSizeMB {
+		t.Fatal("zero must normalize to default 100")
+	}
+	if NormalizeMaxAnchorVideoFileSizeMB(200) != 200 {
+		t.Fatal("non-zero must keep value")
+	}
+}
+
 func TestToLiveCfgSnapshotMaxAnchorVideosValue(t *testing.T) {
 	if got := toLiveCfgSnapshot(&liveentity.LiveCfg{MaxAnchorVideos: 50}).MaxAnchorVideos; got != 50 {
 		t.Fatalf("stored max anchor videos = %d, want 50", got)

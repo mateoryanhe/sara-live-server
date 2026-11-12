@@ -16,6 +16,8 @@ const DefaultMaxAnchorPhotos uint32 = 100
 
 const DefaultMaxAnchorVideos uint32 = 100
 
+const DefaultMaxAnchorVideoFileSizeMB uint32 = 100
+
 type liveCfgSnapshot struct {
 	PaidDanmakuPrice                float64
 	VideoCallTicketEnabled          bool
@@ -28,6 +30,7 @@ type liveCfgSnapshot struct {
 	OneToOneLiveRoomEnabled         bool
 	MaxAnchorPhotos                 uint32
 	MaxAnchorVideos                 uint32
+	MaxAnchorVideoFileSizeMB        uint32
 }
 
 var (
@@ -39,6 +42,7 @@ var (
 		LiveRoomCallMinTotalRechargeUsd: entity.LiveRoomCallMinTotalRechargeUSD,
 		MaxAnchorPhotos:                 DefaultMaxAnchorPhotos,
 		MaxAnchorVideos:                 DefaultMaxAnchorVideos,
+		MaxAnchorVideoFileSizeMB:        DefaultMaxAnchorVideoFileSizeMB,
 	}
 )
 
@@ -82,6 +86,7 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		OneToOneLiveRoomEnabled:         row.OneToOneLiveRoomEnabled,
 		MaxAnchorPhotos:                 NormalizeMaxAnchorPhotos(row.MaxAnchorPhotos),
 		MaxAnchorVideos:                 NormalizeMaxAnchorVideos(row.MaxAnchorVideos),
+		MaxAnchorVideoFileSizeMB:        NormalizeMaxAnchorVideoFileSizeMB(row.MaxAnchorVideoFileSizeMB),
 	}
 }
 
@@ -95,6 +100,13 @@ func NormalizeMaxAnchorPhotos(v uint32) uint32 {
 func NormalizeMaxAnchorVideos(v uint32) uint32 {
 	if v == 0 {
 		return DefaultMaxAnchorVideos
+	}
+	return v
+}
+
+func NormalizeMaxAnchorVideoFileSizeMB(v uint32) uint32 {
+	if v == 0 {
+		return DefaultMaxAnchorVideoFileSizeMB
 	}
 	return v
 }
@@ -180,4 +192,14 @@ func GetMaxAnchorPhotos() uint32 {
 // GetMaxAnchorVideos 主播相册视频上限；未配置或为 0 时默认 100。
 func GetMaxAnchorVideos() uint32 {
 	return getLiveCfgCache().MaxAnchorVideos
+}
+
+// GetMaxAnchorVideoFileSizeMB 主播相册单个视频大小上限(MB)；未配置或为 0 时默认 100。
+func GetMaxAnchorVideoFileSizeMB() uint32 {
+	return getLiveCfgCache().MaxAnchorVideoFileSizeMB
+}
+
+// GetMaxAnchorVideoFileSizeBytes 主播相册单个视频大小上限(字节)。
+func GetMaxAnchorVideoFileSizeBytes() int64 {
+	return int64(GetMaxAnchorVideoFileSizeMB()) * 1024 * 1024
 }

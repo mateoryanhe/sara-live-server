@@ -151,7 +151,7 @@ func mergeUploadAnchorVideoOpenAPI(paths, schemas map[string]any) {
 		"required": []any{"file", "price"},
 		"properties": map[string]any{
 			"file":        openAPIBinaryProp("相册视频文件(mp4,仅1个)"),
-			"price":       openAPINumberProp("钻石价格(须为已上架价格挡位)", "float64", nil),
+			"price":       openAPINumberProp("钻石价格(0=免费)", "float64", nil),
 			"description": openAPIStringProp("描述(可空,最多200字)"),
 		},
 	}
@@ -168,7 +168,7 @@ func mergeUploadAnchorVideoOpenAPI(paths, schemas map[string]any) {
 		"post": openAPIMultipartPostOp(
 			"上传主播相册视频(单个)",
 			[]string{"主播视频"},
-			"multipart: file(仅1个)+price(必填,须命中已上架挡位)+description(可空); 仅 mp4.",
+			"multipart: file(仅1个)+price(必填,0=免费)+description(可空); 仅 mp4.",
 			reqName,
 			resName,
 		),
