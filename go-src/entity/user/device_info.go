@@ -26,6 +26,8 @@ type DeviceInfo struct {
 	ApkCh string `json:"apkCh,omitempty" dc:"App APK推广渠道编码"`
 	// H5AppCh 可选; H5-App 配对以 deviceInfo.ch + CMS 为准, 保留字段仅兼容旧客户端
 	H5AppCh string `json:"h5AppCh,omitempty" dc:"(兼容)H5-App渠道码"`
+	// RegisterAttr 注册时 H5/PWA URL 归因对象(type/ch/tjuserid); 仅首次注册写入 user_register_url_attrs
+	RegisterAttr *RegisterUrlAttr `json:"registerAttr,omitempty" dc:"注册URL归因{type,ch,tjuserid}"`
 }
 
 // PromotionChannelCode 解析 deviceInfo.ch; 无字段/空/非正整数时 ok=false,推广统计全部跳过

@@ -48,7 +48,13 @@ func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStart
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 	if room.LiveRecordId == 0 {
-		return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
+		// 热重启后内存可能丢绑定:主播心跳时查 live_rooms + 未结束 live_records 补回.
+		if userId == room.ID {
+			tryRecoverLiveRecordBinding(room, true)
+		}
+		if room.LiveRecordId == 0 {
+			return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
+		}
 	}
 
 	if userId == room.ID {

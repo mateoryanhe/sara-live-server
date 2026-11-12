@@ -11,7 +11,6 @@ import (
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/gameplatform"
 	"xr-game-server/core/event"
-	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/gamebetdao"
 	"xr-game-server/dao/gamevendordao"
@@ -58,12 +57,6 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 		vendorDetailLog().Warningf(ctx, "vendor transfer failed transaction_id=%s code=%d msg=%s", req.TransactionID, resp.Error.Code, resp.Error.Message)
 		return resp, nil
 	}
-	if accountdao.GetAccountById(userID) == nil {
-		resp := vendorTransferFail(vendorCallbackCodePlayerNotFound, "player not found")
-		vendorDetailLog().Warningf(ctx, "vendor transfer failed transaction_id=%s code=%d msg=%s", req.TransactionID, resp.Error.Code, resp.Error.Message)
-		return resp, nil
-	}
-
 	userInfo := loadUserInfoForVendorVerify(userID)
 	if userInfo == nil {
 		resp := vendorTransferFail(vendorCallbackCodePlayerNotFound, "player not found")

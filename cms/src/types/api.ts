@@ -57,13 +57,13 @@ export interface UserStatTrendPoint {
     time: string
     activeUserCount: number
     registerUserCount: number
-    /** App 设备码用户充值(USD) */
+    /** App 用户充值(USD;注册 X-Platform=android/ios) */
     appDeviceRechargeAmount?: number
-    /** H5 设备码用户充值(USD) */
+    /** H5 用户充值(USD;注册 X-Platform=web) */
     h5DeviceRechargeAmount?: number
-    /** App 设备码用户登录人数(去重) */
+    /** App 用户登录人数(去重;注册 X-Platform=android/ios) */
     appDeviceLoginCount?: number
-    /** H5 设备码用户登录人数(去重) */
+    /** H5 用户登录人数(去重;注册 X-Platform=web) */
     h5DeviceLoginCount?: number
     /** 柱形图指标, key 见 user-stat-bar-series.ts */
     barMetrics?: Record<string, number>
@@ -508,6 +508,7 @@ export interface LiveRoomIncomeAmounts {
 	totalVideoCallTicketIncome?: number
     totalVideoCallBillingIncome?: number
     totalShortVideoIncome?: number
+    totalAnchorVideoIncome?: number
     totalGameIncome?: number
     totalLiveDuration?: number
 }
@@ -703,6 +704,14 @@ export interface UserPromotionAttributionDetailItem {
     apkChannelApkDownloadUrl?: string
 }
 
+export interface UserRegisterUrlAttrDetailItem {
+    type?: string
+    ch?: string
+    tjuserid?: string
+    createdAt?: string | null
+    updatedAt?: string | null
+}
+
 export interface UserExtDetailItem {
     canRank?: boolean
     prettyId?: string
@@ -806,6 +815,7 @@ export interface UserDetail {
     channelPayProfile?: UserChannelPayProfileDetailItem | null
     withdrawPayout?: UserWithdrawPayoutDetailItem | null
     promotionAttribution?: UserPromotionAttributionDetailItem | null
+    registerUrlAttr?: UserRegisterUrlAttrDetailItem | null
 }
 
 export interface QueryBotAnchorListReq extends PageQuery {
@@ -2000,6 +2010,18 @@ export interface ShortVideoPriceTierQuery extends PageQuery {
     statusFilter?: number
 }
 
+export interface AnchorVideoPriceTier {
+    id: string
+    price: number
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface AnchorVideoPriceTierQuery extends PageQuery {
+    statusFilter?: number
+}
+
 export interface LiveRoomTag {
     id: string
     name: string
@@ -2055,6 +2077,7 @@ export interface IncomeSettlementLogAmounts {
 	totalVideoCallTicketIncome: number
     totalVideoCallBillingIncome: number
     totalShortVideoIncome: number
+    totalAnchorVideoIncome: number
     totalGameIncome: number
     totalLiveDuration: number
     effectiveLiveDays?: number
@@ -2602,6 +2625,56 @@ export interface SaveFirebaseCfgRes {
     id: string
 }
 
+export interface FirebasePushCfg {
+    id: string
+    enabled: number
+    offlineCallTitle: string
+    offlineCallBody: string
+    offlineCallIcon: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetFirebasePushCfgRes {
+    cfg: FirebasePushCfg | null
+}
+
+export interface SaveFirebasePushCfgReq {
+    id?: number
+    enabled: number
+    offlineCallTitle: string
+    offlineCallBody: string
+    offlineCallIcon: string
+}
+
+export interface SaveFirebasePushCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface GameActivityCfg {
+    id: string
+    buttonIcon: string
+    gameListUrl: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetGameActivityCfgRes {
+    cfg: GameActivityCfg | null
+}
+
+export interface SaveGameActivityCfgReq {
+    id?: number
+    buttonIcon: string
+    gameListUrl: string
+}
+
+export interface SaveGameActivityCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface MetaPixelCfg {
     id: string
     enabled: number
@@ -2610,6 +2683,29 @@ export interface MetaPixelCfg {
     testEventCode: string
     createdAt: string
     updatedAt: string
+}
+
+export interface AttrReportCfg {
+    id: string
+    baseApi: string
+    secretKey: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetAttrReportCfgRes {
+    cfg: AttrReportCfg | null
+}
+
+export interface SaveAttrReportCfgReq {
+    id?: number
+    baseApi: string
+    secretKey: string
+}
+
+export interface SaveAttrReportCfgRes {
+    success: boolean
+    id: string
 }
 
 export interface GetMetaPixelCfgRes {

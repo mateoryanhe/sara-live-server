@@ -284,7 +284,11 @@ func ViewerCanUseLiveRoomCall(userId uint64) bool {
 
 // CanInitiateLiveRoomCall 当前用户是否可向该直播间发起 1v1 通话
 // 暂不校验累计充值满 10 USD(AllowCallIcon 仍校验,便于客户端隐藏入口)
+// CMS「1v1 房间」关闭时一律不可发起(与 allowCallIcon 一致)
 func CanInitiateLiveRoomCall(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+	if !livecfg.IsOneToOneLiveRoomEnabled() {
+		return false
+	}
 	return canInitiateLiveRoomCallBase(room, cfg, userId)
 }
 
@@ -317,6 +321,9 @@ func allowShowCallIconForRoom(room *liveentity.LiveRoom, cfg *liveentity.LiveRoo
 }
 
 func allowShowCallIcon(ctx context.Context, room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+	if !livecfg.IsOneToOneLiveRoomEnabled() {
+		return false
+	}
 	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
 		return false
 	}

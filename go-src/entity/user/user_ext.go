@@ -65,7 +65,7 @@ type UserExt struct {
 	InviterId                 uint64     `gorm:"index;default:0;comment:邀请者用户ID(0为无)" json:"inviterId"`
 	PromotionChannelCode      int        `gorm:"index;default:0;comment:注册推广渠道编码(0为无)" json:"promotionChannelCode"`
 	ApkPromotionChannel       string     `gorm:"size:64;index;default:'';comment:APK推广渠道编码(空为无)" json:"apkPromotionChannel"`
-	RegisterPromotionPlatform string     `gorm:"size:8;default:'';comment:注册客户端平台(h5/app,推广日报分母)" json:"registerPromotionPlatform"`
+	RegisterPromotionPlatform string     `gorm:"size:8;default:'';comment:注册客户端平台(h5/app;优先X-Platform:web→h5,android/ios→app)" json:"registerPromotionPlatform"`
 	RegisterClientPlatform    string     `gorm:"size:16;default:'';comment:注册时X-Platform(android/ios/web)" json:"registerClientPlatform"`
 	InviterInviteRechargeRewardGold float64    `gorm:"type:decimal(16,4);default:0;comment:因该用户充值已发放给邀请人的返现金币累计" json:"inviterInviteRechargeRewardGold"`
 	GameLiveRoomId            uint64     `gorm:"index;default:0;comment:玩游戏上下文直播间ID(0大厅无关联,>0写入game_bet_logs)" json:"gameLiveRoomId"`

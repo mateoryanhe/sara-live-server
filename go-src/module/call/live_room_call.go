@@ -51,6 +51,9 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
+	if !livecfg.IsOneToOneLiveRoomEnabled() {
+		return nil, errercode.CreateCode(errercode.OneToOneLiveRoomStartDisabled)
+	}
 	if !liveroom.CanInitiateLiveRoomCall(room, cfg, callerId) {
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
@@ -78,7 +81,7 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	trackActiveCallOrder(order.ID)
 
 	channelName := buildCallChannelName(callerId, anchorId)
-	if err := pushCallRequest(order, channelName); err != nil {
+	if _, err := pushCallRequest(order, channelName); err != nil {
 		return nil, err
 	}
 

@@ -19,10 +19,13 @@ import (
 	"xr-game-server/module/liverecord"
 )
 
-// StopLive 下播
+// StopLive 下播(主播 App 上报)
 func StopLive(ctx context.Context, _ *liveroomdto.StopLiveReq) (*liveroomdto.StopLiveRes, error) {
-
 	userId := httpserver.GetAuthId(ctx)
+	if room := liveroomdao.GetRoomById(userId); room != nil && room.LiveRecordId == 0 {
+		// 仅主播主动下播时补绑;心跳超时/机器人下播不走此路径.
+		tryRecoverLiveRecordBinding(room, false)
+	}
 	liveRecord := stopLive(userId)
 	return &liveroomdto.StopLiveRes{
 		LiveRecord: liverecord.ToAppItem(liveRecord),
@@ -55,6 +58,7 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 	clearLiveCameraState(anchorId)
 	// 移除在线名单 / 观众列表 / 贡献榜缓存
 	clearRoomAudienceCaches(anchorId)
+	resetLiveRecordRecoverAttempts(anchorId)
 
 	room := liveroomdao.GetRoomById(anchorId)
 	if room == nil {

@@ -95,8 +95,10 @@ APIS = [
     ("/liveRoom/reportLiveStartStatus", "yes", "(&controller.LiveRoomAppController{}).ReportLiveStartStatus", "上报开播状态", "studio", "reportBroadcastState"),
     ("/liveRoom/gameRecommendList", "yes", "(&controller.LiveRoomAppController{}).GameRecommendList", "推荐游戏列表", "studio", "browseGamePicks"),
     ("/liveRoom/reportAnchorCode", "yes", "(&controller.LiveRoomAppController{}).ReportAnchorCode", "上报主播码", "studio", "submitHostCode"),
+    ("/activity/getRoomActivity", "yes", "(&controller.ActivityAppController{}).GetRoomActivity", "房间活动配置", "campaign", "fetchRoomActivity"),
     ("/call/liveRoomCall", "yes", "(&controller.CallAppController{}).LiveRoomCall", "直播间发起通话", "session", "inviteFromHall"),
     ("/call/oneToOneRoomCall", "yes", "(&controller.CallAppController{}).OneToOneRoomCall", "1v1房间发起通话", "session", "inviteDirectVideo"),
+    ("/call/repushIncomingCall", "yes", "(&controller.CallAppController{}).RepushIncomingCall", "重推进行中的来电", "session", "repushIncomingInvite"),
     ("/call/batchInviteLiveRoomCall", "yes", "(&controller.CallAppController{}).BatchInviteLiveRoomCall", "批量邀请通话", "session", "inviteManyFromHall"),
     ("/call/anchorRejectCall", "yes", "(&controller.CallAppController{}).AnchorRejectCall", "拒接通话", "session", "declineInvite"),
     ("/call/acceptCall", "yes", "(&controller.CallAppController{}).AcceptCall", "接听通话", "session", "acceptInvite"),
@@ -134,8 +136,8 @@ APIS = [
     ("/shortVideo/appShortVideoStatList", "yes", "(&controller.ShortVideoAppController{}).AppShortVideoStatList", "短视频统计", "clip", "browseStats"),
     ("/shortVideo/appShortVideoPriceTierList", "yes", "(&controller.ShortVideoAppController{}).AppShortVideoPriceTierList", "价格档位", "clip", "browsePriceTiers"),
     ("/shortVideo/appUserShortVideoList", "yes", "(&controller.ShortVideoAppController{}).AppUserShortVideoList", "指定用户短视频", "clip", "browseUserFeed"),
-    ("/game/appGameList", "yes", "(&controller.GameAppController{}).AppGameList", "游戏列表", "play", "browseTitles"),
-    ("/game/appGameStart", "yes", "(&controller.GameAppController{}).AppGameStart", "启动游戏", "play", "openTitle"),
+    ("/game/appGameList", "yes", "(&controller.GameAppController{}).BrowseTitles", "标题列表", "play", "browseTitles"),
+    ("/game/appGameStart", "yes", "(&controller.GameAppController{}).OpenTitle", "打开标题", "play", "openTitle"),
     ("/game/appGameBetList", "yes", "(&controller.GameAppController{}).AppGameBetList", "下注记录", "play", "browseBets"),
     ("/game/appGameConsumeRank", "yes", "(&controller.GameAppController{}).AppGameConsumeRank", "单场游戏消费榜", "play", "browseRoundSpend"),
     ("/gift/appGiftList", "yes", "(&controller.GiftAppController{}).GiftList", "礼物列表", "present", "browseCatalog"),
@@ -145,7 +147,10 @@ APIS = [
     ("/anchorPhoto/delete", "yes", "(&controller.AnchorPhotoAppController{}).Delete", "删除主播相册照片", "gallery", "removePhoto"),
     ("/anchorVideo/list", "yes", "(&controller.AnchorVideoAppController{}).List", "主播视频列表", "gallery", "browseVideos"),
     ("/anchorVideo/upload", "yes", "RAW:controller.HandleUploadAnchorVideo", "上传主播相册视频", "gallery", "uploadVideo"),
+    ("/anchorVideo/update", "yes", "(&controller.AnchorVideoAppController{}).Update", "修改主播相册视频", "gallery", "updateVideo"),
     ("/anchorVideo/delete", "yes", "(&controller.AnchorVideoAppController{}).Delete", "删除主播相册视频", "gallery", "removeVideo"),
+    ("/anchorVideo/unlock", "yes", "(&controller.AnchorVideoAppController{}).Unlock", "付费解锁主播相册视频", "gallery", "unlockVideo"),
+    ("/anchorVideo/priceTierList", "yes", "(&controller.AnchorVideoAppController{}).PriceTierList", "主播相册短视频价格挡位", "gallery", "browseVideoPrices"),
     ("/rechargeOrder/reportChargePanelEnter", "yes", "(&controller.RechargeOrderAppController{}).ReportChargePanelEnter", "上报充值面板曝光", "topup", "notifyChargePanelEnter"),
     ("/rechargeOrder/createRechargeOrder", "yes", "(&controller.RechargeOrderAppController{}).CreateRechargeOrder", "创建充值订单", "topup", "openStoreOrder"),
     ("/rechargeOrder/createChannelRechargeOrder", "yes", "(&controller.RechargeOrderAppController{}).CreateChannelRechargeOrder", "渠道充值建单", "topup", "openChannelOrder"),
@@ -298,7 +303,7 @@ def write_md():
     rows = [
         "# Sofie App 接口对接表",
         "",
-        "新旧并存：旧路径仍可用。Sofie 路径统一 `POST /sofie/{模块}/{动作}`，请求体字段与旧接口相同。",
+        "新旧并存：旧路径仍可用。Sofie 路径统一 `POST /sofie/{模块}/{动作}`，请求体字段默认与旧接口相同。",
         "",
         "| 模块 | 说明 | 鉴权 | 旧 URL | 新 URL |",
         "| --- | --- | --- | --- | --- |",
@@ -313,6 +318,11 @@ def write_md():
     rows.append("- `/sysInfo/cfg` 旧接口为 GET，Sofie 对应接口改为 POST，请求体仍按原字段。")
     rows.append("- 创建房间、上传头像、发布短视频仍为 multipart，路径换成 Sofie 新地址即可。")
     rows.append("- Apifox/OpenAPI 仅 `config/local` 开启，独立地址见 `server.sofieOpenapiPath` / `server.sofieSwaggerPath`，不与旧 App 文档混用。")
+    rows.append("- `POST /sofie/play/browseTitles`：应答列表项用 `titleCode`（旧接口为 `gameCode`），避免字段名含 game。")
+    rows.append("- `POST /sofie/play/openTitle`：请求用 `titleCode`（旧接口为 `gameCode`）；`roomId`/`urlParams`/`link` 不变。")
+    rows.append("- `POST /sofie/gallery/uploadVideo`：仅单个 `file`；必填 `price`（须为已上架价格挡位）、可选 `description`（最多200字）。")
+    rows.append("- `POST /sofie/gallery/browseVideos`：库拉主播视频最多1000再分页；项含 `id`/`price`/`paid`（价格0或已购或本人为 true）。")
+    rows.append("- `POST /sofie/gallery/unlockVideo`：入参 `videoId`；扣钻解锁并写购买记录；缓存 key=`userId_anchorId`；已购/免费/本人 `deducted=0`。")
     rows.append("")
     (ROOT / "README.md").write_text("\n".join(rows), encoding="utf-8")
 

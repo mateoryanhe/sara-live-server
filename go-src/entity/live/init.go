@@ -37,6 +37,8 @@ func Init() {
 	initAnchorReceivedGift()
 	initAnchorPhoto()
 	initAnchorVideo()
+	initAnchorVideoPurchase()
+	initAnchorVideoPriceTier()
 	initHomeBanner()
 	initVipCfg()
 	initAgoraCfg()

@@ -318,6 +318,20 @@ func MirrorGuildShortVideoEarn(roomId uint64, amount float64) {
 	})
 }
 
+// MirrorGuildAnchorVideoEarn 同步主播相册视频收益到工会
+func MirrorGuildAnchorVideoEarn(roomId uint64, amount float64) {
+	at := time.Now()
+	ForRoomGuild(roomId, func(guildId uint64) {
+		if u := GetGuildIncomeUnsettled(guildId); u != nil {
+			u.AddAnchorVideoEarn(amount)
+		}
+		if t := GetGuildIncomeTotal(guildId); t != nil {
+			t.AddAnchorVideoEarn(amount)
+		}
+		MirrorDailyGuildAnchorVideoEarn(guildId, at, amount)
+	})
+}
+
 // MirrorGuildGameEarn 同步游戏收益到工会
 func MirrorGuildGameEarn(roomId uint64, goldAmount, incomeDelta float64) {
 	at := time.Now()

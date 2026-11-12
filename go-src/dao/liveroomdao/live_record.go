@@ -53,3 +53,38 @@ func resolveLiveRecordTarget(row *entity.LiveRecord) *entity.LiveRecord {
 	}
 	return row
 }
+
+// LoadLiveRecordFromDB 按主键直查库(不走缓存、不造空行);不存在返回 nil.
+func LoadLiveRecordFromDB(id uint64) *entity.LiveRecord {
+	if id == 0 {
+		return nil
+	}
+	var row entity.LiveRecord
+	err := g.DB().Model(string(entity.TbLiveRecord)).WherePri(id).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// FindLatestOpenLiveRecordIdByAnchor 该主播最新一条未结束场次(end_time IS NULL);无则返回 0.
+func FindLatestOpenLiveRecordIdByAnchor(anchorId uint64) uint64 {
+	if anchorId == 0 {
+		return 0
+	}
+	type idRow struct {
+		ID uint64 `json:"id"`
+	}
+	var row idRow
+	err := g.DB().Model(string(entity.TbLiveRecord)).
+		Fields("id").
+		Where(string(entity.LiveRecordAnchorId), anchorId).
+		WhereNull(string(entity.LiveRecordEndTime)).
+		OrderDesc(string(entity.LiveRecordStartTime)).
+		Limit(1).
+		Scan(&row)
+	if err != nil || row.ID == 0 {
+		return 0
+	}
+	return row.ID
+}

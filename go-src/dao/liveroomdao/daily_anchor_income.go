@@ -39,6 +39,13 @@ func MirrorDailyAnchorShortVideoEarn(roomId uint64, at time.Time, amount float64
 	})
 }
 
+// MirrorDailyAnchorAnchorVideoEarn 同步主播相册视频收益到主播日表
+func MirrorDailyAnchorAnchorVideoEarn(roomId uint64, at time.Time, amount float64) {
+	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
+		row.AddAnchorVideoEarn(amount)
+	})
+}
+
 // MirrorDailyAnchorGameEarn 同步游戏收益到主播日表
 func MirrorDailyAnchorGameEarn(roomId uint64, at time.Time, goldAmount, incomeDelta float64) {
 	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {

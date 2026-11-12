@@ -8,10 +8,11 @@ import (
 	userentity "xr-game-server/entity/user"
 )
 
-// RegisterAttribution 注册时 Meta CAPI 高级匹配参数(来自请求与 deviceInfo).
+// RegisterAttribution 注册时 Meta CAPI / 归因上报匹配参数(来自请求与 deviceInfo).
 type RegisterAttribution struct {
 	ClientIPAddress string
 	ClientUserAgent string
+	EventSourceURL  string
 	MetaFbp         string
 	MetaFbc         string
 }
@@ -22,6 +23,10 @@ func registerAttributionFromCtx(ctx context.Context, deviceInfo *userentity.Devi
 	if r != nil {
 		out.ClientIPAddress = strings.TrimSpace(r.GetClientIp())
 		out.ClientUserAgent = strings.TrimSpace(r.Header.Get("User-Agent"))
+		out.EventSourceURL = strings.TrimSpace(r.Header.Get("Referer"))
+		if out.EventSourceURL == "" {
+			out.EventSourceURL = strings.TrimSpace(r.Header.Get("Origin"))
+		}
 		fbp, fbc := metaCookiesFromHeader(r.Header.Get("Cookie"))
 		out.MetaFbp = fbp
 		out.MetaFbc = fbc

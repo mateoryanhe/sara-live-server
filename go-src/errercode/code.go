@@ -273,6 +273,8 @@ const (
 	AnchorVideoLimit XRCode = 196
 	// AnchorVideoNonExist 主播相册视频不存在
 	AnchorVideoNonExist XRCode = 197
+	// AnchorVideoPriceTierNonExist 主播相册短视频价格挡位不存在
+	AnchorVideoPriceTierNonExist XRCode = 198
 )
 
 type XError struct {

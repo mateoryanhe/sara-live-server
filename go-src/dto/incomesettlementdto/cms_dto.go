@@ -151,6 +151,7 @@ type CMSIncomeSettlementLogItem struct {
 	TotalVideoCallTicketIncome  float64    `json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome float64    `json:"totalVideoCallBillingIncome"`
 	TotalShortVideoIncome       float64    `json:"totalShortVideoIncome"`
+	TotalAnchorVideoIncome      float64    `json:"totalAnchorVideoIncome"`
 	TotalGameIncome             float64    `json:"totalGameIncome"`
 	TotalLiveDuration           float64    `json:"totalLiveDuration"`
 	EffectiveLiveDays           uint64     `json:"effectiveLiveDays"`

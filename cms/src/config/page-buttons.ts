@@ -109,7 +109,10 @@ const CONFIG_PAGES = new Set([
     'AuditCodeCfgManagement',
     'GooglePlayCfgManagement',
     'FirebaseCfgManagement',
+    'FirebasePushCfgManagement',
+    'GameActivityCfgManagement',
     'MetaPixelCfgManagement',
+    'AttributionReportCfgManagement',
     'HaiPayCfgManagement',
     'CfEmailCfgManagement',
     'DbBackupCfgManagement',
@@ -477,6 +480,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     CoinMerchantRechargeCfgManagement: [...DEFAULT_CRUD_BUTTONS],
     UserWithdrawTierListManagement: [...DEFAULT_CRUD_BUTTONS],
     VoiceChatMicSeatTierManagement: [...DEFAULT_CRUD_BUTTONS, {key: 'sync', label: '同步数据'}],
+    AnchorVideoPriceTierManagement: [
+        ...DEFAULT_CRUD_BUTTONS,
+        {key: 'onShelf', label: '上架'},
+        {key: 'offShelf', label: '下架'},
+    ],
     UserWithdrawPayoutCountryCfgManagement: [
         BTN.view,
         BTN.edit,

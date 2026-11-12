@@ -9,9 +9,11 @@ import (
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchornosalarysharecfg"
 	"xr-game-server/module/anchorrank"
+	"xr-game-server/module/anchorvideopricetier"
 	"xr-game-server/module/apkpromotionchannel"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/appversioncfg"
+	"xr-game-server/module/attrreport"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
 	"xr-game-server/module/botanchor"
@@ -25,7 +27,9 @@ import (
 	"xr-game-server/module/dbbackup"
 	"xr-game-server/module/domainsite"
 	"xr-game-server/module/fiatcurrency"
+	"xr-game-server/module/firebasepush"
 	"xr-game-server/module/game"
+	"xr-game-server/module/gameactivity"
 	"xr-game-server/module/gameconsumrank"
 	"xr-game-server/module/gift"
 	"xr-game-server/module/h5livedeploy"
@@ -73,7 +77,10 @@ func Init() {
 	randomnick.Init()
 	usermaxid.Init()
 	auth.InitAuth()
+	firebasepush.Init()
+	gameactivity.Init()
 	metapixel.Init()
+	attrreport.Init()
 	preload.Init()
 	currencylog.Init()
 	wallet.Init() // 须早于 vip/stat:美金入账时先发币加赠,再累计
@@ -86,6 +93,7 @@ func Init() {
 	banner.Init()
 	privateroombilling.Init()
 	voicechatmicseattier.Init()
+	anchorvideopricetier.Init()
 	vip.Init()
 	apppkg.Init()
 	fiatcurrency.Init()

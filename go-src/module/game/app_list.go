@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/entity/game"
+	userentity "xr-game-server/entity/user"
 )
 
 const (
@@ -24,8 +25,11 @@ func GetAppGameList(ctx context.Context, req *gameplatformdto.AppGameListReq) (*
 
 	if cfgdao.GameListRequireRechargeFromMemory() {
 		userId := httpserver.GetAuthId(ctx)
-		if !userinfodao.UserAccountFirstRechargeDone(userId) {
-			return emptyAppGameListRes(pageIndex, pageSize), nil
+		// 主播身份(普通/高级/机器人主播)不受「需充值可见」限制，永远可见游戏列表
+		if info := userinfodao.GetUserInfoByUserId(userId); info == nil || !userentity.UserTypeIsAnchor(info.UserType) {
+			if !userinfodao.UserAccountFirstRechargeDone(userId) {
+				return emptyAppGameListRes(pageIndex, pageSize), nil
+			}
 		}
 	}
 

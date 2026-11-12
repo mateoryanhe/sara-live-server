@@ -79,7 +79,7 @@ func GamePlatformCfgReady() bool {
 		strings.TrimSpace(row.SecretKey) != ""
 }
 
-// GameListRequireRechargeFromMemory 开启后 App 游戏列表仅对已充值用户可见.
+// GameListRequireRechargeFromMemory 开启后 App 游戏列表仅对已充值普通用户可见(主播不受限).
 func GameListRequireRechargeFromMemory() bool {
 	row := GetGamePlatformCfgFromMemory()
 	if row == nil {

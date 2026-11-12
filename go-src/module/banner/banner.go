@@ -31,14 +31,17 @@ func GetAppBannerList(ctx context.Context, req *bannerdto.AppBannerListReq) (*ba
 	return &bannerdto.AppBannerListRes{List: list}, nil
 }
 
-// applyShareQueryLinks 所有 Banner 按当前用户拼 token; 必须拷贝条目,避免改脏内存缓存.
+// applyShareQueryLinks 所有 Banner 按当前用户拼登录同款 token(userId.token); 必须拷贝条目,避免改脏内存缓存.
 func applyShareQueryLinks(ctx context.Context, list []*bannerdto.AppBannerItem) []*bannerdto.AppBannerItem {
 	if len(list) == 0 {
 		return list
 	}
-	appToken := ""
+	clientToken := ""
 	if userId := httpserver.GetAuthId(ctx); userId > 0 {
-		appToken = xrtoken.GetAppToken(userId)
+		if raw := strings.TrimSpace(xrtoken.GetAppToken(userId)); raw != "" {
+			// 与 deviceLogin/emailLogin 等返回一致: "{userId}.{token}"
+			clientToken = strconv.FormatUint(userId, 10) + "." + raw
+		}
 	}
 	out := make([]*bannerdto.AppBannerItem, 0, len(list))
 	for _, item := range list {
@@ -46,7 +49,7 @@ func applyShareQueryLinks(ctx context.Context, list []*bannerdto.AppBannerItem) 
 			continue
 		}
 		cloned := *item
-		cloned.Link = appendShareParamsToLink(item.Link, appToken)
+		cloned.Link = appendShareParamsToLink(item.Link, clientToken)
 		out = append(out, &cloned)
 	}
 	return out

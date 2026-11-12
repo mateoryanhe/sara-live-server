@@ -52,7 +52,7 @@ func formatSettledText(settled bool, yesText, noText string) string {
 // incomeAmountOnlyCSVCells 仅收益金额列(不含时长),与 CMS 每日流水列表导出表头一致
 func incomeAmountOnlyCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 	if amounts == nil {
-		return []string{"", "", "", "", "", "", "", "", ""}
+		return []string{"", "", "", "", "", "", "", "", "", ""}
 	}
 	return []string{
 		formatCSVFloat(amounts.TotalIncome),
@@ -64,6 +64,7 @@ func incomeAmountOnlyCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []strin
 		formatCSVFloat(amounts.TotalVideoCallTicketIncome),
 		formatCSVFloat(amounts.TotalVideoCallBillingIncome),
 		formatCSVFloat(amounts.TotalShortVideoIncome),
+		formatCSVFloat(amounts.TotalAnchorVideoIncome),
 	}
 }
 
@@ -86,6 +87,7 @@ func incomeAmountItemCSVCells(item accountdto.LiveRoomIncomeAmountsItem) []strin
 		formatCSVFloat(item.TotalVideoCallTicketIncome),
 		formatCSVFloat(item.TotalVideoCallBillingIncome),
 		formatCSVFloat(item.TotalShortVideoIncome),
+		formatCSVFloat(item.TotalAnchorVideoIncome),
 		formatLiveDurationMinutes(item.TotalLiveDuration),
 	}
 }

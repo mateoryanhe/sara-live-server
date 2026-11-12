@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
 	userentity "xr-game-server/entity/user"
@@ -36,12 +34,6 @@ func HandleVendorVerify(ctx context.Context, req *gameplatformdto.VendorVerifyRe
 		vendorDetailLog().Warningf(ctx, "vendor verify failed user_id=%s code=%d msg=%s", userIDStr, resp.Code, resp.Message)
 		return resp, nil
 	}
-	if accountdao.GetAccountById(userID) == nil {
-		resp := vendorVerifyFail(vendorCallbackCodePlayerNotFound, "player not found")
-		vendorDetailLog().Warningf(ctx, "vendor verify failed user_id=%s code=%d msg=%s", userIDStr, resp.Code, resp.Message)
-		return resp, nil
-	}
-
 	userInfo := loadUserInfoForVendorVerify(userID)
 	if userInfo == nil {
 		resp := vendorVerifyFail(vendorCallbackCodePlayerNotFound, "player not found")
@@ -63,19 +55,7 @@ func HandleVendorVerify(ctx context.Context, req *gameplatformdto.VendorVerifyRe
 }
 
 func loadUserInfoForVendorVerify(userID uint64) *userentity.UserInfo {
-	if userInfo := userinfodao.GetUserInfoFromMemory(userID); userInfo != nil {
-		return userInfo
-	}
-	var row userentity.UserInfo
-	if err := g.DB().Model(string(userentity.TbUserInfo)).Unscoped().
-		Where("id = ?", userID).
-		Scan(&row); err != nil {
-		return nil
-	}
-	if row.ID == 0 {
-		return nil
-	}
-	return &row
+	return userinfodao.FindUserInfoByUserId(userID)
 }
 
 func fillVendorVerifyReq(req *gameplatformdto.VendorVerifyReq, params map[string]string) {

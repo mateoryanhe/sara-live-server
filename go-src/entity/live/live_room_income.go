@@ -19,6 +19,7 @@ const (
 	LiveRoomIncomeTotalVideoCallTicketIncome  db.TbCol = "total_video_call_ticket_income"
 	LiveRoomIncomeTotalVideoCallBillingIncome db.TbCol = "total_video_call_billing_income"
 	LiveRoomIncomeTotalShortVideoIncome       db.TbCol = "total_short_video_income"
+	LiveRoomIncomeTotalAnchorVideoIncome      db.TbCol = "total_anchor_video_income"
 	LiveRoomIncomeTotalGameIncome             db.TbCol = "total_game_income"
 	LiveRoomIncomeTotalLiveDuration           db.TbCol = "total_live_duration"
 	LiveRoomIncomeEffectiveLiveDays           db.TbCol = "effective_live_days"
@@ -33,13 +34,14 @@ const (
 // LiveRoomIncomeAmounts 直播间/工会收益字段(房间与工会收益表共用结构)
 type LiveRoomIncomeAmounts struct {
 	TotalIncome                 float64 `gorm:"default:0;comment:直播收益" json:"totalIncome"`
-	TotalSocialIncome           float64 `gorm:"type:decimal(16,4);default:0;comment:累计社交流水(礼物/付费弹幕/视频通话/短视频)" json:"totalSocialIncome"`
+	TotalSocialIncome           float64 `gorm:"type:decimal(16,4);default:0;comment:累计社交流水(礼物/付费弹幕/视频通话/短视频/相册视频)" json:"totalSocialIncome"`
 	TotalGiftIncome             float64 `gorm:"default:0;comment:累计礼物收益" json:"totalGiftIncome"`
 	TotalPaidDanmakuIncome      float64 `gorm:"default:0;comment:累计付费弹幕收益" json:"totalPaidDanmakuIncome"`
 	TotalVideoCallIncome        float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话收益" json:"totalVideoCallIncome"`
 	TotalVideoCallTicketIncome  float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
 	TotalShortVideoIncome       float64 `gorm:"type:decimal(10,4);default:0;comment:累计短视频付费观看收益" json:"totalShortVideoIncome"`
+	TotalAnchorVideoIncome      float64 `gorm:"type:decimal(10,4);default:0;comment:累计主播相册视频收益" json:"totalAnchorVideoIncome"`
 	TotalGameIncome             float64 `gorm:"type:decimal(10,4);default:0;comment:累计游戏收益(金币下注额)" json:"totalGameIncome"`
 	TotalLiveDuration           float64 `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
 }
@@ -57,6 +59,7 @@ func (a *LiveRoomIncomeAmounts) clearAmounts() {
 	a.TotalVideoCallTicketIncome = 0
 	a.TotalVideoCallBillingIncome = 0
 	a.TotalShortVideoIncome = 0
+	a.TotalAnchorVideoIncome = 0
 	a.TotalGameIncome = 0
 	a.TotalLiveDuration = 0
 }
@@ -74,6 +77,7 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 		a.TotalVideoCallTicketIncome == 0 &&
 		a.TotalVideoCallBillingIncome == 0 &&
 		a.TotalShortVideoIncome == 0 &&
+		a.TotalAnchorVideoIncome == 0 &&
 		a.TotalGameIncome == 0 &&
 		a.TotalLiveDuration == 0
 }
@@ -142,6 +146,9 @@ func addIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, sr
 	if src.TotalShortVideoIncome > 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, &dst.TotalShortVideoIncome, src.TotalShortVideoIncome)
 	}
+	if src.TotalAnchorVideoIncome > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalAnchorVideoIncome, id, &dst.TotalAnchorVideoIncome, src.TotalAnchorVideoIncome)
+	}
 	if src.TotalGameIncome > 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, &dst.TotalGameIncome, src.TotalGameIncome)
 	}
@@ -164,6 +171,7 @@ func clearIncomeAmountsLocked(tb db.TbName, id any, a *LiveRoomIncomeAmounts, up
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalAnchorVideoIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, 0)
 	touchIncomeUpdatedAt(tb, id, updatedAt)
@@ -182,6 +190,7 @@ func consumeIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts
 	dst.TotalVideoCallTicketIncome = math.SubFloat64(dst.TotalVideoCallTicketIncome, snap.TotalVideoCallTicketIncome)
 	dst.TotalVideoCallBillingIncome = math.SubFloat64(dst.TotalVideoCallBillingIncome, snap.TotalVideoCallBillingIncome)
 	dst.TotalShortVideoIncome = math.SubFloat64(dst.TotalShortVideoIncome, snap.TotalShortVideoIncome)
+	dst.TotalAnchorVideoIncome = math.SubFloat64(dst.TotalAnchorVideoIncome, snap.TotalAnchorVideoIncome)
 	dst.TotalGameIncome = math.SubFloat64(dst.TotalGameIncome, snap.TotalGameIncome)
 	dst.TotalLiveDuration = math.SubFloat64(dst.TotalLiveDuration, snap.TotalLiveDuration)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, dst.TotalIncome)
@@ -192,6 +201,7 @@ func consumeIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, dst.TotalVideoCallTicketIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, dst.TotalVideoCallBillingIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, dst.TotalShortVideoIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalAnchorVideoIncome, id, dst.TotalAnchorVideoIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, dst.TotalGameIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, dst.TotalLiveDuration)
 	touchIncomeUpdatedAt(tb, id, updatedAt)
@@ -306,6 +316,7 @@ func regLiveRoomIncomeCols(tb db.TbName) {
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallTicketIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallBillingIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalShortVideoIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalAnchorVideoIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalGameIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalLiveDuration)
 }

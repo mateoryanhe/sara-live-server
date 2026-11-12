@@ -65,6 +65,7 @@ import {shortVideoListMessages} from './short-video-list'
 import {shortVideoCfgMessages} from './short-video-cfg'
 import {shortVideoCategoryListMessages} from './short-video-category-list'
 import {shortVideoPriceTierListMessages} from './short-video-price-tier-list'
+import {anchorVideoPriceTierListMessages} from './anchor-video-price-tier-list'
 import {shortVideoWatchListMessages} from './short-video-watch-list'
 import {shortVideoAuthorSettlementLogListMessages} from './short-video-author-settlement-log-list'
 import {accountCfgMessages} from './account-cfg'
@@ -102,7 +103,10 @@ import {sofiePrivacyPolicyMessages} from './sofie-privacy-policy'
 import {auditCodeMessages} from './audit-code'
 import {googlePlayMessages} from './google-play'
 import {firebaseMessages} from './firebase'
+import {firebasePushMessages} from './firebase-push'
+import {gameActivityMessages} from './game-activity'
 import {metaPixelMessages} from './meta-pixel'
+import {attrReportCfgMessages} from './attr-report-cfg'
 import {haipayMessages} from './haipay'
 import {cfEmailMessages} from './cf-email'
 import {dbBackupMessages} from './db-backup'
@@ -202,6 +206,7 @@ const pageMessageBuilders = [
   ['shortVideoCfg', shortVideoCfgMessages],
   ['shortVideoCategoryList', shortVideoCategoryListMessages],
   ['shortVideoPriceTierList', shortVideoPriceTierListMessages],
+  ['anchorVideoPriceTierList', anchorVideoPriceTierListMessages],
   ['shortVideoWatchList', shortVideoWatchListMessages],
   ['shortVideoAuthorSettlementLogList', shortVideoAuthorSettlementLogListMessages],
   ['accountCfg', accountCfgMessages],
@@ -238,8 +243,11 @@ const pageMessageBuilders = [
   ['auditCode', auditCodeMessages],
   ['googlePlay', googlePlayMessages],
   ['firebase', firebaseMessages],
+  ['firebasePush', firebasePushMessages],
+  ['gameActivity', gameActivityMessages],
   ['haipay', haipayMessages],
   ['metaPixel', metaPixelMessages],
+  ['attrReportCfg', attrReportCfgMessages],
   ['cfEmail', cfEmailMessages],
   ['dbBackup', dbBackupMessages],
   ['uploadResource', uploadResourceMessages],

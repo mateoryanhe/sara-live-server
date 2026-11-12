@@ -60,5 +60,11 @@ export const liveRoutes: RouteRecordRaw = {
             component: () => import('@/views/live/voice-chat-mic-seat-tier/tier-list.vue'),
             meta: {title: '麦位挡位'},
         },
+        {
+            path: 'anchor-video-price-tier/tier-list',
+            name: 'AnchorVideoPriceTierManagement',
+            component: () => import('@/views/live/anchor-video-price-tier/tier-list.vue'),
+            meta: {title: '主播相册短视频价格'},
+        },
     ],
 }

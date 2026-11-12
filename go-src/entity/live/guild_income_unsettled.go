@@ -42,6 +42,9 @@ func (r *GuildIncomeUnsettled) AddPaidDanmakuEarn(v float64) {
 func (r *GuildIncomeUnsettled) AddShortVideoEarn(v float64) {
 	addIncomeEarn(TbGuildIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
 }
+func (r *GuildIncomeUnsettled) AddAnchorVideoEarn(v float64) {
+	addIncomeEarn(TbGuildIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalAnchorVideoIncome, &r.TotalAnchorVideoIncome)
+}
 
 func (r *GuildIncomeUnsettled) AddGameEarn(goldAmount, incomeDelta float64) {
 	addGameEarn(TbGuildIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, goldAmount, incomeDelta)

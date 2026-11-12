@@ -23,6 +23,7 @@ export function buildAnchorDailyEffectiveLiveCsvColumns(
 	{header: t(`${ns}.videoTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.videoBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.shortVideoIncome`), value: row => row.totalShortVideoIncome},
+    {header: t(`${ns}.anchorVideoIncome`), value: row => row.totalAnchorVideoIncome},
     {
       header: t(`${ns}.dailySettled`),
       value: row => (row.settled ? t(`${ns}.dailySettledYes`) : t(`${ns}.dailySettledNo`)),
@@ -50,6 +51,7 @@ export function buildGuildDailyEffectiveLiveCsvColumns(
 	{header: t(`${ns}.videoTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.videoBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.shortVideoIncome`), value: row => row.totalShortVideoIncome},
+    {header: t(`${ns}.anchorVideoIncome`), value: row => row.totalAnchorVideoIncome},
     {
       header: t(`${ns}.dailySettled`),
       value: row => (row.settled ? t(`${ns}.dailySettledYes`) : t(`${ns}.dailySettledNo`)),
@@ -94,6 +96,7 @@ export function buildLiveDailyEffectiveLiveListCsvColumns(
 	{header: t(`${ns}.dailyVideoTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.dailyVideoBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.dailyShortVideoIncome`), value: row => row.totalShortVideoIncome},
+    {header: t(`${ns}.dailyAnchorVideoIncome`), value: row => row.totalAnchorVideoIncome},
     {
       header: t('pages.anchorList.dailySettled'),
       value: row => (row.settled ? t('pages.anchorList.dailySettledYes') : t('pages.anchorList.dailySettledNo')),

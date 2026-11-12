@@ -32,6 +32,7 @@ function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLo
 	{header: t(`${ns}.totalVideoCallTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.totalVideoCallBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.totalShortVideoIncome`), value: row => row.totalShortVideoIncome},
+    {header: t(`${ns}.totalAnchorVideoIncome`), value: row => row.totalAnchorVideoIncome},
     {header: t(`${ns}.totalLiveDuration`), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
     {header: t(`${ns}.effectiveLiveDays`), value: row => row.effectiveLiveDays ?? ''},
   ]

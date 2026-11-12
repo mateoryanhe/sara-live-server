@@ -61,7 +61,7 @@ func OneToOneRoomCall(ctx context.Context, req *calldto.OneToOneRoomCallReq) (*c
 	trackActiveCallOrder(order.ID)
 
 	channelName := buildCallChannelName(callerId, targetId)
-	if err := pushCallRequest(order, channelName); err != nil {
+	if _, err := pushCallRequest(order, channelName); err != nil {
 		return nil, err
 	}
 

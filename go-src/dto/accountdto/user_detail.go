@@ -73,7 +73,7 @@ type UserExtDetailItem struct {
 	ApkPromotionChannel       string     `json:"apkPromotionChannel" dc:"APK推广渠道编码(空为无)"`
 	ApkPromotionChannelName   string     `json:"apkPromotionChannelName" dc:"APK推广渠道名称(CMS配置)"`
 	PromotionChannelCode      int        `json:"promotionChannelCode" dc:"H5推广URL整数渠道码(0为无)"`
-	RegisterPromotionPlatform string     `json:"registerPromotionPlatform" dc:"注册客户端 h5/app"`
+	RegisterPromotionPlatform string     `json:"registerPromotionPlatform" dc:"注册客户端 h5/app(优先X-Platform:web→h5,android/ios→app)"`
 	RegisterClientPlatform    string     `json:"registerClientPlatform" dc:"注册时X-Platform(android/ios/web)"`
 	UpdatedAt                 *time.Time `json:"updatedAt"`
 }
@@ -88,6 +88,15 @@ type UserPromotionAttributionDetailItem struct {
 	ApkChannelCode             string `json:"apkChannelCode" dc:"App deviceInfo.apkCh"`
 	ApkChannelName             string `json:"apkChannelName" dc:"APK推广渠道列表-渠道名称"`
 	ApkChannelApkDownloadUrl   string `json:"apkChannelApkDownloadUrl" dc:"APK推广渠道列表-专用APK下载地址"`
+}
+
+// UserRegisterUrlAttrDetailItem CMS 用户详情：注册 URL 归因(user_register_url_attrs, accept 上报用)
+type UserRegisterUrlAttrDetailItem struct {
+	Type      string     `json:"type" dc:"pwa/h5/apk"`
+	Ch        string     `json:"ch" dc:"渠道编号"`
+	TjUserId  string     `json:"tjuserid" dc:"推广用户ID"`
+	CreatedAt *time.Time `json:"createdAt"`
+	UpdatedAt *time.Time `json:"updatedAt"`
 }
 
 // UserCumulativeStatDetailItem 累计统计(user_cumulative_stats)
@@ -148,4 +157,5 @@ type GetUserDetailRes struct {
 	ChannelPayProfile *UserChannelPayProfileDetailItem `json:"channelPayProfile"`
 	WithdrawPayout        *UserWithdrawPayoutDetailItem        `json:"withdrawPayout"`
 	PromotionAttribution  *UserPromotionAttributionDetailItem  `json:"promotionAttribution"`
+	RegisterUrlAttr       *UserRegisterUrlAttrDetailItem       `json:"registerUrlAttr"`
 }

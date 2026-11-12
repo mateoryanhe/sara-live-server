@@ -156,6 +156,14 @@ func (r *DailyAnchorEffectiveLive) AddShortVideoEarn(v float64) {
 	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
 }
 
+// AddAnchorVideoEarn 主播相册视频收益(总收益+相册视频细分,内部加锁)
+func (r *DailyAnchorEffectiveLive) AddAnchorVideoEarn(v float64) {
+	if r == nil || r.ID == "" {
+		return
+	}
+	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalAnchorVideoIncome, &r.TotalAnchorVideoIncome)
+}
+
 // AddGameEarn 游戏收益(总收益按钻石折算 + 游戏细分金币下注额,内部加锁)
 func (r *DailyAnchorEffectiveLive) AddGameEarn(goldAmount, incomeDelta float64) {
 	if r == nil || r.ID == "" {

@@ -1,6 +1,6 @@
 # Sofie App 接口对接表
 
-新旧并存：旧路径仍可用。Sofie 路径统一 `POST /sofie/{模块}/{动作}`，请求体字段与旧接口相同。
+新旧并存：旧路径仍可用。Sofie 路径统一 `POST /sofie/{模块}/{动作}`，请求体字段默认与旧接口相同。
 
 | 模块 | 说明 | 鉴权 | 旧 URL | 新 URL |
 | --- | --- | --- | --- | --- |
@@ -92,8 +92,10 @@
 | `studio` | 上报开播状态 | 需要登录 | `POST /liveRoom/reportLiveStartStatus` | `POST /sofie/studio/reportBroadcastState` |
 | `studio` | 推荐游戏列表 | 需要登录 | `POST /liveRoom/gameRecommendList` | `POST /sofie/studio/browseGamePicks` |
 | `studio` | 上报主播码 | 需要登录 | `POST /liveRoom/reportAnchorCode` | `POST /sofie/studio/submitHostCode` |
+| `campaign` | 房间活动配置 | 需要登录 | `POST /activity/getRoomActivity` | `POST /sofie/campaign/fetchRoomActivity` |
 | `session` | 直播间发起通话 | 需要登录 | `POST /call/liveRoomCall` | `POST /sofie/session/inviteFromHall` |
 | `session` | 1v1房间发起通话 | 需要登录 | `POST /call/oneToOneRoomCall` | `POST /sofie/session/inviteDirectVideo` |
+| `session` | 重推进行中的来电 | 需要登录 | `POST /call/repushIncomingCall` | `POST /sofie/session/repushIncomingInvite` |
 | `session` | 批量邀请通话 | 需要登录 | `POST /call/batchInviteLiveRoomCall` | `POST /sofie/session/inviteManyFromHall` |
 | `session` | 拒接通话 | 需要登录 | `POST /call/anchorRejectCall` | `POST /sofie/session/declineInvite` |
 | `session` | 接听通话 | 需要登录 | `POST /call/acceptCall` | `POST /sofie/session/acceptInvite` |
@@ -131,8 +133,8 @@
 | `clip` | 短视频统计 | 需要登录 | `POST /shortVideo/appShortVideoStatList` | `POST /sofie/clip/browseStats` |
 | `clip` | 价格档位 | 需要登录 | `POST /shortVideo/appShortVideoPriceTierList` | `POST /sofie/clip/browsePriceTiers` |
 | `clip` | 指定用户短视频 | 需要登录 | `POST /shortVideo/appUserShortVideoList` | `POST /sofie/clip/browseUserFeed` |
-| `play` | 游戏列表 | 需要登录 | `POST /game/appGameList` | `POST /sofie/play/browseTitles` |
-| `play` | 启动游戏 | 需要登录 | `POST /game/appGameStart` | `POST /sofie/play/openTitle` |
+| `play` | 标题列表 | 需要登录 | `POST /game/appGameList` | `POST /sofie/play/browseTitles` |
+| `play` | 打开标题 | 需要登录 | `POST /game/appGameStart` | `POST /sofie/play/openTitle` |
 | `play` | 下注记录 | 需要登录 | `POST /game/appGameBetList` | `POST /sofie/play/browseBets` |
 | `play` | 单场游戏消费榜 | 需要登录 | `POST /game/appGameConsumeRank` | `POST /sofie/play/browseRoundSpend` |
 | `present` | 礼物列表 | 需要登录 | `POST /gift/appGiftList` | `POST /sofie/present/browseCatalog` |
@@ -142,7 +144,10 @@
 | `gallery` | 删除主播相册照片 | 需要登录 | `POST /anchorPhoto/delete` | `POST /sofie/gallery/removePhoto` |
 | `gallery` | 主播视频列表 | 需要登录 | `POST /anchorVideo/list` | `POST /sofie/gallery/browseVideos` |
 | `gallery` | 上传主播相册视频 | 需要登录 | `POST /anchorVideo/upload` | `POST /sofie/gallery/uploadVideo` |
+| `gallery` | 修改主播相册视频 | 需要登录 | `POST /anchorVideo/update` | `POST /sofie/gallery/updateVideo` |
 | `gallery` | 删除主播相册视频 | 需要登录 | `POST /anchorVideo/delete` | `POST /sofie/gallery/removeVideo` |
+| `gallery` | 付费解锁主播相册视频 | 需要登录 | `POST /anchorVideo/unlock` | `POST /sofie/gallery/unlockVideo` |
+| `gallery` | 主播相册短视频价格挡位 | 需要登录 | `POST /anchorVideo/priceTierList` | `POST /sofie/gallery/browseVideoPrices` |
 | `topup` | 上报充值面板曝光 | 需要登录 | `POST /rechargeOrder/reportChargePanelEnter` | `POST /sofie/topup/notifyChargePanelEnter` |
 | `topup` | 创建充值订单 | 需要登录 | `POST /rechargeOrder/createRechargeOrder` | `POST /sofie/topup/openStoreOrder` |
 | `topup` | 渠道充值建单 | 需要登录 | `POST /rechargeOrder/createChannelRechargeOrder` | `POST /sofie/topup/openChannelOrder` |
@@ -200,3 +205,8 @@
 - `/sysInfo/cfg` 旧接口为 GET，Sofie 对应接口改为 POST，请求体仍按原字段。
 - 创建房间、上传头像、发布短视频仍为 multipart，路径换成 Sofie 新地址即可。
 - Apifox/OpenAPI 仅 `config/local` 开启，独立地址见 `server.sofieOpenapiPath` / `server.sofieSwaggerPath`，不与旧 App 文档混用。
+- `POST /sofie/play/browseTitles`：应答列表项用 `titleCode`（旧接口为 `gameCode`），避免字段名含 game。
+- `POST /sofie/play/openTitle`：请求用 `titleCode`（旧接口为 `gameCode`）；`roomId`/`urlParams`/`link` 不变。
+- `POST /sofie/gallery/uploadVideo`：仅单个 `file`；必填 `price`（须为已上架价格挡位）、可选 `description`（最多200字）。
+- `POST /sofie/gallery/browseVideos`：库拉主播视频最多1000再分页；项含 `id`/`price`/`paid`（价格0或已购或本人为 true）。
+- `POST /sofie/gallery/unlockVideo`：入参 `videoId`；扣钻解锁并写购买记录；缓存 key=`userId_anchorId`；已购/免费/本人 `deducted=0`。

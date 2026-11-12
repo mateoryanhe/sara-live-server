@@ -82,21 +82,114 @@ func placeholderVoiceChatMicSeat(roomId uint64, seatIndex int) *liveentity.Voice
 	}
 }
 
+func peekVoiceChatMicSeatCached(roomId uint64, seatIndex int) *liveentity.VoiceChatMicSeat {
+	if roomId == 0 || seatIndex < 0 || seatIndex >= liveentity.MaxVoiceChatMicSeatCount || voiceChatMicSeatCacheMgr == nil {
+		return nil
+	}
+	id := liveentity.BuildVoiceChatMicSeatId(roomId, seatIndex)
+	row, ok := voiceChatMicSeatCacheMgr.GetRowCached(gctx.New(), id)
+	if !ok || row == nil || row.ID == "" {
+		return nil
+	}
+	return row
+}
+
+// EnsureVoiceChatMicSeatsLoaded 先扫内存麦位缓存,缺失的座位一次批量查库并回填(含占位,避免反复 miss).
+func EnsureVoiceChatMicSeatsLoaded(roomId uint64, atLeastIndexes ...int) {
+	if roomId == 0 {
+		return
+	}
+	seatCount := VoiceChatMicSeatCountForRoom(roomId)
+	need := seatCount
+	for _, idx := range atLeastIndexes {
+		if idx+1 > need {
+			need = idx + 1
+		}
+	}
+	if need > liveentity.MaxVoiceChatMicSeatCount {
+		need = liveentity.MaxVoiceChatMicSeatCount
+	}
+	if need <= 0 {
+		return
+	}
+
+	missing := make([]int, 0, need)
+	for i := 0; i < need; i++ {
+		if peekVoiceChatMicSeatCached(roomId, i) == nil {
+			missing = append(missing, i)
+		}
+	}
+	if len(missing) == 0 {
+		return
+	}
+	if voiceChatMicSeatCacheMgr == nil {
+		for _, idx := range missing {
+			_ = loadVoiceChatMicSeatFromDB(liveentity.BuildVoiceChatMicSeatId(roomId, idx))
+		}
+		return
+	}
+
+	byIndex := make(map[int]*liveentity.VoiceChatMicSeat, len(missing))
+	for _, seat := range loadVoiceChatMicSeatsByRoomAndIndexes(roomId, missing) {
+		if seat == nil {
+			continue
+		}
+		byIndex[int(seat.SeatIndex)] = seat
+	}
+	for _, idx := range missing {
+		if seat := byIndex[idx]; seat != nil {
+			publishVoiceChatMicSeatSnapshot(seat)
+			continue
+		}
+		// 未落库时仅回填内存占位,首次 Set* 时经 syndb 入库
+		publishVoiceChatMicSeatSnapshot(placeholderVoiceChatMicSeat(roomId, idx))
+	}
+}
+
 func GetVoiceChatMicSeat(roomId uint64, seatIndex int) *liveentity.VoiceChatMicSeat {
 	if roomId == 0 || seatIndex < 0 || seatIndex >= liveentity.MaxVoiceChatMicSeatCount {
 		return nil
 	}
-	id := liveentity.BuildVoiceChatMicSeatId(roomId, seatIndex)
-	if voiceChatMicSeatCacheMgr == nil {
-		return loadVoiceChatMicSeatFromDB(id)
+	if seat := peekVoiceChatMicSeatCached(roomId, seatIndex); seat != nil {
+		return seat
 	}
-	return voiceChatMicSeatCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*liveentity.VoiceChatMicSeat, error) {
-		if loaded := loadVoiceChatMicSeatFromDB(id); loaded != nil {
-			return loaded, nil
+	EnsureVoiceChatMicSeatsLoaded(roomId, seatIndex)
+	if seat := peekVoiceChatMicSeatCached(roomId, seatIndex); seat != nil {
+		return seat
+	}
+	if voiceChatMicSeatCacheMgr == nil {
+		if loaded := loadVoiceChatMicSeatFromDB(liveentity.BuildVoiceChatMicSeatId(roomId, seatIndex)); loaded != nil {
+			return loaded
 		}
-		// 未落库时仅返回内存占位,首次 Set* 时经 syndb 入库
-		return placeholderVoiceChatMicSeat(roomId, seatIndex), nil
-	})
+		return placeholderVoiceChatMicSeat(roomId, seatIndex)
+	}
+	seat := placeholderVoiceChatMicSeat(roomId, seatIndex)
+	publishVoiceChatMicSeatSnapshot(seat)
+	return seat
+}
+
+func loadVoiceChatMicSeatsByRoom(roomId uint64) []*liveentity.VoiceChatMicSeat {
+	rows := make([]*liveentity.VoiceChatMicSeat, 0)
+	if roomId == 0 {
+		return rows
+	}
+	_ = g.Model(string(liveentity.TbVoiceChatMicSeat)).
+		Where("room_id = ?", roomId).
+		Order("seat_index asc").
+		Scan(&rows)
+	return rows
+}
+
+func loadVoiceChatMicSeatsByRoomAndIndexes(roomId uint64, indexes []int) []*liveentity.VoiceChatMicSeat {
+	rows := make([]*liveentity.VoiceChatMicSeat, 0)
+	if roomId == 0 || len(indexes) == 0 {
+		return rows
+	}
+	_ = g.Model(string(liveentity.TbVoiceChatMicSeat)).
+		Where("room_id = ? AND seat_index IN (?)", roomId, indexes).
+		Order("seat_index asc").
+		Scan(&rows)
+	return rows
 }
 
 func loadVoiceChatMicSeatsBySession(roomId, liveRecordId uint64) []*liveentity.VoiceChatMicSeat {
@@ -159,18 +252,23 @@ func RestoreVoiceChatMicSessionFromDB(roomId, liveRecordId, anchorId uint64) {
 
 func bootstrapVoiceChatMicSessionRows(roomId, liveRecordId, anchorId uint64) {
 	seatCount := VoiceChatMicSeatCountForRoom(roomId)
+	byIndex := make(map[int]*liveentity.VoiceChatMicSeat)
+	for _, seat := range loadVoiceChatMicSeatsByRoom(roomId) {
+		if seat == nil {
+			continue
+		}
+		byIndex[int(seat.SeatIndex)] = seat
+	}
 	for i := 0; i < seatCount; i++ {
 		userId := uint64(0)
 		if i == liveentity.VoiceChatHostSeatIndex {
 			userId = anchorId
 		}
-		id := liveentity.BuildVoiceChatMicSeatId(roomId, i)
-		row := loadVoiceChatMicSeatFromDB(id)
-		if row != nil && row.LiveRecordId == liveRecordId {
+		if row := byIndex[i]; row != nil && row.LiveRecordId == liveRecordId {
 			publishVoiceChatMicSeatSnapshot(row)
 			continue
 		}
-		row = liveentity.NewVoiceChatMicSeat(roomId, i, liveRecordId, userId)
+		row := liveentity.NewVoiceChatMicSeat(roomId, i, liveRecordId, userId)
 		publishVoiceChatMicSeatSnapshot(row)
 	}
 }
@@ -353,13 +451,19 @@ func InitVoiceChatMicSession(roomId, liveRecordId, anchorId uint64) {
 		return
 	}
 	seatCount := VoiceChatMicSeatCountForRoom(roomId)
+	byIndex := make(map[int]*liveentity.VoiceChatMicSeat)
+	for _, seat := range loadVoiceChatMicSeatsByRoom(roomId) {
+		if seat == nil {
+			continue
+		}
+		byIndex[int(seat.SeatIndex)] = seat
+	}
 	for i := 0; i < seatCount; i++ {
 		userId := uint64(0)
 		if i == liveentity.VoiceChatHostSeatIndex {
 			userId = anchorId
 		}
-		id := liveentity.BuildVoiceChatMicSeatId(roomId, i)
-		row := loadVoiceChatMicSeatFromDB(id)
+		row := byIndex[i]
 		if row == nil {
 			row = liveentity.NewVoiceChatMicSeat(roomId, i, liveRecordId, userId)
 		} else {

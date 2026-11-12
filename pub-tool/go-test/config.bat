@@ -16,6 +16,11 @@ set LOCAL_BUILD_PATH=%LOCAL_PROJECT_PATH%\go-build
 REM SSH key configuration
 set SSH_KEY_PATH=D:\tools\ppk\live-test.ppk
 
+REM Pinned SSH host key for restart.bat (plink -hostkey)
+set "SSH_HOST_KEY=ssh-ed25519 255 SHA256:Tdj/hGmwAtxmGT6wqkC/o6YkQwJJH7tSgj5h6eKkxIQ"
+
+set "RESTART_TITLE=XR Game Server Test Restart"
+
 REM Application name
 set APP_NAME=xr-game-server
 

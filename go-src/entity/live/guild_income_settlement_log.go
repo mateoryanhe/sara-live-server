@@ -390,6 +390,7 @@ func initGuildIncomeSettlementLogSyndb(storage GuildIncomeSettlementStorage) {
 		LiveRoomIncomeTotalVideoCallTicketIncome,
 		LiveRoomIncomeTotalVideoCallBillingIncome,
 		LiveRoomIncomeTotalShortVideoIncome,
+		LiveRoomIncomeTotalAnchorVideoIncome,
 		LiveRoomIncomeTotalGameIncome,
 		LiveRoomIncomeTotalLiveDuration,
 		GuildIncomeSettlementLogSettlementSalary,

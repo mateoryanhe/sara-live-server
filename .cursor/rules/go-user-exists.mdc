@@ -1,0 +1,42 @@
+---
+description: 按用户ID检查是否存在，统一用 FindUserInfoByUserId
+globs: go-src/**/*.go
+alwaysApply: true
+---
+
+# Go：按用户 ID 检查是否存在
+
+## 统一接口（必须）
+
+仅根据 `userId` 判断用户是否存在时，**一律**：
+
+```go
+import "xr-game-server/dao/userinfodao"
+
+if userinfodao.FindUserInfoByUserId(userId) == nil {
+    // 不存在
+}
+```
+
+- 优先读 `user_info` 内存缓存，未命中再查库并回填。
+- 库中没有则返回 `nil`，**不会自动建号**。
+- 需要余额/昵称等字段时，直接用返回的 `*UserInfo`，勿再查一遍。
+
+## 禁止
+
+- **禁止** `accountdao.GetAccountById` 做「是否存在」校验（会打 `accounts` 表，且与业务数据无关）。
+- **禁止** 用 `userinfodao.GetUserInfoByUserId` 做存在性判断：库中没有时会 **自动 NewUserInfo**，厂商回调等外部 ID 场景会脏数据。
+- **禁止** 业务侧手写 `SELECT user_infos WHERE id=?` / `GetUserInfoFromMemory` + 自行查库 的重复存在性逻辑（应走 `FindUserInfoByUserId`）。
+
+## 对照
+
+| API | 用途 |
+|-----|------|
+| `FindUserInfoByUserId` | **存在性** + 只读已存在用户（游戏厂商 verify/balance/transfer 等） |
+| `GetUserInfoByUserId` | 业务内取用户并保证有行（登录后链路；不存在会新建） |
+| `GetUserInfoFromMemory` | 仅内存，未命中即 nil（不做存在性结论） |
+| `GetAccountById` | 需要 account 字段（封禁/注销/openId/channel 等）时才用 |
+
+## 背景
+
+2026-11-12：游戏厂商 `/verify` `/balance` 高频回调里用 `GetAccountById` 打库；实际只需确认用户存在并读金币，应走 `user_info` 统一接口。

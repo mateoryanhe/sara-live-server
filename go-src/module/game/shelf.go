@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/gamequery"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
 	entity "xr-game-server/entity/game"
 	"xr-game-server/errercode"
@@ -238,7 +238,7 @@ func GetCMSGameStartLink(ctx context.Context, req *gameplatformdto.CMSGameStartL
 	if gameCode == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if accountdao.GetAccountById(req.UserId) == nil {
+	if userinfodao.FindUserInfoByUserId(req.UserId) == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	shelfRow := cfgdao.GetGameCfgByGameCode(gameCode)

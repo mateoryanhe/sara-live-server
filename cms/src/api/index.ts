@@ -8,6 +8,7 @@ import {bannerApi} from './modules/banner'
 import {activityMessageApi} from './modules/activityMessage'
 import {privateRoomBillingApi} from './modules/privateRoomBilling'
 import {voiceChatMicSeatTierApi} from './modules/voice-chat-mic-seat-tier'
+import {anchorVideoPriceTierApi} from './modules/anchor-video-price-tier'
 import {shortVideoApi} from './modules/shortVideo'
 import {rechargeCfgApi} from './modules/rechargeCfg'
 import {vipCfgApi} from './modules/vipCfg'
@@ -42,7 +43,10 @@ import {fiatCurrencyApi} from './modules/fiatCurrency'
 import {haipayApi} from './modules/haipay'
 import {cfEmailApi} from './modules/cf-email'
 import {firebaseApi} from './modules/firebase'
+import {firebasePushApi} from './modules/firebase-push'
+import {gameActivityApi} from './modules/game-activity'
 import {metaPixelApi} from './modules/meta-pixel'
+import {attrReportCfgApi} from './modules/attr-report-cfg'
 import {dbBackupApi} from './modules/db-backup'
 import {staticCacheCfgApi} from './modules/static-cache-cfg'
 
@@ -57,6 +61,7 @@ export {
     activityMessageApi,
     privateRoomBillingApi,
     voiceChatMicSeatTierApi,
+    anchorVideoPriceTierApi,
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,
@@ -92,7 +97,10 @@ export {
     haipayApi,
     cfEmailApi,
     firebaseApi,
+    firebasePushApi,
+    gameActivityApi,
     metaPixelApi,
+    attrReportCfgApi,
     dbBackupApi,
     staticCacheCfgApi,
 }
@@ -108,6 +116,7 @@ export default {
     activityMessageApi,
     privateRoomBillingApi,
     voiceChatMicSeatTierApi,
+    anchorVideoPriceTierApi,
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,
@@ -143,7 +152,10 @@ export default {
     haipayApi,
     cfEmailApi,
     firebaseApi,
+    firebasePushApi,
+    gameActivityApi,
     metaPixelApi,
+    attrReportCfgApi,
     dbBackupApi,
     staticCacheCfgApi,
 }

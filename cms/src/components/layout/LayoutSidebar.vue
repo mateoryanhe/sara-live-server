@@ -363,7 +363,7 @@ const hasMenuPermission = (moduleName: string) => {
             </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('LuckyGiftPoolCfgManagement') || hasMenuPermission('LuckyGiftPoolPendingBalanceList') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement') || hasMenuPermission('VoiceChatMicSeatTierManagement')"
+            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('LuckyGiftPoolCfgManagement') || hasMenuPermission('LuckyGiftPoolPendingBalanceList') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement') || hasMenuPermission('VoiceChatMicSeatTierManagement') || hasMenuPermission('AnchorVideoPriceTierManagement')"
             index="/live">
           <template #title>
             <el-icon>
@@ -418,6 +418,12 @@ const hasMenuPermission = (moduleName: string) => {
               <Microphone/>
             </el-icon>
             <span>{{ t('menu.VoiceChatMicSeatTierManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AnchorVideoPriceTierManagement')" index="/live/anchor-video-price-tier/tier-list">
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>{{ t('menu.AnchorVideoPriceTierManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -699,7 +705,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ChannelDownloadLandingDeployManagement') || hasMenuPermission('ShareActivityDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
+            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('FirebasePushCfgManagement') || hasMenuPermission('GameActivityCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ChannelDownloadLandingDeployManagement') || hasMenuPermission('ShareActivityDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
             index="/frontend-module">
           <template #title>
             <el-icon>
@@ -708,7 +714,7 @@ const hasMenuPermission = (moduleName: string) => {
             <span>{{ t('menu.ConfigDeployGroup') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
+              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('FirebasePushCfgManagement') || hasMenuPermission('GameActivityCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
               index="/frontend-module/config">
             <template #title>
               <el-icon>
@@ -751,6 +757,18 @@ const hasMenuPermission = (moduleName: string) => {
                 <Key/>
               </el-icon>
               <span>{{ t('menu.FirebaseCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('FirebasePushCfgManagement')" index="/config/firebase-push">
+              <el-icon>
+                <Bell/>
+              </el-icon>
+              <span>{{ t('menu.FirebasePushCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GameActivityCfgManagement')" index="/config/game-activity">
+              <el-icon>
+                <Present/>
+              </el-icon>
+              <span>{{ t('menu.GameActivityCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('PrivacyPolicyCfgManagement')" index="/config/privacy-policy">
               <el-icon>
@@ -884,7 +902,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('HostTlsMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ProcessDownLogListManagement') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AttributionReportCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('HostTlsMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ProcessDownLogListManagement') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -893,7 +911,7 @@ const hasMenuPermission = (moduleName: string) => {
             <span>{{ t('menu.ConfigManagement') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
+              v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AttributionReportCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
               index="/config/group/basic">
             <template #title>
               <el-icon>
@@ -918,6 +936,12 @@ const hasMenuPermission = (moduleName: string) => {
                 <User/>
               </el-icon>
               <span>{{ t('menu.AccountCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('AttributionReportCfgManagement')" index="/config/attribution-report-cfg">
+              <el-icon>
+                <Promotion/>
+              </el-icon>
+              <span>{{ t('menu.AttributionReportCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')" index="/config/server-runtime-cfg">
               <el-icon>

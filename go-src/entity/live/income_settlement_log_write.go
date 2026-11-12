@@ -14,6 +14,7 @@ func writeIncomeSettlementLogAmounts(tb db.TbName, id uint64, a *LiveRoomIncomeA
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, a.TotalVideoCallTicketIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, a.TotalVideoCallBillingIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, a.TotalShortVideoIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalAnchorVideoIncome, id, a.TotalAnchorVideoIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, a.TotalGameIncome)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, a.TotalLiveDuration)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeSettlementSalary, id, salary)

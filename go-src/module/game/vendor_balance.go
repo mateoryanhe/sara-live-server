@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"xr-game-server/dao/accountdao"
 	"xr-game-server/dto/gameplatformdto"
 )
 
@@ -42,12 +41,6 @@ func HandleVendorBalance(ctx context.Context, req *gameplatformdto.VendorBalance
 		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
 		return resp, nil
 	}
-	if accountdao.GetAccountById(userID) == nil {
-		resp := vendorBalanceFail(vendorCallbackCodePlayerNotFound, "player not found")
-		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
-		return resp, nil
-	}
-
 	userInfo := loadUserInfoForVendorVerify(userID)
 	if userInfo == nil {
 		resp := vendorBalanceFail(vendorCallbackCodePlayerNotFound, "player not found")

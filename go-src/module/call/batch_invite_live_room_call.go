@@ -47,6 +47,9 @@ func BatchInviteLiveRoomCall(ctx context.Context, req *calldto.BatchInviteLiveRo
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
+	if !livecfg.IsOneToOneLiveRoomEnabled() {
+		return nil, errercode.CreateCode(errercode.OneToOneLiveRoomStartDisabled)
+	}
 
 	seen := make(map[uint64]struct{}, len(req.UserIds))
 	targetIds := make([]uint64, 0, len(req.UserIds))

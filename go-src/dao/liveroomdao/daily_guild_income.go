@@ -39,6 +39,13 @@ func MirrorDailyGuildShortVideoEarn(guildId uint64, at time.Time, amount float64
 	})
 }
 
+// MirrorDailyGuildAnchorVideoEarn 同步主播相册视频收益到工会日表
+func MirrorDailyGuildAnchorVideoEarn(guildId uint64, at time.Time, amount float64) {
+	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
+		row.AddAnchorVideoEarn(amount)
+	})
+}
+
 // MirrorDailyGuildGameEarn 同步游戏收益到工会日表
 func MirrorDailyGuildGameEarn(guildId uint64, at time.Time, goldAmount, incomeDelta float64) {
 	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {

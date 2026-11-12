@@ -148,31 +148,27 @@ func mergeUploadAnchorVideoOpenAPI(paths, schemas map[string]any) {
 	resName := openAPISchemaAnchorVideoDTO + "UploadVideoRes"
 	schemas[reqName] = map[string]any{
 		"type":     "object",
-		"required": []any{"file"},
+		"required": []any{"file", "price"},
 		"properties": map[string]any{
-			"file": openAPIBinaryProp("相册视频文件(mp4;可重复多个同名 file 字段一次传多个)"),
+			"file":        openAPIBinaryProp("相册视频文件(mp4,仅1个)"),
+			"price":       openAPINumberProp("钻石价格(须为已上架价格挡位)", "float64", nil),
+			"description": openAPIStringProp("描述(可空,最多200字)"),
 		},
 	}
 	schemas[resName] = map[string]any{
 		"type": "object",
 		"properties": map[string]any{
-			"list": map[string]any{
-				"type": "array",
-				"items": map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"id":    openAPIStringProp("视频ID"),
-						"video": openAPIStringProp("视频完整URL"),
-					},
-				},
-			},
+			"id":          openAPIStringProp("视频ID"),
+			"video":       openAPIStringProp("视频完整URL"),
+			"price":       openAPINumberProp("钻石价格", "float64", nil),
+			"description": openAPIStringProp("描述(可空)"),
 		},
 	}
 	paths["/anchorVideo/upload"] = map[string]any{
 		"post": openAPIMultipartPostOp(
-			"上传主播相册视频(可多个)",
+			"上传主播相册视频(单个)",
 			[]string{"主播视频"},
-			"服务端 MultipartReader 流式解析; form 字段名均为 file,可传多个; 仅 mp4; 每主播最多50个,超限整批失败.",
+			"multipart: file(仅1个)+price(必填,须命中已上架挡位)+description(可空); 仅 mp4.",
 			reqName,
 			resName,
 		),

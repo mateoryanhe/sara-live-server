@@ -93,14 +93,11 @@
 
               <el-tab-pane :label="t('pages.userList.basicSubTabLogin')" name="login">
                 <el-descriptions :column="1" border>
-                  <el-descriptions-item :label="t('pages.userList.registerLoginChannel')">
-                    {{ channelLabel(detail.account?.channel) }}
+                  <el-descriptions-item :label="t('pages.userList.boundEmail')">
+                    {{ detail.userExt?.email || '-' }}
                   </el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.userList.registerPromotionPlatform')">
-                    {{ registerPromotionPlatformLabel }}
-                  </el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.userList.registerClientPlatform')">
-                    {{ registerClientPlatformLabel }}
+                  <el-descriptions-item :label="t('pages.userList.clientType')">
+                    {{ clientTypeLabel }}
                   </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.h5DownloadChannelName')">
                     {{ h5DownloadChannelNameLabel }}
@@ -135,9 +132,6 @@
 
               <el-tab-pane :label="t('pages.userList.basicSubTabRechargeInfo')" name="rechargeInfo">
                 <el-descriptions :column="1" border>
-                  <el-descriptions-item :label="t('pages.userList.boundEmail')">
-                    {{ detail.userExt?.email || '-' }}
-                  </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.rechargeOrderList.payName')">
                     {{ detail.channelPayProfile?.name || '-' }}
                   </el-descriptions-item>
@@ -214,6 +208,72 @@
                     {{ detail.withdrawPayout.updatedAt || '-' }}
                   </el-descriptions-item>
                 </el-descriptions>
+              </el-tab-pane>
+
+              <el-tab-pane :label="t('pages.userList.basicSubTabAttribution')" name="attribution">
+                <el-empty
+                    v-if="!hasRegisterUrlAttr && !hasPromotionAttribution"
+                    :description="t('pages.userList.attributionEmpty')"
+                />
+                <div v-else class="attribution-panel">
+                  <div class="attribution-section">
+                    <div class="attribution-section-title">{{ t('pages.userList.registerUrlAttrSection') }}</div>
+                    <el-empty
+                        v-if="!hasRegisterUrlAttr"
+                        :description="t('pages.userList.registerUrlAttrEmpty')"
+                    />
+                    <el-descriptions v-else :column="1" border>
+                      <el-descriptions-item :label="t('pages.userList.registerUrlAttrType')">
+                        {{ detail.registerUrlAttr?.type || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.registerUrlAttrCh')">
+                        {{ detail.registerUrlAttr?.ch || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.registerUrlAttrTjUserId')">
+                        {{ detail.registerUrlAttr?.tjuserid || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('common.createdAt')">
+                        {{ formatDate(detail.registerUrlAttr?.createdAt) }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('common.updatedAt')">
+                        {{ formatDate(detail.registerUrlAttr?.updatedAt) }}
+                      </el-descriptions-item>
+                    </el-descriptions>
+                  </div>
+                  <div class="attribution-section">
+                    <div class="attribution-section-title">{{ t('pages.userList.promotionAttributionSection') }}</div>
+                    <el-empty
+                        v-if="!hasPromotionAttribution"
+                        :description="t('pages.userList.promotionAttributionEmpty')"
+                    />
+                    <el-descriptions v-else :column="1" border>
+                      <el-descriptions-item :label="t('pages.userList.promotionUrlChannelCode')">
+                        {{ detail.promotionAttribution?.promotionChannelCode || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.promotionUrlChannelName')">
+                        {{ detail.promotionAttribution?.promotionUrlChannelName || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.h5AppChannelCode')">
+                        {{ detail.promotionAttribution?.h5AppChannelCode || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.promotionLandingUrl')">
+                        {{ detail.promotionAttribution?.promotionLandingUrl || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.promotionUrlApkDownload')">
+                        {{ detail.promotionAttribution?.promotionUrlApkDownloadUrl || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.apkChannelCode')">
+                        {{ detail.promotionAttribution?.apkChannelCode || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.apkChannelName')">
+                        {{ detail.promotionAttribution?.apkChannelName || '-' }}
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="t('pages.userList.apkChannelApkDownload')">
+                        {{ detail.promotionAttribution?.apkChannelApkDownloadUrl || '-' }}
+                      </el-descriptions-item>
+                    </el-descriptions>
+                  </div>
+                </div>
               </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
@@ -480,6 +540,31 @@ const bothPromotionDownloadChannelsEmpty = computed(
   () => !h5DownloadChannelNameRaw.value && !landingPageDownloadChannelNameRaw.value,
 )
 
+const hasRegisterUrlAttr = computed(() => {
+  const row = detail.value?.registerUrlAttr
+  if (!row) return false
+  return Boolean(
+    (row.type ?? '').trim()
+    || (row.ch ?? '').trim()
+    || (row.tjuserid ?? '').trim(),
+  )
+})
+
+const hasPromotionAttribution = computed(() => {
+  const row = detail.value?.promotionAttribution
+  if (!row) return false
+  return Boolean(
+    (row.promotionChannelCode ?? 0) > 0
+    || (row.promotionUrlChannelName ?? '').trim()
+    || (row.h5AppChannelCode ?? '').trim()
+    || (row.promotionLandingUrl ?? '').trim()
+    || (row.promotionUrlApkDownloadUrl ?? '').trim()
+    || (row.apkChannelCode ?? '').trim()
+    || (row.apkChannelName ?? '').trim()
+    || (row.apkChannelApkDownloadUrl ?? '').trim(),
+  )
+})
+
 const officialSiteChannelLabel = computed(() => t('pages.userList.officialSiteChannelName'))
 
 const h5DownloadChannelNameLabel = computed(() => {
@@ -496,18 +581,8 @@ const landingPageDownloadChannelNameLabel = computed(() => {
   return landingPageDownloadChannelNameRaw.value || '-'
 })
 
-const registerPromotionPlatformLabel = computed(() => {
-  const platform = (detail.value?.userExt?.registerPromotionPlatform ?? '').trim().toLowerCase()
-  if (platform === 'h5') {
-    return t('pages.userList.registerPromotionPlatformH5')
-  }
-  if (platform === 'app') {
-    return t('pages.userList.registerPromotionPlatformApp')
-  }
-  return platform || '-'
-})
-
-const registerClientPlatformLabel = computed(() => {
+// 客户端类型：仅注册时请求头 X-Platform（android/ios/web）
+const clientTypeLabel = computed(() => {
   const platform = (detail.value?.userExt?.registerClientPlatform ?? '').trim().toLowerCase()
   if (platform === 'android') {
     return t('pages.userList.registerClientPlatformAndroid')
@@ -588,27 +663,6 @@ const userTypeLabel = (userType?: number) => {
   return userTypeLabelMap.value[userType] || t('pages.userList.userTypeNormal')
 }
 
-const ACCOUNT_CHANNEL_LABEL_KEYS: Record<number, string> = {
-  1: 'channelTest',
-  2: 'channelPhone',
-  3: 'channelBotAnchor',
-  4: 'channelDevice',
-  5: 'channelShortVideoAuthor',
-  6: 'channelH5Device',
-  7: 'channelEmail',
-  8: 'channelCoinMerchant',
-  9: 'channelFirebase',
-}
-
-const channelLabel = (channel?: number) => {
-  if (channel === undefined || channel === null) return '-'
-  const key = ACCOUNT_CHANNEL_LABEL_KEYS[channel]
-  if (key) {
-    return t(`pages.userList.${key}`)
-  }
-  return t('pages.userList.channelUnknown')
-}
-
 const genderLabel = (gender?: number) => {
   if (gender === 1) return t('pages.userList.genderMale')
   if (gender === 2) return t('pages.userList.genderFemale')
@@ -685,6 +739,18 @@ onActivated(() => {
 
 .basic-sub-tabs :deep(.el-tabs__header) {
   margin-bottom: 16px;
+}
+
+.attribution-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.attribution-section-title {
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
 }
 
 .wallet-panel {

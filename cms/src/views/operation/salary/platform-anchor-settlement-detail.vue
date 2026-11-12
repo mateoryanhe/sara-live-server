@@ -88,6 +88,7 @@
                 <el-descriptions-item :label="settlementText('totalVideoCallTicketIncome')">{{ amount(item.totalVideoCallTicketIncome) }}</el-descriptions-item>
                 <el-descriptions-item :label="settlementText('totalVideoCallBillingIncome')">{{ amount(item.totalVideoCallBillingIncome) }}</el-descriptions-item>
                 <el-descriptions-item :label="settlementText('totalShortVideoIncome')">{{ amount(item.totalShortVideoIncome) }}</el-descriptions-item>
+                <el-descriptions-item :label="settlementText('totalAnchorVideoIncome')">{{ amount(item.totalAnchorVideoIncome) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>

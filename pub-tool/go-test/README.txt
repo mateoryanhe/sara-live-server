@@ -19,8 +19,10 @@ XR Game Server 一键部署脚本 (PuTTY版)
 - config.bat: 配置文件，包含服务器信息、路径等
 - deploy.bat: 主要的批处理部署脚本
 - 一键部署.bat: 用户友好的启动脚本
+- restart.bat: 仅热重启(失败则冷启),不编译不上传;测热重启窗口开播用
+- 一键重启.bat: 双击跑 restart.bat
 - README.txt: 本说明文件
-- plink.exe: PuTTY SSH客户端工具
+- plink.exe: PuTTY SSH客户端工具(可与 go-prod 共用)
 - pscp.exe: PuTTY 安全文件传输工具
 
 使用前准备

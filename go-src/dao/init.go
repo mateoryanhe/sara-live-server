@@ -5,6 +5,7 @@ import (
 	"xr-game-server/dao/anchorphotodao"
 	"xr-game-server/dao/anchorreceivedgiftdao"
 	"xr-game-server/dao/anchorvideodao"
+	"xr-game-server/dao/anchorvideopurchasedao"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dao/channelpaydao"
 	"xr-game-server/dao/cmsuserdao"
@@ -38,6 +39,7 @@ func Init() {
 	anchorreceivedgiftdao.Init()
 	anchorphotodao.Init()
 	anchorvideodao.Init()
+	anchorvideopurchasedao.Init()
 	shortvideodao.Init()
 	rechargeorderdao.InitRechargeOrderDao()
 	channelpaydao.Init()

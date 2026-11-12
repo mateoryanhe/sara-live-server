@@ -149,6 +149,14 @@ func (r *DailyGuildEffectiveLive) AddShortVideoEarn(v float64) {
 	addIncomeEarnWithLockKey(TbDailyGuildEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
 }
 
+// AddAnchorVideoEarn 主播相册视频收益(总收益+相册视频细分,内部加锁)
+func (r *DailyGuildEffectiveLive) AddAnchorVideoEarn(v float64) {
+	if r == nil || r.ID == "" {
+		return
+	}
+	addIncomeEarnWithLockKey(TbDailyGuildEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalAnchorVideoIncome, &r.TotalAnchorVideoIncome)
+}
+
 func (r *DailyGuildEffectiveLive) AddGameEarn(goldAmount, incomeDelta float64) {
 	if r == nil || r.ID == "" {
 		return

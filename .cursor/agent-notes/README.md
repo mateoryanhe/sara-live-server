@@ -10,6 +10,7 @@
 | [git-release-tags.mdc](../rules/git-release-tags.mdc) | **发版 Git tag 命名** `vYYYY.MM.DD`（如 `v2026.10.30`） |
 | [go-build-output.mdc](../rules/go-build-output.mdc) | Go 编译 `-o` 路径，勿生成 `...` 目录 |
 | [go-xrpool-async.mdc](../rules/go-xrpool-async.mdc) | Go 异步须 `xrpool.AddWithRecover`，勿裸 `go func` |
+| [go-user-exists.mdc](../rules/go-user-exists.mdc) | 按 userId 检查存在：统一 `FindUserInfoByUserId` |
 | [server-safety.mdc](../rules/server-safety.mdc) | 远程/数据库删除须问用户；**发版须用户同意** |
 | [flutter-push-subscribe.mdc](../rules/flutter-push-subscribe.mdc) | Flutter：PushBus 上 **Repository 与 ViewModel 各自订阅**（勿中心 revision 转 UI） |
 | [read-agent-notes.mdc](../rules/read-agent-notes.mdc) | 任务前必读入口 |
@@ -38,6 +39,11 @@
 - **deploy.bat**：打包目录用 `temp_deploy_%RANDOM%` 避免 file-lock 时误打旧 `config.yaml`（曾把正式配置打到提审服）。
 - **提审服 1GB**：CPU 长期 100%、syndb 仅 `force_wait` 时，fork 可能极慢或失败，脚本会等满再冷启；正式服资源充足时以热重启为主。
 - **2026-10-12 热重启卡死**：`tracking.drainTrackingQueue` 空队列时 `default:break` 只跳出 `select` 导致忙等，`PrepareRestart` 同步调用后阶段一永不结束；已改为 `drainTrackingTQueue` 与 stat 一致。
+- **2026-11-11 热重启双进程窗口开播丢场次**：正式服 `03:31:33` `RestartAllServer` → `03:31:40` child ready；主播 `1006615` 在 `03:31:39` `startLive` 写出 `live_records.id=2120358770352603136`，但接管后的进程内存 `live_rooms.live_record_id=0`。此后 `reportLiveStartStatus` 因 `LiveRecordId==0` 直接 success、不累加时长；`05:35:21` `stopLive` 返回 `liveRecord:null`，`end_time` 一直 NULL、`total_live_duration=0`。根因：fork 后父子短暂并存，开播落在即将退出的旧进程，新进程未继承该场次绑定。
+- **补绑（防下次）**：仅主播主动上报时补绑——心跳（`authId==roomId`）与 App `stopLive`；观众心跳、超时下播、机器人下播不补。查 `live_rooms` + 该主播最新未结束 `live_records`，校验后补回内存并 `addTask`；心跳单房间最多查库 20 次，下播补绑不计入。见 `module/liveroom/recover_live_record_id.go`。
+- **Sofie 标题列表/打开**：`browseTitles` 应答、`openTitle` 请求用 `titleCode`（旧接口仍为 `gameCode`），避免 JSON 字段含 game；见 `BrowseTitles`/`OpenTitle` + sofie DTO。
+- **Sofie OpenAPI / Apifox**：文档从旧 `/game/*` **`$ref` 克隆**；仅改 operation 树不够（body 仍指向 `AppGameStartReq.gameCode`）。`api/sofie/openapi.go` 会对 `browseTitles`/`openTitle` **解引用并克隆** schema、`gameCode→titleCode`、文案去 game/游戏，并 prune 未引用 components。Apifox 须从本地 `sofieOpenapiPath` **重新导入**才更新。
+- **仪表盘客户端 App/H5**：仅按注册时 `X-Platform` 落库的 `register_client_platform`（`web`→H5，`android`/`ios`→App）分桶充值/登陆；空/未知不计入。**不再**回落 `register_promotion_platform` / `accounts.channel`。历史已写入的日统计不自动重算。
 - **live-hot-restart-gw（18900）**：与主 Go **独立**；`go-prod/deploy.bat` **不**编译/上传/启停 gw（改用 `deploy-hr-gw.bat` / `restart-hr-gw.bat`）。`/hotRestart` 无进程时 `sudo start.sh` 冷启，热重启连不上时可 fallback 冷启；`/coldStart` 强制冷启。`config.json` 需 `coldStartScript`（同 xgameserver/start.sh）。**进程探活**：默认每 **3s** `pgrep`，连续 **3 分钟**无 `xr-game-server` 则自动冷启。冷启后若配置 `mysqlDSN` 写入 `process_down_logs`。**正式服**（2026-10-27）：`mysqlDSN` → `127.0.0.1:14501/live_prod`。停 gw 勿用 `pgrep -x`（`comm` 截断），用 `pkill -f live-hot-restart-gw`。
 - **分享下载 shareCode**：`getUserInfo.shareCode` = 文案 + `\n` + `Invite Code: {邀请码}` + `\n` + 短链 `https://{官网域名}/dl`；`GET /dl` 免登录 **302** 到官网 assets 当前最大 APK（成功时埋点 `share_short_link_click`）。CMS「分享下载文案」可预览/复制最终文案（邀请码占位 `YOUR_INVITE_CODE`）；趋势在埋点「下载量」Tab「分享短链点击」。
 - **Sofie 官网部署**（2026-10-27）：CMS「配置部署 → Sofie官网部署」`/config/sofie-official-site-deploy`；独立站点 `siteKey=sofie-official-site`、前缀 **`/sofie-site`**（勿用 `/sofie`，与 Sofie App API `/sofie/...` 冲突）、默认目录 `/home/ec2-user/cdn/sofie-official-site`、示例域名 `sofielive.net`。保存映射可上传 **pem+key**（multipart `saveOfficialSiteDeployCfgUpload`），证书落到 `/home/ec2-user/ssl/site-tls/sofie-official-site/` 并写入 `domain_site_mappings`，立即用于该域名 HTTPS。
@@ -99,6 +105,47 @@
 - **原因**：清理 `go-src/.../` 误用 `rd /s /q`，路径转义错误，永久删除 `.git` 与大量源码；回收站无备份。
 - **恢复**：GitHub reset 到 `0abdb09` + Cursor History + 聊天记录重做 8 个 commit + 未提交改动。
 - **教训**：见 `workspace-safety.mdc`；**做完务必 `git push`**。
+
+## 游戏活动配置（2026-11-11）
+
+- CMS：前端配置 → **游戏活动配置** `/config/game-activity`
+- 表 `game_activity_cfgs`：`button_icon`（可上传）、`game_list_url`（可填）
+- CMS 接口：`/gameActivity/getGameActivityCfg`、`/gameActivity/saveGameActivityCfg`
+- App（路径**不含游戏字眼**）：`POST /activity/getRoomActivity`（需登录，body `roomId`）→ `buttonIcon` / `listUrl` / `itemId`
+  - Sofie：`POST /sofie/campaign/fetchRoomActivity`
+  - `itemId`：房间推荐上架第一条；无则上架列表（sort desc）第一条（值为第三方编码）
+
+## 通话重推来电（2026-11-11）
+
+- App：`POST /call/repushIncomingCall`（需登录）；Sofie：`POST /sofie/session/repushIncomingInvite`
+- 查活跃订单中「呼叫中」且 `receiverId=当前用户` 的最新一单 → 再推 WS `LiveRoomCallRequest`；响应同步带回推送字段（`calling=false` 表示无人呼叫）
+
+## Firebase 推送配置（2026-11-11）
+
+- CMS：前端配置 → **Firebase推送** `/config/firebase-push`
+- 表 `firebase_push_cfgs`：`enabled`；1v1 主播离线：`offline_call_title` / `offline_call_body` / `offline_call_icon`
+- 默认文案：标题 `Incoming video call`，正文 `{nickname} is calling you`；图标空=App 默认
+- FCM 凭证复用「Firebase登录」`firebase_cfgs` 服务账号（本页不存密钥）
+- CMS 接口：`/firebasePush/getFirebasePushCfg`、`/firebasePush/saveFirebasePushCfg`
+
+## 归因数据上报配置（2026-11-11）
+
+- CMS：系统配置 → 基础配置 → **归因数据上报** `/config/attribution-report-cfg`
+- 表 `attr_report_cfgs`：`base_api`（只填主机，如 `https://cdntk.showsme.click`）、`secret_key`（→ body `api_token`）
+- 上报固定拼路径：`{baseApi}/tj/api/accept.php`
+- 业务通用方法：`attrreport.PostAccept(ctx, payload)` / `PostAcceptAsync`（xrpool）；未配置则跳过
+- 所有事件必带：`event_time`（Unix 秒/UTC）、`country`（ISO alpha-2 如 `ID`；注册国→登录国→IP Geo，解析不到空串）
+- CMS 接口：`/attrReportCfg/getAttrReportCfg`、`/attrReportCfg/saveAttrReportCfg`
+
+## 注册 URL 归因 registerAttr（2026-11-11）
+
+- 表 `user_register_url_attrs`（主键=userId，syndb；**仅客户端上报了 registerAttr 才入库**）
+- Find：缓存命中（含负缓存 `PublishRow(nil)`）不打库；库无记录写 `nil` 占位防穿透；Save/Publish 真实行会覆盖负缓存
+- 字段：`type`（`pwa`/`h5`/`apk`）、`ch`、`tjuserid`
+- 前端：`deviceInfo.registerAttr: { "type":"h5", "ch":"123", "tjuserid":"456" }`
+- 注册：有 `registerAttr` → 入库 + `CompleteRegistration`；无上报 → `MarkRegisterUrlAttrAbsent` 只写负缓存不上库
+- CMS 用户详情「基本信息 → 用户归因」：`registerUrlAttr`（type/ch/tjuserid）+ 既有 `promotionAttribution`
+- 普通用户账号首充：订阅 `RechargeGoldArrivedEvent`（`IsAccountFirst`）→ `FindUserRegisterUrlAttrByUserId` 有有效记录才 `PostAccept(Purchase)`；排除币商/白名单；Find 命中负缓存不打库；Purchase 带 `currency`/`value`（订单 `Currency`+`Price` 美金，缺币种有金额时默认 `USD`，无则 omitempty）
 
 ## module/stat 队列（2026-09-04）
 
@@ -268,6 +315,28 @@
 
 - `live_cfgs.max_anchor_videos`（CMS「直播配置」同页，默认 **100**，0/空按默认）；`anchorvideodao.SetMaxVideosProvider(livecfg.GetMaxAnchorVideos)`
 - 仅服务端上传校验；dao 兜底默认亦改为 100（原 50）
+
+## 主播相册短视频价格挡位（2026-11-12）
+
+- 表 `anchor_video_price_tiers`（首次启动 AutoMigrate）；CMS「直播管理 → 主播相册短视频价格」`AnchorVideoPriceTierManagement`
+- CMS：`/anchorVideoPriceTier/*` 列表/增删改/上下架；改动后刷内存
+- App：**只读内存** `POST /anchorVideo/priceTierList`（Sofie `/sofie/gallery/browseVideoPrices`），**禁止查库**
+- 权限：角色勾选该页面；菜单 `/live/anchor-video-price-tier/tier-list`
+
+## 主播相册视频上传（2026-11-12）
+
+- **仅单个** `file`（multipart）；必填 `price`（须命中已上架价格挡位，校验走价格内存）、可选 `description`（可空，最多 200 字）
+- 表字段：`anchor_videos.price` / `description`；列表/上传应答带出 `id`
+- 旧 App：`POST /anchorVideo/upload`；Sofie：`/sofie/gallery/uploadVideo`
+
+## 主播相册视频列表/付费（2026-11-12）
+
+- 列表：`POST /anchorVideo/list` **读主播列表缓存**（miss 从库加载最多 **1000**），再 `pageIndex/pageSize` 分页
+- 上传新增 / **修改** / 删除：刷新该主播列表缓存（`PublishList`；删除后再 `RefreshVideoListCache` 对齐库）
+- 修改：`POST /anchorVideo/update`（Sofie `/sofie/gallery/updateVideo`），入参 `videoId`/`price`/`description`；`price=0` 免费，`>0` 须命中已上架挡位
+- 列表项：`id` / `price` / `description` / **`paid`**（`price==0` 免费默认 true；主播本人 true；否则查购买记录）
+- 购买缓存：**key=`userId_anchorId`**，val=付费记录列表；`unlock` 成功后刷新
+- 表 `anchor_video_purchases`；App `POST /anchorVideo/unlock`（Sofie `/sofie/gallery/unlockVideo`）
 
 - CMS：`/config/upload-resource` **云桶开关**（S3 兼容，面向 CF R2）
 - 字段：`s3Enabled` / **`s3PublicDomain`（云桶访问域名，App 拼文件 URL）** / `s3Endpoint`（R2 S3 API）/ `s3Bucket` / AK·SK / `s3KeyPrefix`（如 `test`、`prod`）；Region 固定代码内 `auto`，CMS 不展示

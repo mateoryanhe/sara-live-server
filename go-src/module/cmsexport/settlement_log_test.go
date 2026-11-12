@@ -10,23 +10,24 @@ import (
 func TestAnchorSettlementLogToCSVRowIncludesFullBreakdown(t *testing.T) {
 	row := testAnchorSettlementLog()
 	got := anchorSettlementLogToCSVRow(row, map[uint64]string{row.RoomId: "anchor"})
-	if len(got) != 27 {
-		t.Fatalf("unexpected column count: got %d want 27", len(got))
+	if len(got) != 28 {
+		t.Fatalf("unexpected column count: got %d want 28", len(got))
 	}
 	checks := map[int]string{
 		0:  "\t9007199254740993",
 		1:  "6001000001",
 		2:  "anchor",
-		13: "11",
-		14: "12",
-		15: "13",
-		16: "14",
-		17: "true",
-		18: "15",
-		19: "16",
-		24: "21",
-		25: "22",
-		26: "2026-09-24 10:11:12",
+		12: "8.5",
+		14: "11",
+		15: "12",
+		16: "13",
+		17: "14",
+		18: "true",
+		19: "15",
+		20: "16",
+		25: "21",
+		26: "22",
+		27: "2026-09-24 10:11:12",
 	}
 	for index, want := range checks {
 		if got[index] != want {
@@ -38,8 +39,8 @@ func TestAnchorSettlementLogToCSVRowIncludesFullBreakdown(t *testing.T) {
 func TestPlatformAnchorPayoutToCSVRowIncludesPayoutAndFlowDetails(t *testing.T) {
 	row := testAnchorSettlementLog()
 	got := platformAnchorPayoutToCSVRow(row, map[uint64]string{row.RoomId: "anchor"})
-	if len(got) != 35 {
-		t.Fatalf("unexpected column count: got %d want 35", len(got))
+	if len(got) != 36 {
+		t.Fatalf("unexpected column count: got %d want 36", len(got))
 	}
 	checks := map[int]string{
 		0:  "\t9007199254740993",
@@ -54,12 +55,13 @@ func TestPlatformAnchorPayoutToCSVRowIncludesPayoutAndFlowDetails(t *testing.T) 
 		9:  "platform-1",
 		10: "2026-09-24 12:13:14",
 		11: "failed",
-		22: "11",
-		23: "12",
-		24: "13",
-		25: "14",
-		26: "true",
-		34: "22",
+		21: "8.5",
+		23: "11",
+		24: "12",
+		25: "13",
+		26: "14",
+		27: "true",
+		35: "22",
 	}
 	for index, want := range checks {
 		if got[index] != want {
@@ -90,6 +92,7 @@ func testAnchorSettlementLog() *liveentity.AnchorIncomeSettlementLog {
 			TotalVideoCallTicketIncome:  6,
 			TotalVideoCallBillingIncome: 7,
 			TotalShortVideoIncome:       8,
+			TotalAnchorVideoIncome:      8.5,
 			TotalGameIncome:             9,
 			TotalLiveDuration:           600,
 		},

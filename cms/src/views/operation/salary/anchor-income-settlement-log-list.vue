@@ -182,6 +182,9 @@
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalAnchorVideoIncome')" align="right" min-width="150">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalAnchorVideoIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>

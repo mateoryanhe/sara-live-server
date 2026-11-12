@@ -104,12 +104,13 @@ func MarkFirstRechargeDone(userId uint64) bool {
 	return true
 }
 
-// SaveRegisterPromotionPlatform 注册时按 accounts.channel 写入 h5/app(不读 Header),仅写一次.
+// SaveRegisterPromotionPlatform 注册时写入 h5/app:优先 X-Platform(web→h5,android/ios→app),否则回落 accounts.channel;仅写一次.
 func SaveRegisterPromotionPlatform(ctx context.Context, userId uint64, accountChannel uint) string {
 	if userId == 0 {
 		return ""
 	}
-	platform := promotionattribution.ResolveRegisterPromotionPlatform(ctx, accountChannel)
+	xPlatform := gameevent.NormalizeStatClientPlatform(httpserver.ClientPlatformFromContext(ctx))
+	platform := promotionattribution.ResolveRegisterPromotionPlatform(xPlatform, accountChannel)
 	if platform == "" {
 		return ""
 	}
@@ -122,12 +123,20 @@ func SaveRegisterPromotionPlatform(ctx context.Context, userId uint64, accountCh
 	return platform
 }
 
-// GetRegisterPromotionPlatform 用户注册时的推广报表平台(h5/app); 空表示历史账号未落库.
+// GetRegisterPromotionPlatform 用户注册时的推广/客户端报表平台(h5/app); 空表示历史账号未落库.
 func GetRegisterPromotionPlatform(userId uint64) string {
 	if userId == 0 {
 		return ""
 	}
 	return strings.TrimSpace(GetUserExtByUserId(userId).RegisterPromotionPlatform)
+}
+
+// GetRegisterClientPlatform 注册时 X-Platform(android/ios/web);空表示未落库.
+func GetRegisterClientPlatform(userId uint64) string {
+	if userId == 0 {
+		return ""
+	}
+	return strings.TrimSpace(GetUserExtByUserId(userId).RegisterClientPlatform)
 }
 
 // SaveRegisterClientPlatform 注册时按请求头 X-Platform 写入(android/ios/web),仅写一次.

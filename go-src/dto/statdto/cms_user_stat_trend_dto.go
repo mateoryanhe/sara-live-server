@@ -16,10 +16,10 @@ type CMSUserStatTrendPoint struct {
 	Time                    string            `json:"time"                    dc:"时间标识"`
 	ActiveUserCount         uint64            `json:"activeUserCount"         dc:"活跃用户数(去重登录)"`
 	RegisterUserCount       uint64            `json:"registerUserCount"       dc:"新注册用户数"`
-	AppDeviceRechargeAmount float64           `json:"appDeviceRechargeAmount" dc:"App设备码用户充值(USD)"`
-	H5DeviceRechargeAmount  float64           `json:"h5DeviceRechargeAmount"  dc:"H5设备码用户充值(USD)"`
-	AppDeviceLoginCount     uint64            `json:"appDeviceLoginCount"     dc:"App设备码用户登录人数(去重)"`
-	H5DeviceLoginCount      uint64            `json:"h5DeviceLoginCount"      dc:"H5设备码用户登录人数(去重)"`
+	AppDeviceRechargeAmount float64           `json:"appDeviceRechargeAmount" dc:"App用户充值(USD;注册X-Platform=android/ios)"`
+	H5DeviceRechargeAmount  float64           `json:"h5DeviceRechargeAmount"  dc:"H5用户充值(USD;注册X-Platform=web)"`
+	AppDeviceLoginCount     uint64            `json:"appDeviceLoginCount"     dc:"App用户登录人数(去重;注册X-Platform=android/ios)"`
+	H5DeviceLoginCount      uint64            `json:"h5DeviceLoginCount"      dc:"H5用户登录人数(去重;注册X-Platform=web)"`
 	BarMetrics              map[string]uint64 `json:"barMetrics"              dc:"柱形图指标(见 UserStatBarMetric*)"`
 }
 

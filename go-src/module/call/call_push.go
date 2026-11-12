@@ -16,12 +16,10 @@ import (
 
 const liveRoomCallRequestMessage = "有人请求跟你通话"
 
-func pushCallRequest(order *entity.CallOrder, channelName string) error {
-	receiverToken, _, err := agora.ResolveChannelToken(order.ReceiverId, channelName, agoradto.RTCRolePublisher)
-	if err != nil {
-		return err
+func buildCallRequestPushItem(order *entity.CallOrder, channelName, receiverToken string) *calldto.CallRequestPushItem {
+	if order == nil {
+		return nil
 	}
-
 	item := &calldto.CallRequestPushItem{
 		OrderId:       strconv.FormatUint(order.ID, 10),
 		Source:        entity.NormalizeCallOrderSource(order.Source),
@@ -35,8 +33,21 @@ func pushCallRequest(order *entity.CallOrder, channelName string) error {
 		item.CallerNickname = u.Nickname
 		item.CallerAvatar = upload.ResolveAvatarUrlForUser(order.CallerId, u.Avatar)
 	}
+	return item
+}
+
+// pushCallRequest 向接听方推送来电(WS); 返回推送载荷便于 HTTP 同步带回.
+func pushCallRequest(order *entity.CallOrder, channelName string) (*calldto.CallRequestPushItem, error) {
+	if order == nil {
+		return nil, nil
+	}
+	receiverToken, _, err := agora.ResolveChannelToken(order.ReceiverId, channelName, agoradto.RTCRolePublisher)
+	if err != nil {
+		return nil, err
+	}
+	item := buildCallRequestPushItem(order, channelName, receiverToken)
 	push.Data(order.ReceiverId, cmd.LiveRoomCallRequest, item)
-	return nil
+	return item, nil
 }
 
 const liveRoomCallRejectedMessage = "对方已拒接"

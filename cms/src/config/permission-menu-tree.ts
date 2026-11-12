@@ -241,6 +241,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('LiveCfgManagement'),
             page('LiveRoomTagManagement'),
             page('VoiceChatMicSeatTierManagement'),
+            page('AnchorVideoPriceTierManagement'),
         ],
     },
     {
@@ -354,6 +355,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('AppPkgManagement'),
                 page('AppVersionCfgManagement'),
                 page('FirebaseCfgManagement'),
+                page('FirebasePushCfgManagement'),
+                page('GameActivityCfgManagement'),
                 page('PrivacyPolicyCfgManagement'),
                 page('SofiePrivacyPolicyCfgManagement'),
                 page('AuditCodeCfgManagement'),
@@ -393,6 +396,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('RandomNicknameManagement'),
                 page('AppTokenConfig'),
                 page('AccountCfgManagement'),
+                page('AttributionReportCfgManagement'),
                 page('ServerRuntimeCfgManagement', {subPages: [{pageName: 'PreloadCfgManagement', titleKey: 'menu.PreloadCfgManagement'}]}),
             ]),
             group('config-security', 'menu.ConfigSecurityGroup', [

@@ -75,6 +75,7 @@ func toCMSDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profi
 			TotalVideoCallTicketIncome:  amounts.TotalVideoCallTicketIncome,
 			TotalVideoCallBillingIncome: amounts.TotalVideoCallBillingIncome,
 			TotalShortVideoIncome:       amounts.TotalShortVideoIncome,
+			TotalAnchorVideoIncome:      amounts.TotalAnchorVideoIncome,
 			TotalGameIncome:             amounts.TotalGameIncome,
 			TotalLiveDuration:           amounts.TotalLiveDuration,
 		},

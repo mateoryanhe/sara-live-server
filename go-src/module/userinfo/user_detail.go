@@ -38,11 +38,32 @@ func QueryUserDetail(_ context.Context, req *accountdto.GetUserDetailReq) (*acco
 		Wallet:         toUserWalletDetailItem(userInfo),
 		UserExt:        toUserExtDetailItem(userExt),
 		PromotionAttribution: toUserPromotionAttributionDetailItem(userExt),
+		RegisterUrlAttr:      toUserRegisterUrlAttrDetailItem(userinfodao.FindUserRegisterUrlAttrByUserId(req.UserId)),
 		CumulativeStat: toUserCumulativeStatDetailItem(userinfodao.GetUserCumulativeStatFromDB(req.UserId)),
 		LoginDevice:       toUserLoginDeviceDetailItem(userlogindevicedao.GetUserLoginDeviceFromDB(req.UserId)),
 		ChannelPayProfile: toUserChannelPayProfileDetailItem(channelpaydao.GetExisting(req.UserId)),
 		WithdrawPayout:    toUserWithdrawPayoutDetailItem(userwithdrawdao.GetUserPayoutInfo(req.UserId)),
 	}, nil
+}
+
+func toUserRegisterUrlAttrDetailItem(row *userentity.UserRegisterUrlAttr) *accountdto.UserRegisterUrlAttrDetailItem {
+	if row == nil || row.ID == 0 || !row.HasValues() {
+		return nil
+	}
+	item := &accountdto.UserRegisterUrlAttrDetailItem{
+		Type:     strings.TrimSpace(row.Type),
+		Ch:       strings.TrimSpace(row.Ch),
+		TjUserId: strings.TrimSpace(row.TjUserId),
+	}
+	if !row.CreatedAt.IsZero() {
+		createdAt := row.CreatedAt
+		item.CreatedAt = &createdAt
+	}
+	if !row.UpdatedAt.IsZero() {
+		updatedAt := row.UpdatedAt
+		item.UpdatedAt = &updatedAt
+	}
+	return item
 }
 
 func toUserWithdrawPayoutDetailItem(row *userentity.UserPayoutInfo) *accountdto.UserWithdrawPayoutDetailItem {

@@ -79,6 +79,8 @@ const (
 	ReasonUserWithdrawRefund Reason = 37
 	// ReasonLuckyGiftPayout 幸运礼物返奖
 	ReasonLuckyGiftPayout Reason = 38
+	// ReasonAnchorVideoUnlock 主播相册视频付费解锁
+	ReasonAnchorVideoUnlock Reason = 39
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -157,6 +159,8 @@ func (r Reason) String() string {
 		return "UserWithdrawRefund"
 	case ReasonLuckyGiftPayout:
 		return "LuckyGiftPayout"
+	case ReasonAnchorVideoUnlock:
+		return "AnchorVideoUnlock"
 	default:
 		return "Unknown"
 	}

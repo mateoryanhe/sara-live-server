@@ -3,45 +3,108 @@ package anchorvideo
 import (
 	"context"
 	"strings"
+	"unicode/utf8"
 
+	"xr-game-server/constants/common"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/anchorvideodao"
+	"xr-game-server/dao/anchorvideopurchasedao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/anchorvideodto"
+	entity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/module/anchorvideopricetier"
 	"xr-game-server/module/upload"
 )
 
-// GetVideoList App 查询主播视频列表(读缓存)
-func GetVideoList(_ context.Context, req *anchorvideodto.VideoListReq) (*anchorvideodto.VideoListRes, error) {
+const (
+	maxAnchorVideoDescriptionRunes = 200
+	defaultVideoListPageSize       = 20
+	maxVideoListPageSize           = 100
+)
+
+// GetVideoList 读主播相册列表缓存(最多1000)再分页;新增/删除会刷新缓存;paid:价格0/主播本人/已购为true.
+func GetVideoList(ctx context.Context, req *anchorvideodto.VideoListReq) (*anchorvideodto.VideoListRes, error) {
 	if req == nil || req.AnchorId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	rows := anchorvideodao.GetVideoList(req.AnchorId)
-	list := make([]*anchorvideodto.VideoItem, 0, len(rows))
-	for _, row := range rows {
+	pageIndex := req.PageIndex
+	if pageIndex <= 0 {
+		pageIndex = 1
+	}
+	pageSize := req.PageSize
+	if pageSize <= 0 {
+		pageSize = defaultVideoListPageSize
+	}
+	if pageSize > maxVideoListPageSize {
+		pageSize = maxVideoListPageSize
+	}
+
+	rows := anchorvideodao.GetCachedVideoList(req.AnchorId)
+	total := len(rows)
+	offset := (pageIndex - 1) * pageSize
+	if offset > total {
+		offset = total
+	}
+	end := offset + pageSize
+	if end > total {
+		end = total
+	}
+	pageRows := rows[offset:end]
+
+	viewerId := httpserver.GetAuthId(ctx)
+	purchased := map[uint64]struct{}{}
+	if viewerId > 0 && viewerId != req.AnchorId {
+		purchased = anchorvideopurchasedao.GetPurchasedVideoIds(viewerId, req.AnchorId)
+	}
+
+	list := make([]*anchorvideodto.VideoItem, 0, len(pageRows))
+	for _, row := range pageRows {
 		if row == nil || row.ID == 0 || row.IsDeleted {
 			continue
 		}
-		list = append(list, &anchorvideodto.VideoItem{
-			Id:    row.ID,
-			Video: upload.GetUrlByName(row.Video),
-		})
+		item := toVideoItem(row)
+		item.Paid = isVideoPaidForViewer(viewerId, row, purchased)
+		list = append(list, item)
 	}
-	return &anchorvideodto.VideoListRes{List: list}, nil
+	return &anchorvideodto.VideoListRes{
+		List:      list,
+		Total:     total,
+		PageIndex: pageIndex,
+		PageSize:  pageSize,
+	}, nil
 }
 
-// AddVideosFromStoredFiles 将已上传的对象路径批量写入主播视频库;超上限整批失败
-func AddVideosFromStoredFiles(ctx context.Context, storedNames []string) (*anchorvideodto.UploadVideoRes, error) {
-	names := make([]string, 0, len(storedNames))
-	for _, name := range storedNames {
-		name = strings.TrimSpace(name)
-		if name == "" {
-			continue
-		}
-		names = append(names, name)
+func isVideoPaidForViewer(viewerId uint64, row *entity.AnchorVideo, purchased map[uint64]struct{}) bool {
+	if row == nil {
+		return false
 	}
-	if len(names) == 0 {
+	// 价格为 0: 免费,默认已付费
+	if row.Price <= common.Zero {
+		return true
+	}
+	if viewerId == 0 {
+		return false
+	}
+	// 主播本人
+	if viewerId == row.AnchorId {
+		return true
+	}
+	_, ok := purchased[row.ID]
+	return ok
+}
+
+// AddVideoFromStoredFile 写入单个相册视频;price 须命中已上架价格挡位(读价格缓存);description 可空.
+func AddVideoFromStoredFile(ctx context.Context, storedName string, price float64, description string) (*anchorvideodto.UploadVideoRes, error) {
+	storedName = strings.TrimSpace(storedName)
+	if storedName == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if price <= common.Zero || !anchorvideopricetier.IsOnShelfPrice(price) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	description = strings.TrimSpace(description)
+	if utf8.RuneCountInString(description) > maxAnchorVideoDescriptionRunes {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	userId := httpserver.GetAuthId(ctx)
@@ -52,27 +115,56 @@ func AddVideosFromStoredFiles(ctx context.Context, storedNames []string) (*ancho
 	if info == nil || !info.IsAnchor() {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
 	}
-	remain := anchorvideodao.MaxVideos() - anchorvideodao.CountVideos(userId)
-	if remain <= 0 || len(names) > remain {
+	if anchorvideodao.CountVideos(userId) >= anchorvideodao.MaxVideos() {
 		return nil, errercode.CreateCode(errercode.AnchorVideoLimit)
 	}
-	list := make([]*anchorvideodto.VideoItem, 0, len(names))
-	for _, name := range names {
-		row := anchorvideodao.TryAddVideo(userId, name)
-		if row == nil {
-			for _, item := range list {
-				if item != nil && item.Id > 0 {
-					anchorvideodao.SoftDeleteVideos(userId, []uint64{item.Id})
-				}
-			}
-			return nil, errercode.CreateCode(errercode.AnchorVideoLimit)
-		}
-		list = append(list, &anchorvideodto.VideoItem{
-			Id:    row.ID,
-			Video: upload.GetUrlByName(row.Video),
-		})
+	row := anchorvideodao.TryAddVideo(userId, storedName, price, description)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.AnchorVideoLimit)
 	}
-	return &anchorvideodto.UploadVideoRes{List: list}, nil
+	item := toVideoItem(row)
+	return &anchorvideodto.UploadVideoRes{
+		Id:          item.Id,
+		Video:       item.Video,
+		Price:       item.Price,
+		Description: item.Description,
+	}, nil
+}
+
+// UpdateVideo 修改自己相册视频的价格/描述,并刷新列表缓存.
+func UpdateVideo(ctx context.Context, req *anchorvideodto.UpdateVideoReq) (*anchorvideodto.UpdateVideoRes, error) {
+	if req == nil || req.VideoId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if req.Price < common.Zero {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if req.Price > common.Zero && !anchorvideopricetier.IsOnShelfPrice(req.Price) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	description := strings.TrimSpace(req.Description)
+	if utf8.RuneCountInString(description) > maxAnchorVideoDescriptionRunes {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	info := userinfodao.GetUserInfoByUserId(userId)
+	if info == nil || !info.IsAnchor() {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
+	}
+	row := anchorvideodao.UpdateVideoMeta(userId, req.VideoId, req.Price, description)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.AnchorVideoNonExist)
+	}
+	item := toVideoItem(row)
+	return &anchorvideodto.UpdateVideoRes{
+		Id:          item.Id,
+		Video:       item.Video,
+		Price:       item.Price,
+		Description: item.Description,
+	}, nil
 }
 
 // DeleteVideo 批量删除当前登录主播自己的相册视频
@@ -100,4 +192,16 @@ func DeleteVideo(ctx context.Context, req *anchorvideodto.DeleteVideoReq) (*anch
 		Success:    true,
 		DeletedIds: deletedIds,
 	}, nil
+}
+
+func toVideoItem(row *entity.AnchorVideo) *anchorvideodto.VideoItem {
+	if row == nil {
+		return &anchorvideodto.VideoItem{}
+	}
+	return &anchorvideodto.VideoItem{
+		Id:          row.ID,
+		Video:       upload.GetUrlByName(row.Video),
+		Price:       row.Price,
+		Description: row.Description,
+	}
 }

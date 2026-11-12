@@ -17,6 +17,7 @@ func InitUserInfoDao() {
 	userInfoCacheMgr = cache.NewRowCache[*userentity.UserInfo]()
 	initUserCumulativeStatDao()
 	initUserExtDao()
+	initUserRegisterUrlAttrDao()
 	initEmailUserIdCache()
 	initFirebaseUserIdCache()
 	initUserRechargeCfgFirstRechargeDao()
@@ -53,6 +54,25 @@ func GetUserInfoFromMemory(userId uint64) *userentity.UserInfo {
 	}
 	v, _ := userInfoCacheMgr.GetRowCached(gctx.New(), userId)
 	return v
+}
+
+// FindUserInfoByUserId 按用户ID查已存在用户:优先内存,未命中再读库并回填缓存;库中不存在返回 nil(不自动新建)
+func FindUserInfoByUserId(userId uint64) *userentity.UserInfo {
+	if userId == 0 {
+		return nil
+	}
+	if info := GetUserInfoFromMemory(userId); info != nil {
+		return info
+	}
+	var data *userentity.UserInfo
+	_ = g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
+		string(db.IdName): userId,
+	}).Scan(&data)
+	if data == nil || data.ID == 0 {
+		return nil
+	}
+	PublishUserInfo(data)
+	return data
 }
 
 // RemoveUserInfosFromMemory 批量删除用户基础信息进程缓存，不影响数据库数据。

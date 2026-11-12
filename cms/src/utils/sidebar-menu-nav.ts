@@ -111,8 +111,9 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
         add('/config')
         if (
             path.startsWith('/operation/random-nickname/')
-            || path === '/config/app-token'
+            ||             path === '/config/app-token'
             || path === '/config/account-cfg'
+            || path === '/config/attribution-report-cfg'
             || path === '/config/server-runtime-cfg'
         ) {
             add('/config/group/basic')

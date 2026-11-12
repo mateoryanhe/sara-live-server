@@ -13,20 +13,24 @@ const (
 )
 
 const (
-	AnchorVideoAnchorId db.TbCol = "anchor_id"
-	AnchorVideoVideo    db.TbCol = "video"
+	AnchorVideoAnchorId    db.TbCol = "anchor_id"
+	AnchorVideoVideo       db.TbCol = "video"
+	AnchorVideoPrice       db.TbCol = "price"
+	AnchorVideoDescription db.TbCol = "description"
 )
 
 // AnchorVideo 主播相册视频(软删走 syndb)
 type AnchorVideo struct {
 	migrate.MoreModel
-	AnchorId uint64 `gorm:"index:idx_av_anchor_created,priority:1;default:0;comment:主播用户ID" json:"anchorId"`
-	Video    string `gorm:"size:255;default:'';comment:视频资源名" json:"video"`
+	AnchorId    uint64  `gorm:"index:idx_av_anchor_created,priority:1;default:0;comment:主播用户ID" json:"anchorId"`
+	Video       string  `gorm:"size:255;default:'';comment:视频资源名" json:"video"`
+	Price       float64 `gorm:"type:decimal(10,4);default:0;comment:钻石价格" json:"price"`
+	Description string  `gorm:"size:200;default:'';comment:描述(可空)" json:"description"`
 	// CreatedAt 覆盖嵌入字段以建复合索引
 	CreatedAt time.Time `gorm:"index:idx_av_anchor_created,priority:2" json:"createdAt"`
 }
 
-func NewAnchorVideo(anchorId uint64, video string) *AnchorVideo {
+func NewAnchorVideo(anchorId uint64, video string, price float64, description string) *AnchorVideo {
 	ret := &AnchorVideo{}
 	ret.ID = snowflake.GetId()
 	now := time.Now()
@@ -34,6 +38,8 @@ func NewAnchorVideo(anchorId uint64, video string) *AnchorVideo {
 	ret.SetUpdatedAt(now)
 	ret.SetAnchorId(anchorId)
 	ret.SetVideo(video)
+	ret.SetPrice(price)
+	ret.SetDescription(description)
 	return ret
 }
 
@@ -45,6 +51,16 @@ func (r *AnchorVideo) SetAnchorId(v uint64) {
 func (r *AnchorVideo) SetVideo(v string) {
 	r.Video = v
 	syndb.AddData(TbAnchorVideo, AnchorVideoVideo, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *AnchorVideo) SetPrice(v float64) {
+	r.Price = v
+	syndb.AddData(TbAnchorVideo, AnchorVideoPrice, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *AnchorVideo) SetDescription(v string) {
+	r.Description = v
+	syndb.AddData(TbAnchorVideo, AnchorVideoDescription, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *AnchorVideo) SetCreatedAt(v time.Time) {
@@ -81,5 +97,7 @@ func initAnchorVideo() {
 	syndb.RegQuick(TbAnchorVideo, db.DeletedAtName)
 	syndb.RegQuick(TbAnchorVideo, AnchorVideoAnchorId)
 	syndb.RegQuick(TbAnchorVideo, AnchorVideoVideo)
+	syndb.RegQuick(TbAnchorVideo, AnchorVideoPrice)
+	syndb.RegQuick(TbAnchorVideo, AnchorVideoDescription)
 	migrate.AutoMigrate(&AnchorVideo{})
 }

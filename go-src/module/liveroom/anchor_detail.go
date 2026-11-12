@@ -95,6 +95,7 @@ func toIncomeAmountsItem(a *entity.LiveRoomIncomeAmounts) accountdto.LiveRoomInc
 		TotalVideoCallTicketIncome:  a.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome: a.TotalVideoCallBillingIncome,
 		TotalShortVideoIncome:       a.TotalShortVideoIncome,
+		TotalAnchorVideoIncome:      a.TotalAnchorVideoIncome,
 		TotalGameIncome:             a.TotalGameIncome,
 		TotalLiveDuration:           a.TotalLiveDuration,
 	}

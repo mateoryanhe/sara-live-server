@@ -31,6 +31,9 @@ func Init() {
 	httpserver.RegNonAuthAppRouteGroup("/sofie/boot", []httpserver.AppRoute{
 		{Path: "/loadConfig", Handler: jsonHandler((&controller.SysInfoController{}).GetInfo)},
 	})
+	httpserver.RegAppRouteGroup("/sofie/campaign", []httpserver.AppRoute{
+		{Path: "/fetchRoomActivity", Handler: jsonHandler((&controller.ActivityAppController{}).GetRoomActivity)},
+	})
 	httpserver.RegAppRouteGroup("/sofie/catalog", []httpserver.AppRoute{
 		{Path: "/browsePackages", Handler: jsonHandler((&controller.RechargeCfgAppController{}).RechargeCfgList)},
 	})
@@ -72,7 +75,10 @@ func Init() {
 		{Path: "/removePhoto", Handler: jsonHandler((&controller.AnchorPhotoAppController{}).Delete)},
 		{Path: "/browseVideos", Handler: jsonHandler((&controller.AnchorVideoAppController{}).List)},
 		{Path: "/uploadVideo", Handler: controller.HandleUploadAnchorVideo},
+		{Path: "/updateVideo", Handler: jsonHandler((&controller.AnchorVideoAppController{}).Update)},
 		{Path: "/removeVideo", Handler: jsonHandler((&controller.AnchorVideoAppController{}).Delete)},
+		{Path: "/unlockVideo", Handler: jsonHandler((&controller.AnchorVideoAppController{}).Unlock)},
+		{Path: "/browseVideoPrices", Handler: jsonHandler((&controller.AnchorVideoAppController{}).PriceTierList)},
 	})
 	httpserver.RegNonAuthAppRouteGroup("/sofie/googleAuth", []httpserver.AppRoute{
 		{Path: "/fetchClientCfg", Handler: jsonHandler((&controller.FirebaseAppController{}).GetClientCfgForApp)},
@@ -123,8 +129,8 @@ func Init() {
 		{Path: "/browseCashOutTiers", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ListWithdrawTiers)},
 	})
 	httpserver.RegAppRouteGroup("/sofie/play", []httpserver.AppRoute{
-		{Path: "/browseTitles", Handler: jsonHandler((&controller.GameAppController{}).AppGameList)},
-		{Path: "/openTitle", Handler: jsonHandler((&controller.GameAppController{}).AppGameStart)},
+		{Path: "/browseTitles", Handler: jsonHandler((&controller.GameAppController{}).BrowseTitles)},
+		{Path: "/openTitle", Handler: jsonHandler((&controller.GameAppController{}).OpenTitle)},
 		{Path: "/browseBets", Handler: jsonHandler((&controller.GameAppController{}).AppGameBetList)},
 		{Path: "/browseRoundSpend", Handler: jsonHandler((&controller.GameAppController{}).AppGameConsumeRank)},
 	})
@@ -168,6 +174,7 @@ func Init() {
 	httpserver.RegAppRouteGroup("/sofie/session", []httpserver.AppRoute{
 		{Path: "/inviteFromHall", Handler: jsonHandler((&controller.CallAppController{}).LiveRoomCall)},
 		{Path: "/inviteDirectVideo", Handler: jsonHandler((&controller.CallAppController{}).OneToOneRoomCall)},
+		{Path: "/repushIncomingInvite", Handler: jsonHandler((&controller.CallAppController{}).RepushIncomingCall)},
 		{Path: "/inviteManyFromHall", Handler: jsonHandler((&controller.CallAppController{}).BatchInviteLiveRoomCall)},
 		{Path: "/declineInvite", Handler: jsonHandler((&controller.CallAppController{}).AnchorRejectCall)},
 		{Path: "/acceptInvite", Handler: jsonHandler((&controller.CallAppController{}).AcceptCall)},

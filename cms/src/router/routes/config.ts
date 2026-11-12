@@ -19,6 +19,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '账号配置'},
         },
         {
+            path: 'attribution-report-cfg',
+            name: 'AttributionReportCfgManagement',
+            component: () => import('@/views/config/attribution-report-cfg.vue'),
+            meta: {title: '归因数据上报'},
+        },
+        {
             path: 'app-version-cfg',
             name: 'AppVersionCfgManagement',
             component: () => import('@/views/config/app-version-cfg.vue'),
@@ -103,6 +109,18 @@ export const configRoutes: RouteRecordRaw = {
             name: 'FirebaseCfgManagement',
             component: () => import('@/views/config/firebase.vue'),
             meta: {title: 'Firebase登录'},
+        },
+        {
+            path: 'firebase-push',
+            name: 'FirebasePushCfgManagement',
+            component: () => import('@/views/config/firebase-push.vue'),
+            meta: {title: 'Firebase推送'},
+        },
+        {
+            path: 'game-activity',
+            name: 'GameActivityCfgManagement',
+            component: () => import('@/views/config/game-activity.vue'),
+            meta: {title: '游戏活动配置'},
         },
         {
             path: 'meta-pixel',

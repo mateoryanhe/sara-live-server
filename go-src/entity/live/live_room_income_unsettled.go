@@ -68,6 +68,11 @@ func (r *LiveRoomIncomeUnsettled) AddShortVideoEarn(v float64) {
 	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
 }
 
+// AddAnchorVideoEarn 主播相册视频收益(总收益+相册视频细分,内部加锁)
+func (r *LiveRoomIncomeUnsettled) AddAnchorVideoEarn(v float64) {
+	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalAnchorVideoIncome, &r.TotalAnchorVideoIncome)
+}
+
 // AddGameEarn 游戏收益(总收益按钻石折算 + 游戏细分金币下注额,内部加锁)
 func (r *LiveRoomIncomeUnsettled) AddGameEarn(goldAmount, incomeDelta float64) {
 	addGameEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, goldAmount, incomeDelta)

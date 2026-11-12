@@ -147,6 +147,9 @@
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyShortVideoIncome')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyAnchorVideoIncome')" align="right" min-width="160">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalAnchorVideoIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>

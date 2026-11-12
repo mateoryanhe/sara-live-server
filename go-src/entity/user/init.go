@@ -12,6 +12,7 @@ func Init() {
 	initCurrencyLog()
 	initCoinMerchantGoldTransferLog()
 	initUserAttributionReport()
+	initUserRegisterUrlAttr()
 	initUserFeedbackRecord()
 	initUserReportRecord()
 	initSimulatorBlacklistLog()

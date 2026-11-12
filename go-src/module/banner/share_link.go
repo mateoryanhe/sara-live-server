@@ -5,28 +5,28 @@ import (
 	"strings"
 )
 
-// appendShareParamsToLink Banner 跳转链接追加 token(当前用户 App Token,便于 H5 鉴权查数据).
-func appendShareParamsToLink(rawLink, appToken string) string {
+// appendShareParamsToLink Banner 跳转链接追加 token(登录同款 userId.token,便于 H5 鉴权).
+func appendShareParamsToLink(rawLink, clientToken string) string {
 	link := strings.TrimSpace(rawLink)
-	appToken = strings.TrimSpace(appToken)
-	if link == "" || appToken == "" {
+	clientToken = strings.TrimSpace(clientToken)
+	if link == "" || clientToken == "" {
 		return link
 	}
 
 	u, err := url.Parse(link)
 	if err != nil || u.Scheme == "" || u.Host == "" {
-		return appendShareParamsRaw(link, appToken)
+		return appendShareParamsRaw(link, clientToken)
 	}
 	q := u.Query()
-	q.Set("token", appToken)
+	q.Set("token", clientToken)
 	u.RawQuery = q.Encode()
 	return u.String()
 }
 
-func appendShareParamsRaw(link, appToken string) string {
+func appendShareParamsRaw(link, clientToken string) string {
 	sep := "?"
 	if strings.Contains(link, "?") {
 		sep = "&"
 	}
-	return link + sep + "token=" + url.QueryEscape(appToken)
+	return link + sep + "token=" + url.QueryEscape(clientToken)
 }

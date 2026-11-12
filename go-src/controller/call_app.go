@@ -64,3 +64,8 @@ func (c *CallAppController) CallHeart(ctx context.Context, req *calldto.CallHear
 func (c *CallAppController) EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes, error) {
 	return call.EndCall(ctx, req)
 }
+
+// RepushIncomingCall 重推进行中的来电(恢复通话流程)
+func (c *CallAppController) RepushIncomingCall(ctx context.Context, req *calldto.RepushIncomingCallReq) (*calldto.RepushIncomingCallRes, error) {
+	return call.RepushIncomingCall(ctx, req)
+}

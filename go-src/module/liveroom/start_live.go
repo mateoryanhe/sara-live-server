@@ -79,6 +79,7 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	resetLiveCameraEnabled(room.ID)
 
 	liveRecordId := snowflake.GetId()
+	resetLiveRecordRecoverAttempts(room.ID)
 	room.SetLiveRecordId(liveRecordId)
 	room.SetHeartTime(&heartTime)
 

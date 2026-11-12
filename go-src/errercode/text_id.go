@@ -97,6 +97,7 @@ func init() {
 		AnchorPhotoNonExist:                "Foto album host tidak ditemukan",
 		AnchorVideoLimit:                   "Batas album video host tercapai",
 		AnchorVideoNonExist:                "Video album host tidak ditemukan",
+		AnchorVideoPriceTierNonExist:       "Tier harga video album host tidak ditemukan",
 		CallOrderNonExist:                  "Pesanan panggilan tidak ditemukan",
 		CallOrderStateInvalid:              "Status pesanan panggilan tidak mengizinkan operasi ini",
 		BotAnchorNonExist:                  "Anchor bot tidak ditemukan",
