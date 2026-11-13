@@ -151,6 +151,11 @@ func (c *LiveRoomAppController) OneToOneRoomList(ctx context.Context, req *liver
 	return liveroom.GetOneToOneRoomList(ctx, req)
 }
 
+// MergedRoomList 合并上架直播间与上架1v1房间列表；排序开播优先，未开播再按 WebSocket 在线优先。
+func (c *LiveRoomAppController) MergedRoomList(ctx context.Context, req *liveroomdto.GetMergedRoomListReq) (res *liveroomdto.GetMergedRoomListRes, err error) {
+	return liveroom.GetMergedRoomList(ctx, req)
+}
+
 func (c *LiveRoomAppController) CreateOneToOneRoom(ctx context.Context, req *liveroomdto.CreateOneToOneRoomReq) (*liveroomdto.CreateOneToOneRoomRes, error) {
 	return liveroom.CreateOneToOneRoom(ctx, req)
 }

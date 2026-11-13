@@ -12,14 +12,16 @@ import (
 )
 
 func GetLuckyGiftPoolCfg(_ context.Context, _ *luckygiftpoolcfgdto.GetLuckyGiftPoolCfgReq) (*luckygiftpoolcfgdto.GetLuckyGiftPoolCfgRes, error) {
-	id, poolBalance, contributePercent, winProbability, tiers, createdAt, _ := snapshotForCMS()
+	id, poolBalance, contributePercent, winProbability, totalConsume, totalPayout, tiers, createdAt, _ := snapshotForCMS()
 	item := &luckygiftpoolcfgdto.LuckyGiftPoolCfgItem{
-		PoolBalance:       poolBalance,
-		ContributePercent: contributePercent,
-		WinProbability:    winProbability,
-		Tiers:             toTierItems(tiers),
-		CreatedAt:         formatCfgTime(createdAt),
-		UpdatedAt:         formatCfgTime(time.Now()),
+		PoolBalance:        poolBalance,
+		ContributePercent:  contributePercent,
+		WinProbability:     winProbability,
+		TotalConsumeAmount: totalConsume,
+		TotalPayoutAmount:  totalPayout,
+		Tiers:              toTierItems(tiers),
+		CreatedAt:          formatCfgTime(createdAt),
+		UpdatedAt:          formatCfgTime(time.Now()),
 	}
 	if id != 0 {
 		item.ID = strconv.FormatUint(id, 10)

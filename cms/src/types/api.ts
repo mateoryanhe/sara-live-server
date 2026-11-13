@@ -2524,6 +2524,8 @@ export interface LuckyGiftPoolCfg {
     poolBalance: number
     contributePercent: number
     winProbability: number
+    totalConsumeAmount: number
+    totalPayoutAmount: number
     tiers: LuckyGiftPoolMultiplierTier[]
     createdAt: string
     updatedAt: string

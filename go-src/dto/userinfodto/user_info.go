@@ -95,6 +95,16 @@ type UpdateNicknameRes struct {
 	Nickname string `json:"nickname"`
 }
 
+// UpdateRemarkReq 修改备注(个人简介)
+type UpdateRemarkReq struct {
+	g.Meta `path:"/updateRemark" method:"post" summary:"修改用户备注" tags:"用户基础信息"`
+	Remark string `json:"remark" v:"max-length:255#备注最长255字符" dc:"用户备注(可空表示清空)"`
+}
+
+type UpdateRemarkRes struct {
+	Remark string `json:"remark"`
+}
+
 // GetCurrencyLogReq 查询用户货币流水
 type GetCurrencyLogReq struct {
 	g.Meta    `path:"/getCurrencyLog" method:"post" summary:"获取用户货币流水" tags:"用户基础信息"`

@@ -133,6 +133,24 @@ func UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (re
 	}, nil
 }
 
+// UpdateRemark 修改当前登录用户备注(可空清空)
+func UpdateRemark(ctx context.Context, req *userinfodto.UpdateRemarkReq) (res *userinfodto.UpdateRemarkRes, err error) {
+	remark := strings.TrimSpace(req.Remark)
+	if remark != "" {
+		if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, remark); err != nil {
+			return nil, err
+		}
+	}
+
+	userId := httpserver.GetAuthId(ctx)
+	data := userinfodao.GetUserInfoByUserId(userId)
+	data.SetRemark(remark)
+	userinfodao.PublishUserInfo(data)
+	return &userinfodto.UpdateRemarkRes{
+		Remark: data.Remark,
+	}, nil
+}
+
 // UploadAvatar 上传头像,保存图片并写回 user_infos.avatar
 func UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *userinfodto.UploadAvatarRes, err error) {
 	name, err := upload.UploadImageForApp(ctx, req.File)

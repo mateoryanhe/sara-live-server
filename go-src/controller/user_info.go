@@ -40,6 +40,10 @@ func (c *UserInfoController) UpdateNickname(ctx context.Context, req *userinfodt
 	return userinfo.UpdateNickname(ctx, req)
 }
 
+func (c *UserInfoController) UpdateRemark(ctx context.Context, req *userinfodto.UpdateRemarkReq) (res *userinfodto.UpdateRemarkRes, err error) {
+	return userinfo.UpdateRemark(ctx, req)
+}
+
 func (c *UserInfoController) UpdateGender(ctx context.Context, req *userinfodto.UpdateGenderReq) (res *userinfodto.UpdateGenderRes, err error) {
 	return userinfo.UpdateGender(ctx, req)
 }

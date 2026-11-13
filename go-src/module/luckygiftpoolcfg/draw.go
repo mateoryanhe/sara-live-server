@@ -29,12 +29,15 @@ func processBatchDrawLocked(unitPrice float64, count int) []DrawResult {
 	forceNoWin := isSettleNoWin()
 	var pendingCredit float64
 
+	var payoutSum float64
 	for i := 0; i < count; i++ {
 		d, next, credit := drawOnceOnBalance(unitPrice, balance, contributePct, winProb, runtime.tiers, forceNoWin)
 		balance = next
 		pendingCredit += credit
+		payoutSum = payoutSum + d.Payout
 		out = append(out, d)
 	}
+	accumulateLuckyGiftTotalsLocked(unitPrice, count, payoutSum)
 	if forceNoWin {
 		// 进池金额进临时表，不改 pool_balance
 		if pendingCredit > 0 {
@@ -47,6 +50,20 @@ func processBatchDrawLocked(unitPrice float64, count int) []DrawResult {
 		storePublicSnapshotLocked()
 	}
 	return out
+}
+
+// accumulateLuckyGiftTotalsLocked 开奖后 syndb 累计消费/返奖(须已持 runtimeMu)
+func accumulateLuckyGiftTotalsLocked(unitPrice float64, count int, payoutSum float64) {
+	if count <= 0 {
+		return
+	}
+	cfg := ensureRuntimeCfgLocked()
+	if unitPrice > 0 {
+		cfg.AddTotalConsumeAmount(unitPrice * float64(count))
+	}
+	if payoutSum > 0 {
+		cfg.AddTotalPayoutAmount(payoutSum)
+	}
 }
 
 // drawOnceOnBalance 单次抽奖。

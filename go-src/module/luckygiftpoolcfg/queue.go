@@ -178,11 +178,15 @@ func processRefundPayoutLocked(amount float64) {
 	}
 	if isSettleNoWin() {
 		enqueuePendingPoolCredit(amount)
+		runtimeMu.Lock()
+		ensureRuntimeCfgLocked().SubTotalPayoutAmount(amount)
+		runtimeMu.Unlock()
 		return
 	}
 	runtimeMu.Lock()
 	defer runtimeMu.Unlock()
 	setRuntimePoolBalanceLocked(runtimePoolBalanceLocked() + amount)
+	ensureRuntimeCfgLocked().SubTotalPayoutAmount(amount)
 	storePublicSnapshotLocked()
 }
 

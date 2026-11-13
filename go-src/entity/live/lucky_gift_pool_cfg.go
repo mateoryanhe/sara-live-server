@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/snowflake"
 	"xr-game-server/core/syndb"
@@ -23,18 +24,22 @@ const (
 )
 
 const (
-	LuckyGiftPoolCfgPoolBalance       db.TbCol = "pool_balance"
-	LuckyGiftPoolCfgContributePercent db.TbCol = "contribute_percent"
-	LuckyGiftPoolCfgWinProbability    db.TbCol = "win_probability"
+	LuckyGiftPoolCfgPoolBalance         db.TbCol = "pool_balance"
+	LuckyGiftPoolCfgContributePercent   db.TbCol = "contribute_percent"
+	LuckyGiftPoolCfgWinProbability      db.TbCol = "win_probability"
+	LuckyGiftPoolCfgTotalConsumeAmount  db.TbCol = "total_consume_amount"
+	LuckyGiftPoolCfgTotalPayoutAmount   db.TbCol = "total_payout_amount"
 )
 
 // LuckyGiftPoolCfg 幸运礼物奖池全局配置(CMS 单行, syndb 异步入库)。
 // 倍率挡位存于 lucky_gift_multiplier_tiers(gift_id=0)，不在本表。
 type LuckyGiftPoolCfg struct {
 	migrate.OneModel
-	PoolBalance       float64 `gorm:"type:decimal(20,4);default:10000000;comment:奖金池余额" json:"poolBalance"`
-	ContributePercent float64 `gorm:"type:decimal(10,4);default:0;comment:礼物金额进入奖池比例(%)" json:"contributePercent"`
-	WinProbability    float64 `gorm:"type:decimal(10,4);default:0;comment:中奖概率(%)" json:"winProbability"`
+	PoolBalance         float64 `gorm:"type:decimal(20,4);default:10000000;comment:奖金池余额" json:"poolBalance"`
+	ContributePercent   float64 `gorm:"type:decimal(10,4);default:0;comment:礼物金额进入奖池比例(%)" json:"contributePercent"`
+	WinProbability      float64 `gorm:"type:decimal(10,4);default:0;comment:中奖概率(%)" json:"winProbability"`
+	TotalConsumeAmount  float64 `gorm:"type:decimal(20,4);default:0;comment:幸运礼物累计消费金额" json:"totalConsumeAmount"`
+	TotalPayoutAmount   float64 `gorm:"type:decimal(20,4);default:0;comment:幸运礼物累计返奖金额" json:"totalPayoutAmount"`
 }
 
 // NewLuckyGiftPoolCfg 新建奖池配置并通过 syndb 入库
@@ -105,11 +110,46 @@ func (r *LuckyGiftPoolCfg) SetWinProbability(v float64) {
 	r.queue(LuckyGiftPoolCfgWinProbability, v)
 }
 
+// AddTotalConsumeAmount 累计幸运礼物消费金额(内存相加后 syndb 写绝对值)
+func (r *LuckyGiftPoolCfg) AddTotalConsumeAmount(v float64) {
+	if r == nil || r.ID == 0 || v <= 0 {
+		return
+	}
+	r.TotalConsumeAmount = math.AddFloat64(r.TotalConsumeAmount, v)
+	r.touchUpdatedAt()
+	r.queue(LuckyGiftPoolCfgTotalConsumeAmount, r.TotalConsumeAmount)
+}
+
+// AddTotalPayoutAmount 累计幸运礼物返奖金额(内存相加后 syndb 写绝对值)
+func (r *LuckyGiftPoolCfg) AddTotalPayoutAmount(v float64) {
+	if r == nil || r.ID == 0 || v <= 0 {
+		return
+	}
+	r.TotalPayoutAmount = math.AddFloat64(r.TotalPayoutAmount, v)
+	r.touchUpdatedAt()
+	r.queue(LuckyGiftPoolCfgTotalPayoutAmount, r.TotalPayoutAmount)
+}
+
+// SubTotalPayoutAmount 返奖退回奖池时扣减累计返奖(钱包加钻失败等)
+func (r *LuckyGiftPoolCfg) SubTotalPayoutAmount(v float64) {
+	if r == nil || r.ID == 0 || v <= 0 {
+		return
+	}
+	r.TotalPayoutAmount = math.SubFloat64(r.TotalPayoutAmount, v)
+	if r.TotalPayoutAmount < 0 {
+		r.TotalPayoutAmount = 0
+	}
+	r.touchUpdatedAt()
+	r.queue(LuckyGiftPoolCfgTotalPayoutAmount, r.TotalPayoutAmount)
+}
+
 func initLuckyGiftPoolCfg() {
 	syndb.RegQuick(TbLuckyGiftPoolCfg, db.CreatedAtName)
 	syndb.RegQuick(TbLuckyGiftPoolCfg, db.UpdatedAtName)
 	syndb.RegQuick(TbLuckyGiftPoolCfg, LuckyGiftPoolCfgPoolBalance)
 	syndb.RegQuick(TbLuckyGiftPoolCfg, LuckyGiftPoolCfgContributePercent)
 	syndb.RegQuick(TbLuckyGiftPoolCfg, LuckyGiftPoolCfgWinProbability)
+	syndb.RegQuick(TbLuckyGiftPoolCfg, LuckyGiftPoolCfgTotalConsumeAmount)
+	syndb.RegQuick(TbLuckyGiftPoolCfg, LuckyGiftPoolCfgTotalPayoutAmount)
 	migrate.AutoMigrate(&LuckyGiftPoolCfg{})
 }

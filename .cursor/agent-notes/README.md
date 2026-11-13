@@ -23,11 +23,12 @@
 | `直播正式服` | ec2-user @ **54.177.166.38**（2026-10 迁移；勿改回 52.9.70.64） | 正式 Go / CMS 部署 |
 | `直播审核服` | ec2-user @ **18.144.161.229**（`~/.ssh/config` 别名；旧记 18.144.165.177 已失效） | 审核专用（~1GB RAM） |
 | `直播测试服-h5` | h5-live @ 54.241.124.37 | H5/SFTP |
+| `语聊测试服` | ec2-user @ **63.185.66.53** | 语聊测试（私钥 `D:\root\yuliao.pem`） |
 
 ### SSH 密钥与连接方式
 
-- OpenSSH 已在 `C:\Users\hw\.ssh\config` 配置主机别名；查询日志时优先直接使用 `ssh 直播测试服`、`ssh 直播审核服`、`ssh 直播正式服`，不要改用 IP 绕过别名。
-- 上述 OpenSSH 别名使用私钥 `D:\root\1v1.pem`。
+- OpenSSH 已在 `C:\Users\hw\.ssh\config` 配置主机别名；查询日志时优先直接使用 `ssh 直播测试服`、`ssh 直播审核服`、`ssh 直播正式服`、`ssh 语聊测试服`，不要改用 IP 绕过别名。
+- 直播相关 OpenSSH 别名使用私钥 `D:\root\1v1.pem`；**语聊测试服**使用 `D:\root\yuliao.pem`。
 - PuTTY 部署脚本使用测试服密钥 `D:\tools\ppk\live-test.ppk`；仅运行既有 `plink.exe` / `pscp.exe` 脚本时使用该 PPK。
 - 只读日志查询无需再次询问；部署、重启、删除和数据库写操作仍按 `server-safety.mdc` 执行。
 - **正式服 IP（部署脚本）**：`pub-tool/go-prod/config.bat` 与 `pub-tool/cms-prod/config.bat` 的 `REMOTE_HOST=54.177.166.38` 为用户确认值，Agent **不得**擅自改回旧 IP。
@@ -63,6 +64,15 @@
 - **端口** `13307`，仅 `127.0.0.1`；库 `live_db`；root 密码与测试/dev 一致
 - **内存**：`innodb_buffer_pool_size=96M`，`max_connections=20`，`performance_schema=OFF`，无 binlog
 - Go 连接串（与 dev 同格式）：`mysql:root:***@tcp(127.0.0.1:13307)/live_db`
+
+## 语聊测试服（2026-11-13 从直播正式服克隆）
+
+- **机器**：`语聊测试服` ec2-user @ **63.185.66.53**（eu-central-1），~957MiB RAM / 30G 盘；私钥 `D:\root\yuliao.pem`
+- **Go**：`/home/ec2-user/xgameserver/`（二进制+`start.sh`+`GeoLite2` 自正式服）；`config.yaml` snowflake **`id: 5`**（勿与测/审/正 2/3/4 冲突）；`goPool.size=80`；日志 `rotateSize` 已缩小；`setcap cap_net_bind_service` 绑 443
+- **MariaDB**：端口 **`13307`** / 库 **`live_db`**（lowmem 配法同审核服）；数据来自正式服 `live_prod` dump
+- **R2**：`upload_resource_cfgs.s3_key_prefix=yuliao`（桶 `1v1`，公域仍 `cdnr2.saralive.net`）；对象从 `prod/` 复制到 `yuliao/`（约 2732 个；R2 须 `aws s3 sync --copy-props none`，失败对象再用 `s3api copy-object --metadata-directive COPY` 补齐）
+- **校验**：本机 `GET https://127.0.0.1/sysInfo/cfg` → `code=0`；域名/DNS/安全组未改，外网访问需另配
+- **注意**：`domain_site_mappings` 里 `w.sofie.net` 原 `root=/home/ec`（截断）已改为 `/home/ec2-user/cdn/extra-domain-042c51f984bb5033`；正式服 `/tmp` 临时包与 `yuliao.pem` 已清
 
 ## 正式服 MariaDB（2026-10-12）
 
@@ -288,7 +298,7 @@
 
 ## 幸运礼物奖池配置与开奖（2026-11-09）
 
-- 表 `lucky_gift_pool_cfgs`（单行）：`pool_balance`（默认 **1000 万**）、`contribute_percent`（进池比例%）、`win_probability`（中奖概率%）
+- 表 `lucky_gift_pool_cfgs`（单行）：`pool_balance`（默认 **1000 万**）、`contribute_percent`（进池比例%）、`win_probability`（中奖概率%）、`total_consume_amount` / `total_payout_amount`（幸运礼物累计消费/返奖，开奖时 syndb 累加；退池扣减返奖累计；CMS 只读）
 - 全局 5 挡倍率权重：`lucky_gift_multiplier_tiers.gift_id=0`（与单礼物挡位同表）
 - 临时入账表 `lucky_gift_pool_pending_balances`：`amount` + `status`(0未处理/2处理中/1已处理)；冷启结算窗口与 PrepareRestart 排空时**不直加** `pool_balance`
 - CMS：`/live/gift/lucky-gift-pool-cfg`（`LuckyGiftPoolCfgManagement`）；API `/luckyGiftPoolCfg/get|save`

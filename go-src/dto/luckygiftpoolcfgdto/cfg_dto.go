@@ -10,13 +10,15 @@ type GetLuckyGiftPoolCfgReq struct {
 }
 
 type LuckyGiftPoolCfgItem struct {
-	ID                string                              `json:"id"`
-	PoolBalance       float64                             `json:"poolBalance"`
-	ContributePercent float64                             `json:"contributePercent"`
-	WinProbability    float64                             `json:"winProbability"`
-	Tiers             []*giftdto.LuckyGiftMultiplierTierItem `json:"tiers"`
-	CreatedAt         string                              `json:"createdAt"`
-	UpdatedAt         string                              `json:"updatedAt"`
+	ID                 string                              `json:"id"`
+	PoolBalance        float64                             `json:"poolBalance"`
+	ContributePercent  float64                             `json:"contributePercent"`
+	WinProbability     float64                             `json:"winProbability"`
+	TotalConsumeAmount float64                             `json:"totalConsumeAmount" dc:"幸运礼物累计消费金额(只读,syndb累计)"`
+	TotalPayoutAmount  float64                             `json:"totalPayoutAmount" dc:"幸运礼物累计返奖金额(只读,syndb累计;退池扣减)"`
+	Tiers              []*giftdto.LuckyGiftMultiplierTierItem `json:"tiers"`
+	CreatedAt          string                              `json:"createdAt"`
+	UpdatedAt          string                              `json:"updatedAt"`
 }
 
 type GetLuckyGiftPoolCfgRes struct {

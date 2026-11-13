@@ -75,6 +75,32 @@ type GetOneToOneRoomListRes struct {
 	List     []*OneToOneRoomListItem `json:"list" dc:"1v1房间列表(在线优先,同态下开播优先)"`
 }
 
+// GetMergedRoomListReq App 合并直播间与1v1房间列表(并集)；过滤参数对齐 roomList + oneToOneRoomList。
+type GetMergedRoomListReq struct {
+	g.Meta             `path:"/mergedRoomList" method:"post" summary:"合并直播间与1v1房间列表" tags:"直播间"`
+	Page               int    `json:"page" dc:"页码(从1开始,默认1)"`
+	PageSize           int    `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	StatusFilter       int    `json:"statusFilter" dc:"开播状态过滤(0=全部,1=仅开播,2=仅未开播;对齐roomList)"`
+	OnlineStatusFilter int    `json:"onlineStatusFilter" v:"in:0,1,2#在线状态无效" dc:"WebSocket在线过滤(0=全部,1=在线,2=离线;对齐oneToOneRoomList.statusFilter)"`
+	TagId              uint64 `json:"tagId,string" dc:"标签ID(0=全部;对齐roomList)"`
+	Title              string `json:"title" dc:"标题(模糊匹配;对齐roomList)"`
+	Notice             string `json:"notice" dc:"公告(模糊匹配;对齐roomList)"`
+	Key                string `json:"key" dc:"关键字(模糊匹配主播ID或主播昵称)"`
+}
+
+// MergedRoomListItem 合并列表条目；未开通/未上架或CMS关闭1v1时 oneToOneRoom 为 null；仅1v1上架时 liveRoom 可为 null。
+type MergedRoomListItem struct {
+	LiveRoom     *LiveRoomListItem     `json:"liveRoom" dc:"直播间条目(等同roomList单条;未上架直播间时为null)"`
+	OneToOneRoom *OneToOneRoomListItem `json:"oneToOneRoom" dc:"1v1条目(等同oneToOneRoomList单条;未开通/CMS关闭时为null)"`
+}
+
+type GetMergedRoomListRes struct {
+	Total    int                   `json:"total" dc:"总条数"`
+	Page     int                   `json:"page" dc:"当前页码"`
+	PageSize int                   `json:"pageSize" dc:"每页数量"`
+	List     []*MergedRoomListItem `json:"list" dc:"合并列表(开播优先,未开播再按WS在线优先)"`
+}
+
 // GetFollowedLiveRoomListReq App 分页查询当前用户关注的直播间列表
 type GetFollowedLiveRoomListReq struct {
 	g.Meta       `path:"/followedRoomList" method:"post" summary:"查询我关注的直播间列表" tags:"直播间"`

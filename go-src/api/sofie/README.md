@@ -20,6 +20,7 @@
 | `profile` | 获取当前用户信息 | 需要登录 | `POST /userInfo/get` | `POST /sofie/profile/fetchMine` |
 | `profile` | 获取用户扩展信息 | 需要登录 | `POST /userInfo/getUserExt` | `POST /sofie/profile/fetchExtra` |
 | `profile` | 修改昵称 | 需要登录 | `POST /userInfo/updateNickname` | `POST /sofie/profile/renameNick` |
+| `profile` | 修改备注 | 需要登录 | `POST /userInfo/updateRemark` | `POST /sofie/profile/replaceRemark` |
 | `profile` | 修改性别 | 需要登录 | `POST /userInfo/updateGender` | `POST /sofie/profile/changeSex` |
 | `profile` | 修改生日 | 需要登录 | `POST /userInfo/updateBirthday` | `POST /sofie/profile/changeBirthDate` |
 | `profile` | 查询货币流水 | 需要登录 | `POST /userInfo/getCurrencyLog` | `POST /sofie/profile/browseLedger` |
@@ -58,6 +59,7 @@
 | `studio` | 查询直播间 | 需要登录 | `POST /liveRoom/get` | `POST /sofie/studio/fetchBooth` |
 | `studio` | 直播间列表 | 需要登录 | `POST /liveRoom/roomList` | `POST /sofie/studio/browseBooths` |
 | `studio` | 1v1房间列表 | 需要登录 | `POST /liveRoom/oneToOneRoomList` | `POST /sofie/studio/browseDirectBooths` |
+| `studio` | 合并直播间与1v1列表 | 需要登录 | `POST /liveRoom/mergedRoomList` | `POST /sofie/studio/browseMergedBooths` |
 | `studio` | 服务器在线普通用户 | 需要登录 | `POST /liveRoom/serverOnlineNormalUserList` | `POST /sofie/studio/browseOnlineNormals` |
 | `studio` | 相邻直播间 | 需要登录 | `POST /liveRoom/nearbyRoomList` | `POST /sofie/studio/browseNearbyBooths` |
 | `studio` | Hot房间列表 | 需要登录 | `POST /liveRoom/hotRoomList` | `POST /sofie/studio/browseHotBooths` |

@@ -24,7 +24,8 @@ alwaysApply: true
 **新增 App 接口**必须同步 `go-src/api/sofie/`（改 `gen_sofie.py` 再生成），见 `sofie-app-api.mdc`。
 
 **直播测试服** → `直播测试服`（ec2-user @ 54.241.124.37）  
-**直播正式服** → `直播正式服`（ec2-user @ 52.9.70.64）  
+**直播正式服** → `直播正式服`（ec2-user @ 54.177.166.38）  
+**语聊测试服** → `语聊测试服`（ec2-user @ 63.185.66.53，私钥 `D:\root\yuliao.pem`）  
 
 远程/数据库**删除类操作必须先问用户**（见 `server-safety.mdc`）。
 

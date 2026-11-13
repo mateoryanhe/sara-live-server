@@ -149,7 +149,7 @@ func applyConfigLocked(cfgID uint64, poolBalance, contributePercent, winProbabil
 	return runtime.cfg.ID, nil
 }
 
-func snapshotForCMS() (id uint64, poolBalance, contributePercent, winProbability float64, tiers []*liveentity.LuckyGiftMultiplierTier, createdAt, updatedAt time.Time) {
+func snapshotForCMS() (id uint64, poolBalance, contributePercent, winProbability, totalConsume, totalPayout float64, tiers []*liveentity.LuckyGiftMultiplierTier, createdAt, updatedAt time.Time) {
 	runtimeMu.Lock()
 	defer runtimeMu.Unlock()
 	poolBalance = runtimePoolBalanceLocked()
@@ -160,6 +160,8 @@ func snapshotForCMS() (id uint64, poolBalance, contributePercent, winProbability
 		id = runtime.cfg.ID
 		createdAt = runtime.cfg.CreatedAt
 		updatedAt = runtime.cfg.UpdatedAt
+		totalConsume = runtime.cfg.TotalConsumeAmount
+		totalPayout = runtime.cfg.TotalPayoutAmount
 	}
 	return
 }

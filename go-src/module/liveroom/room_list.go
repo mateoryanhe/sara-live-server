@@ -583,6 +583,194 @@ func GetOneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomLi
 	}, nil
 }
 
+type mergedRoomCandidate struct {
+	room         *liveentity.LiveRoom
+	inLive       bool
+	inOneToOne   bool
+	online       bool
+	audienceCnt  int
+}
+
+func collectMergedRoomCandidates(oneToOneEnabled bool) []*mergedRoomCandidate {
+	liveRooms := filterRoomsForApp(getRoomListCache())
+	byID := make(map[uint64]*mergedRoomCandidate, len(liveRooms))
+	ordered := make([]*mergedRoomCandidate, 0, len(liveRooms))
+
+	add := func(room *liveentity.LiveRoom, inLive, inOneToOne bool) {
+		if room == nil {
+			return
+		}
+		if cur, ok := byID[room.ID]; ok {
+			if inLive {
+				cur.inLive = true
+			}
+			if inOneToOne {
+				cur.inOneToOne = true
+			}
+			return
+		}
+		c := &mergedRoomCandidate{
+			room:        room,
+			inLive:      inLive,
+			inOneToOne:  inOneToOne,
+			online:      push.IsOnline(room.ID),
+			audienceCnt: appAudienceOnlineCount(room.ID, room.LiveRecordId),
+		}
+		byID[room.ID] = c
+		ordered = append(ordered, c)
+	}
+
+	for _, room := range liveRooms {
+		add(room, true, false)
+	}
+	if oneToOneEnabled {
+		for _, room := range listOnShelfOneToOneLiveRooms() {
+			add(room, false, true)
+		}
+	}
+	return ordered
+}
+
+func filterMergedRoomCandidatesByOnline(cands []*mergedRoomCandidate, onlineStatusFilter int) []*mergedRoomCandidate {
+	if onlineStatusFilter == 0 {
+		return cands
+	}
+	out := make([]*mergedRoomCandidate, 0, len(cands))
+	for _, c := range cands {
+		if c == nil || c.room == nil {
+			continue
+		}
+		switch onlineStatusFilter {
+		case liveroomdto.OneToOneRoomStatusFilterOnline:
+			if !c.online {
+				continue
+			}
+		case liveroomdto.OneToOneRoomStatusFilterOffline:
+			if c.online {
+				continue
+			}
+		}
+		out = append(out, c)
+	}
+	return out
+}
+
+func sortMergedRoomCandidates(cands []*mergedRoomCandidate) {
+	onlineCounts := make(map[uint64]int, len(cands))
+	for _, c := range cands {
+		if c == nil || c.room == nil {
+			continue
+		}
+		onlineCounts[c.room.ID] = c.audienceCnt
+	}
+	// 开播优先;开播档内不比 WS 在线;未开播再按 WS 在线优先;其余沿用房间列表相对序规则
+	sort.SliceStable(cands, func(i, j int) bool {
+		a, b := cands[i], cands[j]
+		if a == nil || a.room == nil {
+			return false
+		}
+		if b == nil || b.room == nil {
+			return true
+		}
+		liveA := a.room.LiveRecordId > 0
+		liveB := b.room.LiveRecordId > 0
+		if liveA != liveB {
+			return liveA
+		}
+		if liveA {
+			return false
+		}
+		if a.online != b.online {
+			return a.online
+		}
+		return compareLiveRoomsForList(a.room, b.room, onlineCounts)
+	})
+}
+
+func buildMergedRoomListItems(ctx context.Context, cands []*mergedRoomCandidate, userID uint64, oneToOneEnabled bool) []*liveroomdto.MergedRoomListItem {
+	list := make([]*liveroomdto.MergedRoomListItem, 0, len(cands))
+	for _, c := range cands {
+		if c == nil || c.room == nil {
+			continue
+		}
+		item := &liveroomdto.MergedRoomListItem{}
+		if c.inLive {
+			item.LiveRoom = toLiveRoomListItem(ctx, c.room, userID)
+		}
+		if oneToOneEnabled && c.inOneToOne {
+			onlineStatus := uint8(liveroomdto.OneToOneRoomStatusFilterOffline)
+			if c.online {
+				onlineStatus = uint8(liveroomdto.OneToOneRoomStatusFilterOnline)
+			}
+			base := toLiveRoomListItem(ctx, c.room, userID)
+			if base != nil {
+				one := &liveroomdto.OneToOneRoomListItem{
+					LiveRoomListItem: *base,
+					OnlineStatus:     onlineStatus,
+				}
+				if row := liveroomdao.GetOneToOneRoom(c.room.ID); row != nil {
+					overlayOneToOneListItem(&one.LiveRoomListItem, row)
+				}
+				item.OneToOneRoom = one
+			}
+		}
+		list = append(list, item)
+	}
+	return list
+}
+
+// GetMergedRoomList App 合并上架直播间与上架1v1；排序开播优先，未开播再按 WS 在线优先。
+func GetMergedRoomList(ctx context.Context, req *liveroomdto.GetMergedRoomListReq) (*liveroomdto.GetMergedRoomListRes, error) {
+	userID := httpserver.GetAuthId(ctx)
+	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
+	oneToOneEnabled := livecfg.IsOneToOneLiveRoomEnabled()
+
+	cands := collectMergedRoomCandidates(oneToOneEnabled)
+	rooms := make([]*liveentity.LiveRoom, 0, len(cands))
+	candByID := make(map[uint64]*mergedRoomCandidate, len(cands))
+	for _, c := range cands {
+		if c == nil || c.room == nil {
+			continue
+		}
+		rooms = append(rooms, c.room)
+		candByID[c.room.ID] = c
+	}
+
+	tagId := req.TagId
+	switch resolveSpecialRoomTagFilterMode(tagId) {
+	case specialRoomTagNameAll:
+		tagId = 0
+	case specialRoomTagNameMy:
+		rooms = filterRoomsByFollowing(rooms, userID)
+		tagId = 0
+	}
+	rooms = filterRoomsByStatus(rooms, req.StatusFilter)
+	rooms = filterRoomsByQuery(rooms, tagId, req.Title, req.Notice, req.Key)
+	rooms = filterRoomsBySeniorAnchor(rooms, userID)
+	rooms = filterRoomsByBlocked(rooms, userID)
+
+	filtered := make([]*mergedRoomCandidate, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		if c := candByID[room.ID]; c != nil {
+			filtered = append(filtered, c)
+		}
+	}
+	filtered = filterMergedRoomCandidatesByOnline(filtered, req.OnlineStatusFilter)
+	sortMergedRoomCandidates(filtered)
+
+	total := len(filtered)
+	start, end := roomListPageRange(total, page, pageSize)
+	return &liveroomdto.GetMergedRoomListRes{
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		List:     buildMergedRoomListItems(ctx, filtered[start:end], userID, oneToOneEnabled),
+	}, nil
+}
+
 // GetFollowedRoomList App 分页查询当前用户关注的直播间(按关注时间倒序)
 func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRoomListReq) (*liveroomdto.GetLiveRoomListRes, error) {
 	userId := httpserver.GetAuthId(ctx)

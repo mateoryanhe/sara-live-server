@@ -34,6 +34,16 @@
           <span class="field-hint">{{ t('pages.luckyGiftPoolCfg.poolBalanceHint') }}</span>
         </el-form-item>
 
+        <el-form-item :label="t('pages.luckyGiftPoolCfg.totalConsumeAmount')">
+          <span class="readonly-stat">{{ formatAmount(form.totalConsumeAmount) }}</span>
+          <span class="field-hint">{{ t('pages.luckyGiftPoolCfg.totalConsumeAmountHint') }}</span>
+        </el-form-item>
+
+        <el-form-item :label="t('pages.luckyGiftPoolCfg.totalPayoutAmount')">
+          <span class="readonly-stat">{{ formatAmount(form.totalPayoutAmount) }}</span>
+          <span class="field-hint">{{ t('pages.luckyGiftPoolCfg.totalPayoutAmountHint') }}</span>
+        </el-form-item>
+
         <el-form-item :label="t('pages.luckyGiftPoolCfg.contributePercent')">
           <el-input-number
               v-model="form.contributePercent"
@@ -153,8 +163,17 @@ const form = reactive({
   poolBalance: DEFAULT_POOL_BALANCE,
   contributePercent: 0,
   winProbability: 0,
+  totalConsumeAmount: 0,
+  totalPayoutAmount: 0,
   updatedAt: '',
 })
+
+const formatAmount = (v: number): string => {
+  if (!Number.isFinite(v)) {
+    return '0'
+  }
+  return Number(v).toLocaleString(undefined, {maximumFractionDigits: 4})
+}
 
 const tiers = ref<LuckyGiftMultiplierTier[]>(createDefaultLuckyGiftMultiplierTiers())
 
@@ -205,6 +224,8 @@ const loadFromServer = async (): Promise<boolean> => {
       form.poolBalance = Number.isFinite(cfg.poolBalance) ? cfg.poolBalance : DEFAULT_POOL_BALANCE
       form.contributePercent = Number.isFinite(cfg.contributePercent) ? cfg.contributePercent : 0
       form.winProbability = Number.isFinite(cfg.winProbability) ? cfg.winProbability : 0
+      form.totalConsumeAmount = Number.isFinite(cfg.totalConsumeAmount) ? cfg.totalConsumeAmount : 0
+      form.totalPayoutAmount = Number.isFinite(cfg.totalPayoutAmount) ? cfg.totalPayoutAmount : 0
       form.updatedAt = cfg.updatedAt || ''
       const parsed = normalizeTiers(cfg.tiers)
       tiers.value = parsed || createDefaultLuckyGiftMultiplierTiers()
@@ -213,6 +234,8 @@ const loadFromServer = async (): Promise<boolean> => {
       form.poolBalance = DEFAULT_POOL_BALANCE
       form.contributePercent = 0
       form.winProbability = 0
+      form.totalConsumeAmount = 0
+      form.totalPayoutAmount = 0
       form.updatedAt = ''
       tiers.value = createDefaultLuckyGiftMultiplierTiers()
     }
@@ -344,6 +367,13 @@ onMounted(() => {
   margin-left: 12px;
   color: #909399;
   font-size: 13px;
+}
+
+.readonly-stat {
+  min-width: 160px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #303133;
 }
 
 .tiers-header {
