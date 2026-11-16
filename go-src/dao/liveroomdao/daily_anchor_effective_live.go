@@ -82,12 +82,13 @@ func mergeDailyAnchorEffectiveLivesFromCache(rows []*entity.DailyAnchorEffective
 
 // DailyAnchorEffectiveLiveCMSListFilter CMS主播每日流水查询条件
 type DailyAnchorEffectiveLiveCMSListFilter struct {
-	RoomId        uint64
-	LiveDateStart string
-	LiveDateEnd   string
-	Settled       int8 // -1全部,0未结算,1已结算
-	PageIndex     int
-	PageSize      int
+	RoomId             uint64
+	LiveDateStart      string
+	LiveDateEnd        string
+	Settled            int8 // -1全部,0未结算,1已结算
+	PageIndex          int
+	PageSize           int
+	OrderRoomIdDateAsc bool // 导出：room_id asc, live_date asc；默认 live_date desc, id desc
 }
 
 // DailyAnchorEffectiveLiveCMSList CMS分页查询主播每日流水(直查DB,命中缓存则用缓存数据)
@@ -110,8 +111,12 @@ func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (
 	if err != nil {
 		return 0, list
 	}
+	order := string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, id desc"
+	if f.OrderRoomIdDateAsc {
+		order = string(entity.DailyAnchorEffectiveLiveRoomId) + " asc, " + string(entity.DailyAnchorEffectiveLiveLiveDate) + " asc"
+	}
 	_ = m.Clone().
-		Order(string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, id desc").
+		Order(order).
 		Limit(f.PageSize).
 		Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
@@ -120,14 +125,15 @@ func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (
 
 // DailyAnchorEffectiveLiveCMSMultiListFilter CMS多主播每日流水查询条件
 type DailyAnchorEffectiveLiveCMSMultiListFilter struct {
-	RoomIds       []uint64
-	Visibility CMSAnchorRoomVisibilityScope
-	LiveDateStart string
-	LiveDateEnd   string
-	Keyword       string
-	Settled       int8
-	PageIndex     int
-	PageSize      int
+	RoomIds            []uint64
+	Visibility         CMSAnchorRoomVisibilityScope
+	LiveDateStart      string
+	LiveDateEnd        string
+	Keyword            string
+	Settled            int8
+	PageIndex          int
+	PageSize           int
+	OrderRoomIdDateAsc bool // 导出：room_id asc, live_date asc；默认 live_date desc, id desc
 }
 
 // DailyAnchorEffectiveLiveCMSMultiList CMS分页查询多主播每日流水(直查DB,命中缓存则用缓存数据)
@@ -168,8 +174,12 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 	if err != nil {
 		return 0, list
 	}
+	order := colPrefix + string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, " + colPrefix + "id desc"
+	if f.OrderRoomIdDateAsc {
+		order = colPrefix + string(entity.DailyAnchorEffectiveLiveRoomId) + " asc, " + colPrefix + string(entity.DailyAnchorEffectiveLiveLiveDate) + " asc"
+	}
 	query := m.Clone().
-		Order(colPrefix + string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, " + colPrefix + "id desc").
+		Order(order).
 		Limit(f.PageSize).
 		Offset((f.PageIndex - 1) * f.PageSize)
 	if needAlias {

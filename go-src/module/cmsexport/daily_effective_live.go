@@ -31,12 +31,13 @@ func exportAnchorDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMess
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSList(&liveroomdao.DailyAnchorEffectiveLiveCMSListFilter{
-			RoomId:        req.AnchorId,
-			LiveDateStart: req.LiveDateStart,
-			LiveDateEnd:   req.LiveDateEnd,
-			Settled:       req.Settled,
-			PageIndex:     pageIndex,
-			PageSize:      pageSize,
+			RoomId:             req.AnchorId,
+			LiveDateStart:      req.LiveDateStart,
+			LiveDateEnd:        req.LiveDateEnd,
+			Settled:            req.Settled,
+			PageIndex:          pageIndex,
+			PageSize:           pageSize,
+			OrderRoomIdDateAsc: true,
 		})
 		csvRows := make([][]string, 0, len(rows))
 		for _, row := range rows {
@@ -83,22 +84,33 @@ func exportLiveDailyEffectiveLiveCSV(ctx context.Context, cmsUserId uint64, payl
 		}, onProgress)
 	}
 	scope := liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds)
+	var lastRoomID uint64
+	var hasPrev bool
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
-			RoomIds:       liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-			Visibility:    scope,
-			LiveDateStart: req.LiveDateStart,
-			LiveDateEnd:   req.LiveDateEnd,
-			Keyword:       req.Keyword,
-			Settled:       req.Settled,
-			PageIndex:     pageIndex,
-			PageSize:      pageSize,
+			RoomIds:            liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+			Visibility:         scope,
+			LiveDateStart:      req.LiveDateStart,
+			LiveDateEnd:        req.LiveDateEnd,
+			Keyword:            req.Keyword,
+			Settled:            req.Settled,
+			PageIndex:          pageIndex,
+			PageSize:           pageSize,
+			OrderRoomIdDateAsc: true,
 		})
 		roomIds := collectDailyAnchorRoomIds(rows)
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
-		csvRows := make([][]string, 0, len(rows))
+		csvRows := make([][]string, 0, len(rows)*2)
 		for _, row := range rows {
+			if row == nil {
+				continue
+			}
+			if hasPrev && row.RoomId != lastRoomID {
+				csvRows = append(csvRows, nil) // 不同主播之间空一行
+			}
 			csvRows = append(csvRows, liveDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
+			lastRoomID = row.RoomId
+			hasPrev = true
 		}
 		return total, csvRows
 	}, onProgress)
@@ -194,13 +206,14 @@ func exportLiveDailyEffectiveLiveByGuildZIP(ctx context.Context, cmsUserId uint6
 	grandTotal := 0
 	for _, guildId := range guildIds {
 		total, _ := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
-			Visibility: liveroomdao.CMSAnchorRoomVisibilityScope{Apply: true, GuildIds: []uint64{guildId}},
-			LiveDateStart: req.LiveDateStart,
-			LiveDateEnd:   req.LiveDateEnd,
-			Keyword:       req.Keyword,
-			Settled:       req.Settled,
-			PageIndex:     1,
-			PageSize:      1,
+			Visibility:         liveroomdao.CMSAnchorRoomVisibilityScope{Apply: true, GuildIds: []uint64{guildId}},
+			LiveDateStart:      req.LiveDateStart,
+			LiveDateEnd:        req.LiveDateEnd,
+			Keyword:            req.Keyword,
+			Settled:            req.Settled,
+			PageIndex:          1,
+			PageSize:           1,
+			OrderRoomIdDateAsc: true,
 		})
 		grandTotal += total
 	}
@@ -265,6 +278,8 @@ func exportLiveDailyEffectiveLiveByGuildZIP(ctx context.Context, cmsUserId uint6
 		pageIndex := 1
 		guildTotal := -1
 		guildExported := 0
+		var lastRoomID uint64
+		var hasPrev bool
 		for {
 			select {
 			case <-ctx.Done():
@@ -273,13 +288,14 @@ func exportLiveDailyEffectiveLiveByGuildZIP(ctx context.Context, cmsUserId uint6
 			default:
 			}
 			total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
-				Visibility: liveroomdao.CMSAnchorRoomVisibilityScope{Apply: true, GuildIds: []uint64{guildId}},
-				LiveDateStart: req.LiveDateStart,
-				LiveDateEnd:   req.LiveDateEnd,
-				Keyword:       req.Keyword,
-				Settled:       req.Settled,
-				PageIndex:     pageIndex,
-				PageSize:      defaultExportPageSize,
+				Visibility:         liveroomdao.CMSAnchorRoomVisibilityScope{Apply: true, GuildIds: []uint64{guildId}},
+				LiveDateStart:      req.LiveDateStart,
+				LiveDateEnd:        req.LiveDateEnd,
+				Keyword:            req.Keyword,
+				Settled:            req.Settled,
+				PageIndex:          pageIndex,
+				PageSize:           defaultExportPageSize,
+				OrderRoomIdDateAsc: true,
 			})
 			if guildTotal < 0 {
 				guildTotal = total
@@ -291,7 +307,15 @@ func exportLiveDailyEffectiveLiveByGuildZIP(ctx context.Context, cmsUserId uint6
 			nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
 			body := &strings.Builder{}
 			for _, row := range rows {
+				if row == nil {
+					continue
+				}
+				if hasPrev && row.RoomId != lastRoomID {
+					writeCSVRowToBuilder(body, nil) // 不同主播之间空一行
+				}
 				writeCSVRowToBuilder(body, liveDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
+				lastRoomID = row.RoomId
+				hasPrev = true
 			}
 			if _, writeErr := entry.Write([]byte(body.String())); writeErr != nil {
 				_ = zw.Close()
@@ -338,14 +362,15 @@ func exportLiveWeeklyUnsettledLiveCSV(ctx context.Context, cmsUserId uint64, pay
 	scope := liveroomdao.ScopeFromAnchorRoomVisibility(vis.Restrict, vis.GuildIds, vis.PlatformAnchorIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
-			RoomIds:       liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-			Visibility:    scope,
-			LiveDateStart: weekStart,
-			LiveDateEnd:   weekEnd,
-			Keyword:       req.Keyword,
-			Settled:       0,
-			PageIndex:     pageIndex,
-			PageSize:      pageSize,
+			RoomIds:            liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+			Visibility:         scope,
+			LiveDateStart:      weekStart,
+			LiveDateEnd:        weekEnd,
+			Keyword:            req.Keyword,
+			Settled:            0,
+			PageIndex:          pageIndex,
+			PageSize:           pageSize,
+			OrderRoomIdDateAsc: true,
 		})
 		roomIds := collectDailyAnchorRoomIds(rows)
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
@@ -391,13 +416,14 @@ func exportGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, payload json.Ra
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuild(&liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildFilter{
-			GuildId:       guildId,
-			RoomId:        parseUint64Filter(req.RoomId),
-			LiveDateStart: req.LiveDateStart,
-			LiveDateEnd:   req.LiveDateEnd,
-			Settled:       req.Settled,
-			PageIndex:     pageIndex,
-			PageSize:      pageSize,
+			GuildId:            guildId,
+			RoomId:             parseUint64Filter(req.RoomId),
+			LiveDateStart:      req.LiveDateStart,
+			LiveDateEnd:        req.LiveDateEnd,
+			Settled:            req.Settled,
+			PageIndex:          pageIndex,
+			PageSize:           pageSize,
+			OrderRoomIdDateAsc: true,
 		})
 		roomIds := collectDailyAnchorRoomIds(rows)
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
@@ -427,12 +453,13 @@ func exportMyGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, cmsUserId uin
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		filter := &liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIdsFilter{
-			GuildIds:      guildIds,
-			LiveDateStart: req.LiveDateStart,
-			LiveDateEnd:   req.LiveDateEnd,
-			Settled:       req.Settled,
-			PageIndex:     pageIndex,
-			PageSize:      pageSize,
+			GuildIds:           guildIds,
+			LiveDateStart:      req.LiveDateStart,
+			LiveDateEnd:        req.LiveDateEnd,
+			Settled:            req.Settled,
+			PageIndex:          pageIndex,
+			PageSize:           pageSize,
+			OrderRoomIdDateAsc: true,
 		}
 		if len(roomIds) == 1 {
 			filter.RoomId = roomIds[0]

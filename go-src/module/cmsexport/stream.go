@@ -82,7 +82,10 @@ func streamCSVExport(
 				_ = fileexport.Delete(record.ExportID)
 				return nil, err
 			}
-			exportedRows++
+			// nil 行为分隔空行，不计入导出进度
+			if row != nil {
+				exportedRows++
+			}
 		}
 		if onProgress != nil {
 			onProgress(exportedRows, totalRows)

@@ -8,14 +8,15 @@ import (
 
 // DailyAnchorEffectiveLiveCMSListByGuildFilter CMS按工会查询名下主播每日流水
 type DailyAnchorEffectiveLiveCMSListByGuildFilter struct {
-	GuildId       uint64
-	RoomId        uint64
-	RoomIds       []uint64
-	LiveDateStart string
-	LiveDateEnd   string
-	Settled       int8 // -1全部,0未结算,1已结算
-	PageIndex     int
-	PageSize      int
+	GuildId            uint64
+	RoomId             uint64
+	RoomIds            []uint64
+	LiveDateStart      string
+	LiveDateEnd        string
+	Settled            int8 // -1全部,0未结算,1已结算
+	PageIndex          int
+	PageSize           int
+	OrderRoomIdDateAsc bool // 导出：room_id asc, live_date asc；默认 live_date desc, id desc
 }
 
 // DailyAnchorEffectiveLiveCMSListByGuild CMS分页查询工会名下主播每日流水(直查DB,命中缓存则用缓存数据)
@@ -58,8 +59,12 @@ func DailyAnchorEffectiveLiveCMSListByGuild(f *DailyAnchorEffectiveLiveCMSListBy
 	if err != nil {
 		return 0, list
 	}
+	order := "d." + string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, d.id desc"
+	if f.OrderRoomIdDateAsc {
+		order = "d." + string(entity.DailyAnchorEffectiveLiveRoomId) + " asc, d." + string(entity.DailyAnchorEffectiveLiveLiveDate) + " asc"
+	}
 	_ = m.Clone().Fields("d.*").
-		Order("d." + string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, d.id desc").
+		Order(order).
 		Limit(f.PageSize).
 		Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
@@ -68,14 +73,15 @@ func DailyAnchorEffectiveLiveCMSListByGuild(f *DailyAnchorEffectiveLiveCMSListBy
 
 // DailyAnchorEffectiveLiveCMSListByGuildIdsFilter CMS按多个工会查询名下主播每日流水
 type DailyAnchorEffectiveLiveCMSListByGuildIdsFilter struct {
-	GuildIds      []uint64
-	RoomId        uint64
-	RoomIds       []uint64
-	LiveDateStart string
-	LiveDateEnd   string
-	Settled       int8
-	PageIndex     int
-	PageSize      int
+	GuildIds           []uint64
+	RoomId             uint64
+	RoomIds            []uint64
+	LiveDateStart      string
+	LiveDateEnd        string
+	Settled            int8
+	PageIndex          int
+	PageSize           int
+	OrderRoomIdDateAsc bool // 导出：room_id asc, live_date asc；默认 live_date desc, id desc
 }
 
 // DailyAnchorEffectiveLiveCMSListByGuildIds CMS分页查询多个工会名下主播每日流水
@@ -118,8 +124,12 @@ func DailyAnchorEffectiveLiveCMSListByGuildIds(f *DailyAnchorEffectiveLiveCMSLis
 	if err != nil {
 		return 0, list
 	}
+	order := "d." + string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, d.id desc"
+	if f.OrderRoomIdDateAsc {
+		order = "d." + string(entity.DailyAnchorEffectiveLiveRoomId) + " asc, d." + string(entity.DailyAnchorEffectiveLiveLiveDate) + " asc"
+	}
 	_ = m.Clone().Fields("d.*").
-		Order("d." + string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, d.id desc").
+		Order(order).
 		Limit(f.PageSize).
 		Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
