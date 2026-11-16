@@ -1,0 +1,68 @@
+server:
+  ###系统配置
+  address: 443  #http服务端口
+  serverRoot: "/home/ec2-user/cdn/official-site"  # GoFrame 默认静态目录; API 走 www, 官网走 web 子域
+  httpsCertPath: "/home/ec2-user/ssl/cf-origin/cf-origin.pem"
+  httpsKeyPath: "/home/ec2-user/ssl/cf-origin/cf-origin.key"
+  clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
+  readTimeout: "120m"
+  writeTimeout: "120m"
+  gzipEnabled: true         # 开启 gzip 响应压缩
+  graceful: true
+  # 热重启一/二阶段等待秒数见 CMS「服务器运行配置」-「热重启」,存 preload_cfgs
+  # PProf配置
+  pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
+  pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
+  ####自定义配置
+  id: 5  # 雪花算法 node(语聊测试服); 各环境必须唯一,范围 1-1023
+  dumpRouterMap: false
+
+bufferSize:
+  db:
+    tickIntervalMs: 1000   # 调度周期(毫秒)
+    cpuIdlePercent: 70     # 系统 CPU 空闲比例达到该值才批量落库
+    maxPendingWaitMs: 10000 # Pending 最长等待(毫秒),超时强制落库
+    batchSize: 300         # 每轮全局批量落库上限(所有 queue 共用)
+  websocket:
+    size: 50 # 推送批量大小(未配置时默认10)
+  goPool:
+    size: 80 # 协程池大小(未配置时走默认池)
+
+logger:
+  detail:                               # API详情日志；启动时同步为默认 g.Log()
+    path: "/home/ec2-user/log/"
+    file: "detail.log"
+    header: true
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "500m"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+  access:                               # HTTP Server access 日志(替代 GF 内置 access 日志)
+    path: "/home/ec2-user/log/"
+    file: "access.log"
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    levelPrint: false
+    flags: 1                            # 仅时间戳,不含源码路径/级别,便于 CMS 解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "300m"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+  error:                                # HTTP 框架错误 + xrlog 错误日志，g.Log("error")
+    path: "/home/ec2-user/log/"
+    file: "error.log"
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "200m"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+
+database:
+  default:
+    link: "mysql:root:Appledev882116@tcp(127.0.0.1:13307)/live_db"
+    extra: "charset=utf8mb4&parseTime=True&loc=Local"
+    maxIdle: 5
+    maxOpen: 15
+    maxLifetime: "30m"
+    debug: false
