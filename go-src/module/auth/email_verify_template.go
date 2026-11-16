@@ -13,6 +13,7 @@ const (
 	emailLangHI = "hi"
 	emailLangPT = "pt"
 	emailLangID = "id"
+	emailLangAR = "ar"
 )
 
 type emailVerifyTemplate struct {
@@ -72,6 +73,15 @@ var emailVerifyTemplates = map[string]emailVerifyTemplate{
 		IgnoreNote:   "Jika Anda tidak meminta kode ini, abaikan email ini.",
 		Footer:       "Pesan otomatis. Mohon jangan membalas email ini.",
 	},
+	emailLangAR: {
+		Subject:      "رمز التحقق الخاص بك",
+		Title:        "تأكيد بريدك الإلكتروني",
+		Intro:        "أدخل رمز التحقق هذا في التطبيق للمتابعة. الرمز صالح لمحاولة تسجيل دخول واحدة.",
+		ExpiryNote:   "ينتهي هذا الرمز خلال 5 دقائق.",
+		SecurityNote: "لا تشارك هذا الرمز مع أي شخص. لن يطلبه فريقنا أبدًا.",
+		IgnoreNote:   "إذا لم تطلب هذا الرمز، يمكنك تجاهل هذه الرسالة.",
+		Footer:       "رسالة آلية. يرجى عدم الرد.",
+	},
 }
 
 func normalizeEmailLang(lang string) string {
@@ -88,6 +98,8 @@ func normalizeEmailLang(lang string) string {
 		return emailLangPT
 	case strings.HasPrefix(low, "id"):
 		return emailLangID
+	case strings.HasPrefix(low, "ar"):
+		return emailLangAR
 	case strings.HasPrefix(low, "en"):
 		return emailLangEN
 	default:

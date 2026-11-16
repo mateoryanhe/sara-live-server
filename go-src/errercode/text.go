@@ -458,7 +458,7 @@ func langFallbackChain(l lang.Lang) []lang.Lang {
 		return []lang.Lang{lang.LangZHCN, lang.LangEN}
 	case lang.LangZHTW:
 		return []lang.Lang{lang.LangZHTW, lang.LangZHCN, lang.LangEN}
-	case lang.LangES, lang.LangPT, lang.LangHI, lang.LangID:
+	case lang.LangES, lang.LangPT, lang.LangHI, lang.LangID, lang.LangAR:
 		return []lang.Lang{l, lang.LangEN}
 	default:
 		return []lang.Lang{lang.LangEN, lang.LangZHCN}

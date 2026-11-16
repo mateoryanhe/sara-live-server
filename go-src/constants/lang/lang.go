@@ -13,10 +13,11 @@ const (
 	LangPT   Lang = "pt"    // 葡萄牙语
 	LangHI   Lang = "hi"    // 印地语
 	LangID   Lang = "id"    // 印尼语
+	LangAR   Lang = "ar"    // 阿拉伯语
 )
 
-// CMSLocales 与 cms/src/i18n/locales/types.ts SUPPORTED_LOCALES 一致
-var CMSLocales = []Lang{LangZHCN, LangZHTW, LangEN, LangES, LangPT, LangHI, LangID}
+// CMSLocales 与 cms/src/i18n/locales/types.ts SUPPORTED_LOCALES 一致(前端 CMS 未接入 ar 时仍可单独用 Accept-Language: ar 调 Go)
+var CMSLocales = []Lang{LangZHCN, LangZHTW, LangEN, LangES, LangPT, LangHI, LangID, LangAR}
 
 // DefaultLang 默认语言(未识别 Accept-Language 时)
 const DefaultLang = LangEN
@@ -46,6 +47,8 @@ func Parse(s string) Lang {
 		return LangPT
 	case strings.HasPrefix(low, "hi"):
 		return LangHI
+	case strings.HasPrefix(low, "ar"):
+		return LangAR
 	case strings.HasPrefix(low, "en"):
 		return LangEN
 	default:

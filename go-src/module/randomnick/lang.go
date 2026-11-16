@@ -7,6 +7,7 @@ const (
 	LangHI uint8 = 3 // 印地语
 	LangPT uint8 = 4 // 葡萄牙语
 	LangID uint8 = 5 // 印尼语
+	LangAR uint8 = 6 // 阿拉伯语
 )
 
 const DefaultLang = LangEN
@@ -17,6 +18,7 @@ var langCodes = map[uint8]string{
 	LangHI: "hi",
 	LangPT: "pt",
 	LangID: "id",
+	LangAR: "ar",
 }
 
 var langLabels = map[uint8]string{
@@ -25,6 +27,7 @@ var langLabels = map[uint8]string{
 	LangHI: "हिन्दी",
 	LangPT: "Português",
 	LangID: "Bahasa Indonesia",
+	LangAR: "العربية",
 }
 
 // LangCode 语言代码
@@ -45,13 +48,13 @@ func LangLabel(lang uint8) string {
 
 // SupportedLangs 支持的语言列表
 func SupportedLangs() []uint8 {
-	return []uint8{LangEN, LangES, LangHI, LangPT, LangID}
+	return []uint8{LangEN, LangES, LangHI, LangPT, LangID, LangAR}
 }
 
 // NormalizeLang 非法值回落英文
 func NormalizeLang(lang uint8) uint8 {
 	switch lang {
-	case LangEN, LangES, LangHI, LangPT, LangID:
+	case LangEN, LangES, LangHI, LangPT, LangID, LangAR:
 		return lang
 	default:
 		return DefaultLang

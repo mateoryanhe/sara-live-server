@@ -13,6 +13,7 @@ const (
 	LangPT   = lang.LangPT
 	LangHI   = lang.LangHI
 	LangID   = lang.LangID
+	LangAR   = lang.LangAR
 )
 
 // DefaultLang 默认语言
