@@ -1,0 +1,41 @@
+---
+description: 姊妹仓 yuliao(yl) 与 sara-live-server 对应关系、共享规则与日报须双仓核对
+alwaysApply: true
+---
+
+# 双仓：yuliao ↔ sara-live-server
+
+两仓 Go/CMS 技术栈相同，约定大体共享；**本机目录与 Git 远程不同**，写日报、发版、Agent 任务时勿只盯当前工作区。
+
+| | 语聊新项目 | 直播主仓 |
+|---|---|---|
+| 本机目录 | `D:\company-code\yl` | `D:\company-code\sara-live-server` |
+| 远程仓库 | `mateoryanhe/yuliao` | `mateoryanhe/sara-live-server` |
+| 项目规则 | `yl/.cursor/rules/project-yl-yuliao.mdc` | `sara-live-server/.cursor/rules/project-sara-live-server.mdc` |
+| Agent 备忘 | `yl/.cursor/agent-notes/README.md` | `sara-live-server/.cursor/agent-notes/README.md` |
+
+## 共享规则（两仓 `.cursor/rules/` 文件名一致，内容应对齐）
+
+处理**任一仓**任务时，除读本仓 `read-agent-notes.mdc` 外，下列规则两仓均适用（改一边若影响另一边，评估是否同步拷贝）：
+
+- `workspace-safety.mdc`、`server-safety.mdc`、`go-build-output.mdc`、`go-xrpool-async.mdc`、`go-user-exists.mdc`
+- `sofie-app-api.mdc`、`git-release-tags.mdc`、`flutter-push-subscribe.mdc`（仅当动 Flutter）
+- **日报/周报**：`daily-report.mdc`（须**双仓**核对 commit，见该文件）
+
+## 日报 / 周报（必做）
+
+用户要日报或周报时，**必须**在两目录分别执行 `git log` + `git status` 后再写：
+
+```powershell
+git -C D:\company-code\yl log --since=… --oneline
+git -C D:\company-code\yl status
+git -C D:\company-code\sara-live-server log --since=… --oneline
+git -C D:\company-code\sara-live-server status
+```
+
+条目用前缀区分仓库：`[yuliao]`、`[sara-live]`（或 `[yl]` / `[直播]`）。单仓无改动可写「[sara-live] 无提交」等，勿省略核对步骤。
+
+## 默认操作范围
+
+- Cursor 打开 **yl** → 默认改 **yuliao**；直播主仓仅用户点名或日报/同步约定时只读或跨仓改。
+- Cursor 打开 **sara-live-server** → 默认改 **直播主仓**；语聊 **yl** 同理。

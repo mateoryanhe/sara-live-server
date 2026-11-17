@@ -11,11 +11,15 @@ alwaysApply: false
 
 ```text
 今天
-1. …（做了什么；关键路径:行号；commit 可写末尾括号）
-2. …
-明天
+[yuliao]
+1. …（commit hash 可选）
+[sara-live]
 1. …
-2. …
+明天
+[yuliao]
+1. …
+[sara-live]
+1. …
 ```
 
 ### 日报要求
@@ -23,7 +27,8 @@ alwaysApply: false
 - 只分「今天」「明天」两段，不要「一、已推送」那种长结构
 - 每条一行，短句；可带 `文件:行号`、commit hash
 - 未 push / 未提交要标明
-- 先 `git log`（当天）+ `git status` 核对，再写
+- **双仓核对（必做）**：分别对 `D:\company-code\yl`（yuliao）与 `D:\company-code\sara-live-server` 执行当天 `git log` + `git status` 后再写；见 `dual-repos-yuliao-sara.mdc`
+- 条目加仓库前缀：`[yuliao]` / `[sara-live]`；某仓当天无提交可写「无提交」，但须已核对
 - 不要长篇解释；不要复述任务过程
 
 ## 周报
@@ -32,17 +37,21 @@ alwaysApply: false
 
 ```text
 本周
-1. …（主题或模块；可附 commit hash、日期）
-2. …
-下周
+[yuliao]
 1. …
-2. …
+[sara-live]
+1. …
+下周
+[yuliao]
+1. …
+[sara-live]
+1. …
 ```
 
 ### 周报要求
 
 - 只分「本周」「下周」两段；默认**不要**「一、二、三 / 已推送·未提交」长章节（用户明确要求「多文字 / 详述」时，可在每条下扩 1～2 句，**仍保持本周、下周两段**）
-- 时间范围：以用户说的「本周」为准；写前先 `git log --since=…`（限定 `go-src/`、`cms/`、`pub-tool/` 等后端/CMS 路径）+ `git status` 核对
+- 时间范围：以用户说的「本周」为准；**两仓**分别 `git log --since=…` + `git status`；条目用 `[yuliao]` / `[sara-live]` 前缀
 - 每条一行起笔；commit 用 hash 或 `hash · 日期 · 主题`
 - 未 push / 仅本地改动要标明
 

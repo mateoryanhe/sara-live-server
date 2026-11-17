@@ -1,0 +1,23 @@
+---
+description: 本工作区 sara-live-server = 直播主仓；姊妹仓为 yuliao(yl)
+alwaysApply: true
+---
+
+# 项目与仓库对应
+
+- **本机工作区目录**：`D:\company-code\sara-live-server`
+- **Git 远程**：`origin` → `https://github.com/mateoryanhe/sara-live-server.git`
+- **定位**：**Sara/Sofie 直播主仓**；语聊新项目在姊妹仓 **yl / yuliao**
+
+## 姊妹仓
+
+| | 直播主仓（本仓） | 语聊新项目 |
+|---|---|---|
+| 目录 | `D:\company-code\sara-live-server` | `D:\company-code\yl` |
+| 远程 | `mateoryanhe/sara-live-server` | `mateoryanhe/yuliao` |
+
+双仓约定、日报须两仓核对 → `dual-repos-yuliao-sara.mdc`。
+
+## 发版（pub-tool）
+
+直播测/审/正式脚本在本仓 `pub-tool/`（如 `go-test` → 54.241.124.37 等）。**勿**与语聊测试 `pub-tool/go-test`（63.185.66.53、`config/yuliao`）混用路径；语聊发版只在 **yl** 仓操作。

@@ -7,6 +7,8 @@ alwaysApply: true
 
 `.cursor/agent-notes/README.md`
 
+**姊妹仓语聊 yuliao**：`D:\company-code\yl`；双仓约定与日报 → `dual-repos-yuliao-sara.mdc`、`project-yl-yuliao.mdc`（路径在姊妹仓 `.cursor/rules/`）。写日报须两仓 `git log` + `git status`。
+
 若任务涉及服务器、CMS 列表、日志页或部署，继续读同目录下对应专题 md（servers / cms-conventions / changelog-notes）。
 
 **Flutter App**（`flutter-client/`）推送约定 → `flutter-push-subscribe.mdc`（Repository / ViewModel 各自订 PushBus）。

@@ -14,6 +14,13 @@
 | [server-safety.mdc](../rules/server-safety.mdc) | 远程/数据库删除须问用户；**发版须用户同意** |
 | [flutter-push-subscribe.mdc](../rules/flutter-push-subscribe.mdc) | Flutter：PushBus 上 **Repository 与 ViewModel 各自订阅**（勿中心 revision 转 UI） |
 | [read-agent-notes.mdc](../rules/read-agent-notes.mdc) | 任务前必读入口 |
+| [dual-repos-yuliao-sara.mdc](../rules/dual-repos-yuliao-sara.mdc) | **双仓** yuliao ↔ sara-live-server；日报须两仓 git 核对 |
+| [daily-report.mdc](../rules/daily-report.mdc) | 日报/周报格式（含 `[yuliao]` / `[sara-live]`） |
+| [project-sara-live-server.mdc](../rules/project-sara-live-server.mdc) | 本仓定位（直播主仓） |
+
+## 姊妹仓语聊（yuliao）
+
+- 目录 `D:\company-code\yl`，远程 `mateoryanhe/yuliao`；语聊测试发版见该仓 `pub-tool/DEPLOY.md`
 
 ## SSH
 
