@@ -111,6 +111,16 @@
               <span class="form-tip">{{ t('pages.liveConfig.gameLiveRoomEnabledTip') }}</span>
             </el-form-item>
 
+            <el-form-item :label="t('pages.liveConfig.audienceGameListHidden')">
+              <el-switch v-model="formData.audienceGameListHidden"/>
+              <span class="form-tip">{{ t('pages.liveConfig.audienceGameListHiddenTip') }}</span>
+            </el-form-item>
+
+            <el-form-item :label="t('pages.liveConfig.anchorGameListHidden')">
+              <el-switch v-model="formData.anchorGameListHidden"/>
+              <span class="form-tip">{{ t('pages.liveConfig.anchorGameListHiddenTip') }}</span>
+            </el-form-item>
+
             <el-form-item :label="t('pages.liveConfig.oneToOneLiveRoomEnabled')">
               <el-switch v-model="formData.oneToOneLiveRoomEnabled"/>
               <span class="form-tip">{{ t('pages.liveConfig.oneToOneLiveRoomEnabledTip') }}</span>
@@ -163,6 +173,8 @@ const formData = reactive({
   maxAnchorPhotos: 100,
   maxAnchorVideos: 100,
   maxAnchorVideoFileSizeMB: 100,
+  audienceGameListHidden: false,
+  anchorGameListHidden: false,
 })
 
 const metaInfo = reactive({
@@ -206,6 +218,8 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.gameLiveRoomEnabled = false
 	formData.voiceChatLiveRoomEnabled = false
 	formData.oneToOneLiveRoomEnabled = false
+	formData.audienceGameListHidden = false
+	formData.anchorGameListHidden = false
 	formData.audienceListRefreshSeconds = 300
 	formData.oneToOneDailyFreeSeconds = 30
   formData.liveRoomCallMinTotalRechargeUsd = 10
@@ -223,6 +237,8 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.gameLiveRoomEnabled = cfg.gameLiveRoomEnabled ?? false
 	formData.voiceChatLiveRoomEnabled = cfg.voiceChatLiveRoomEnabled ?? false
 	formData.oneToOneLiveRoomEnabled = cfg.oneToOneLiveRoomEnabled ?? false
+	formData.audienceGameListHidden = cfg.audienceGameListHidden ?? false
+	formData.anchorGameListHidden = cfg.anchorGameListHidden ?? false
 	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
 	formData.oneToOneDailyFreeSeconds = cfg.oneToOneDailyFreeSeconds ?? 30
   formData.liveRoomCallMinTotalRechargeUsd = truncateNumber(cfg.liveRoomCallMinTotalRechargeUsd ?? 10)
@@ -258,6 +274,8 @@ const handleSave = async () => {
 	  gameLiveRoomEnabled: formData.gameLiveRoomEnabled,
 	  voiceChatLiveRoomEnabled: formData.voiceChatLiveRoomEnabled,
 	  oneToOneLiveRoomEnabled: formData.oneToOneLiveRoomEnabled,
+	  audienceGameListHidden: formData.audienceGameListHidden,
+	  anchorGameListHidden: formData.anchorGameListHidden,
 	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,
 	  oneToOneDailyFreeSeconds: formData.oneToOneDailyFreeSeconds,
       liveRoomCallMinTotalRechargeUsd: formData.liveRoomCallMinTotalRechargeUsd,

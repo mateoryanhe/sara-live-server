@@ -25,6 +25,8 @@ type liveCfgSnapshot struct {
 	OneToOneDailyFreeSeconds        uint32
 	LiveRoomCallMinTotalRechargeUsd float64
 	ShowcaseLiveRoomEnabled         bool
+	AudienceGameListHidden          bool
+	AnchorGameListHidden            bool
 	GameLiveRoomEnabled             bool
 	VoiceChatLiveRoomEnabled        bool
 	OneToOneLiveRoomEnabled         bool
@@ -81,6 +83,8 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		OneToOneDailyFreeSeconds:        NormalizeOneToOneDailyFreeSeconds(row.OneToOneDailyFreeSeconds),
 		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(row.LiveRoomCallMinTotalRechargeUsd),
 		ShowcaseLiveRoomEnabled:         row.ShowcaseLiveRoomEnabled,
+		AudienceGameListHidden:          row.AudienceGameListHidden,
+		AnchorGameListHidden:            row.AnchorGameListHidden,
 		GameLiveRoomEnabled:             row.GameLiveRoomEnabled,
 		VoiceChatLiveRoomEnabled:        row.VoiceChatLiveRoomEnabled,
 		OneToOneLiveRoomEnabled:         row.OneToOneLiveRoomEnabled,
@@ -167,6 +171,16 @@ func GetLiveRoomCallMinTotalRechargeUSD() float64 {
 // IsShowcaseLiveRoomEnabled App 是否展示秀场直播间入口；未配置时默认关闭。
 func IsShowcaseLiveRoomEnabled() bool {
 	return getLiveCfgCache().ShowcaseLiveRoomEnabled
+}
+
+// IsAudienceGameListHidden 开启后非主播用户查询 App 游戏列表与直播间推荐游戏为空。
+func IsAudienceGameListHidden() bool {
+	return getLiveCfgCache().AudienceGameListHidden
+}
+
+// IsAnchorGameListHidden 开启后主播用户查询 App 游戏列表与直播间推荐游戏为空。
+func IsAnchorGameListHidden() bool {
+	return getLiveCfgCache().AnchorGameListHidden
 }
 
 // IsGameLiveRoomEnabled App 是否展示游戏直播间入口；未配置时默认关闭。
