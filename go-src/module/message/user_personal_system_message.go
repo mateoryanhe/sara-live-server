@@ -63,7 +63,7 @@ func toAppPersonalSystemMessageItem(row *entity.UserPersonalSystemMessage) *mess
 		Params:        row.Params,
 		CreatedAt:     formatMessageTime(row.CreatedAt),
 	}
-	if display := resolvePersonalSystemMessageDisplay(row.MessageTypeId); display != nil {
+	if display := resolvePersonalSystemMessageDisplay(row); display != nil {
 		item.IconEn = upload.GetUrlByName(display.IconEn)
 		item.IconEs = upload.GetUrlByName(display.IconEs)
 		item.IconPt = upload.GetUrlByName(display.IconPt)
@@ -80,13 +80,30 @@ func toAppPersonalSystemMessageItem(row *entity.UserPersonalSystemMessage) *mess
 		item.ContentHi = display.ContentHi
 		item.ContentId = display.ContentId
 	}
+	if row.MessageTypeId == entity.PersonalSystemMessageTypeFollowAnchor {
+		avatarURL := followAnchorFollowerAvatarURL(row)
+		item.Avatar = avatarURL
+		if avatarURL != "" {
+			item.IconEn = avatarURL
+			item.IconEs = avatarURL
+			item.IconPt = avatarURL
+			item.IconHi = avatarURL
+			item.IconId = avatarURL
+		}
+	}
 	return item
 }
 
-func resolvePersonalSystemMessageDisplay(messageTypeId uint32) *personalSystemMessageDisplay {
-	switch messageTypeId {
+func resolvePersonalSystemMessageDisplay(row *entity.UserPersonalSystemMessage) *personalSystemMessageDisplay {
+	if row == nil {
+		return nil
+	}
+	switch row.MessageTypeId {
 	case entity.PersonalSystemMessageTypeWelcome:
 		display := welcomePersonalMessageDisplay()
+		return &display
+	case entity.PersonalSystemMessageTypeFollowAnchor:
+		display := followAnchorPersonalMessageDisplay(row)
 		return &display
 	default:
 		return nil

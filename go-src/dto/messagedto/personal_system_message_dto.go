@@ -11,6 +11,7 @@ type AppPersonalSystemMessageItem struct {
 	Id            uint64 `json:"id,string" dc:"个人系统消息ID"`
 	MessageTypeId uint32 `json:"messageTypeId" dc:"消息类型ID"`
 	Params        string `json:"params" dc:"扩展参数(JSON)"`
+	Avatar        string `json:"avatar" dc:"头像URL(如关注主播类消息为关注人头像)"`
 	IconEn        string `json:"iconEn" dc:"图标URL(英文)"`
 	IconEs        string `json:"iconEs" dc:"图标URL(西班牙语)"`
 	IconPt        string `json:"iconPt" dc:"图标URL(葡萄牙语)"`

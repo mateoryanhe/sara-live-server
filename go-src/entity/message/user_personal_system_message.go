@@ -20,7 +20,8 @@ const (
 )
 
 const (
-	PersonalSystemMessageTypeWelcome uint32 = 1 // 欢迎消息
+	PersonalSystemMessageTypeWelcome      uint32 = 1 // 欢迎消息
+	PersonalSystemMessageTypeFollowAnchor uint32 = 2 // 关注主播(新粉丝通知,发给主播)
 )
 
 // UserPersonalSystemMessage 用户个人系统消息

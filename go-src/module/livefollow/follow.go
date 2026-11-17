@@ -12,6 +12,7 @@ import (
 	"xr-game-server/dto/livefollowdto"
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/module/message"
 	"xr-game-server/module/upload"
 )
 
@@ -53,6 +54,7 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 		livefollowdao.PrependFollowingToListCache(follow)
 		livefollowdao.PrependFollowerToListCache(follow, userinfodao.GetUserInfoByUserId(userId))
 		pushFollowCountChange(userId, req.AnchorId)
+		message.AddFollowAnchorPersonalMessage(req.AnchorId, userId)
 	}
 
 	return &livefollowdto.FollowRes{
