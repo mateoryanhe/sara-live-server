@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {onActivated, onMounted, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import type {GuildAnchorImportResultState} from '@/types/api'
@@ -84,9 +84,11 @@ const goBack = () => {
   router.push({name: 'GuildManagement'})
 }
 
-onMounted(() => {
+// 布局 keep-alive 缓存本页，二次导入同路由进入时不会重新 onMounted，须在激活时重读 sessionStorage
+const loadResult = () => {
   const raw = sessionStorage.getItem(GUILD_ANCHOR_IMPORT_RESULT_KEY)
   if (!raw) {
+    result.value = null
     return
   }
   try {
@@ -95,7 +97,10 @@ onMounted(() => {
     console.error('parse import result failed:', error)
     result.value = null
   }
-})
+}
+
+onMounted(loadResult)
+onActivated(loadResult)
 </script>
 
 <style scoped>
