@@ -22,12 +22,16 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 	existing := cfgdao.LoadLiveCfg()
 	videoCallTicketEnabled := true
 	showcaseLiveRoomEnabled := false
+	audienceGameListHidden := false
+	anchorGameListHidden := false
 	gameLiveRoomEnabled := false
 	voiceChatLiveRoomEnabled := false
 	oneToOneLiveRoomEnabled := false
 	if existing != nil {
 		videoCallTicketEnabled = existing.VideoCallTicketEnabled
 		showcaseLiveRoomEnabled = existing.ShowcaseLiveRoomEnabled
+		audienceGameListHidden = existing.AudienceGameListHidden
+		anchorGameListHidden = existing.AnchorGameListHidden
 		gameLiveRoomEnabled = existing.GameLiveRoomEnabled
 		voiceChatLiveRoomEnabled = existing.VoiceChatLiveRoomEnabled
 		oneToOneLiveRoomEnabled = existing.OneToOneLiveRoomEnabled
@@ -37,6 +41,12 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 	}
 	if req.ShowcaseLiveRoomEnabled != nil {
 		showcaseLiveRoomEnabled = *req.ShowcaseLiveRoomEnabled
+	}
+	if req.AudienceGameListHidden != nil {
+		audienceGameListHidden = *req.AudienceGameListHidden
+	}
+	if req.AnchorGameListHidden != nil {
+		anchorGameListHidden = *req.AnchorGameListHidden
 	}
 	if req.GameLiveRoomEnabled != nil {
 		gameLiveRoomEnabled = *req.GameLiveRoomEnabled
@@ -51,6 +61,8 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 		PaidDanmakuPrice:                req.PaidDanmakuPrice,
 		VideoCallTicketEnabled:          videoCallTicketEnabled,
 		ShowcaseLiveRoomEnabled:         showcaseLiveRoomEnabled,
+		AudienceGameListHidden:          audienceGameListHidden,
+		AnchorGameListHidden:            anchorGameListHidden,
 		GameLiveRoomEnabled:             gameLiveRoomEnabled,
 		VoiceChatLiveRoomEnabled:        voiceChatLiveRoomEnabled,
 		OneToOneLiveRoomEnabled:         oneToOneLiveRoomEnabled,
@@ -109,6 +121,8 @@ func liveCfgItemFromMemory(meta *entity.LiveCfg) *livecfgdto.LiveCfgItem {
 		OneToOneDailyFreeSeconds:        GetOneToOneDailyFreeSeconds(),
 		LiveRoomCallMinTotalRechargeUsd: GetLiveRoomCallMinTotalRechargeUSD(),
 		ShowcaseLiveRoomEnabled:         IsShowcaseLiveRoomEnabled(),
+		AudienceGameListHidden:          IsAudienceGameListHidden(),
+		AnchorGameListHidden:            IsAnchorGameListHidden(),
 		GameLiveRoomEnabled:             IsGameLiveRoomEnabled(),
 		VoiceChatLiveRoomEnabled:        IsVoiceChatLiveRoomEnabled(),
 		OneToOneLiveRoomEnabled:         IsOneToOneLiveRoomEnabled(),

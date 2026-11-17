@@ -2233,6 +2233,8 @@ export interface LiveCfg {
 	oneToOneDailyFreeSeconds: number
     liveRoomCallMinTotalRechargeUsd: number
     showcaseLiveRoomEnabled: boolean
+    audienceGameListHidden: boolean
+    anchorGameListHidden: boolean
     gameLiveRoomEnabled: boolean
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean
@@ -2255,6 +2257,8 @@ export interface SaveLiveCfgReq {
 	oneToOneDailyFreeSeconds: number
     liveRoomCallMinTotalRechargeUsd: number
     showcaseLiveRoomEnabled: boolean
+    audienceGameListHidden: boolean
+    anchorGameListHidden: boolean
     gameLiveRoomEnabled: boolean
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean

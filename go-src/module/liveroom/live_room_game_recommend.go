@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
@@ -12,14 +13,18 @@ import (
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/game"
+	"xr-game-server/module/livecfg"
 )
 
 const liveRoomGameRecommendMaxCount = 20
 
 // GetLiveRoomGameRecommendList App 查询直播间推荐游戏列表(读永久缓存 + game_cfgs).
-func GetLiveRoomGameRecommendList(_ context.Context, req *liveroomdto.GetLiveRoomGameRecommendListReq) (*liveroomdto.GetLiveRoomGameRecommendListRes, error) {
+func GetLiveRoomGameRecommendList(ctx context.Context, req *liveroomdto.GetLiveRoomGameRecommendListReq) (*liveroomdto.GetLiveRoomGameRecommendListRes, error) {
 	if req == nil || req.LiveRoomId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if livecfg.ShouldHideAppGameListForUser(httpserver.GetAuthId(ctx)) {
+		return &liveroomdto.GetLiveRoomGameRecommendListRes{List: []*liveroomdto.LiveRoomGameRecommendItem{}}, nil
 	}
 	rows := liveroomdao.GetActiveLiveRoomGameRecommendsByRoomID(req.LiveRoomId)
 	gameMap := buildOnShelfGameMap()
