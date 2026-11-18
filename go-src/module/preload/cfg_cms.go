@@ -11,6 +11,8 @@ import (
 	"xr-game-server/entity/sys"
 	"xr-game-server/errercode"
 	"xr-game-server/module/resourcemonitor"
+	"xr-game-server/module/usermaxid"
+	userentity "xr-game-server/entity/user"
 )
 
 func GetPreloadCfg(_ context.Context, _ *preloadcfgdto.GetPreloadCfgReq) (*preloadcfgdto.GetPreloadCfgRes, error) {
@@ -22,6 +24,9 @@ func GetPreloadCfg(_ context.Context, _ *preloadcfgdto.GetPreloadCfgReq) (*prelo
 }
 
 func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*preloadcfgdto.SavePreloadCfgRes, error) {
+	if err := usermaxid.SetMaxIdFromCMS(req.UserInfoMaxId); err != nil {
+		return nil, err
+	}
 	existing := cfgdao.LoadPreloadCfg()
 	row := &entity.PreloadCfg{
 		RecentLoginLimit:                req.RecentLoginLimit,
@@ -65,7 +70,17 @@ func defaultPreloadCfgItem() *preloadcfgdto.PreloadCfgItem {
 		MemoryLimitM:                    cfgdao.DefaultMemoryLimitM,
 		IpGeoDbPath:                     cfgdao.DefaultIpGeoDbPath,
 		ResourceMetricCollectionEnabled: cfgdao.DefaultResourceMetricCollectionEnabled,
+		UserInfoMaxId:                   formatUserMaxCounter(),
+		UserInfoDbMaxId:                 strconv.FormatUint(usermaxid.MaxUserInfoIdInDB(), 10),
 	}
+}
+
+func formatUserMaxCounter() string {
+	maxCounter := usermaxid.CurrentUserMaxId()
+	if maxCounter == 0 {
+		maxCounter = userentity.UserMaxIdDefaultID
+	}
+	return strconv.FormatUint(maxCounter, 10)
 }
 
 func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
@@ -107,6 +122,8 @@ func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 		CreatedAt:                       formatPreloadCfgTime(cfg.CreatedAt),
 		ResourceMetricCollectionEnabled: cfg.ResourceMetricCollectionEnabled,
 		UpdatedAt:                       formatPreloadCfgTime(cfg.UpdatedAt),
+		UserInfoMaxId:                   formatUserMaxCounter(),
+		UserInfoDbMaxId:                 strconv.FormatUint(usermaxid.MaxUserInfoIdInDB(), 10),
 	}
 }
 

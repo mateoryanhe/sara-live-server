@@ -3,6 +3,7 @@ import {definePageMessages} from './_define'
 const zh = {
   sectionPreload: '启动预热',
   sectionRuntime: '运行参数',
+  sectionUserInfoMaxId: '用户 ID 号段',
   sectionHotRestart: '热重启',
   hotRestartPhase1Time: '第一阶段时间',
   hotRestartPhase1TimeTip: '热重启一阶段固定等待（秒）：满该时长后再 fork 新进程，期间旧进程持续刷盘；默认 60；修改后需热重启或冷启动生效',
@@ -37,11 +38,19 @@ const zh = {
   fetchCfgFailed: '获取配置失败',
   saveSuccessRestart: '保存成功；资源采集开关立即生效，其他运行参数按提示重启后生效',
   saveFailed: '保存失败',
+  userInfoMaxId: '发号器最大 user ID',
+  userInfoMaxIdTip: '对应 user_max_ids.max_id；新注册用户与 user_infos.id 均为「最大 ID + 1」即 {nextId}，保存后立即生效',
+  userInfoDbMaxId: 'user_infos 当前最大 ID',
+  userInfoDbMaxIdTip: '只读，来自 user_infos 合理号段内的 MAX(id)（排除 UINT64_MAX 等测试脏数据）；设置值不得低于该值与当前发号器',
+  userInfoMaxIdRequired: '请输入最大 user ID',
+  userInfoMaxIdMin: '最小值为 1000000',
+  userInfoMaxIdBelowDb: '不能低于 user_infos 当前最大 ID（{min}）',
 }
 
 const en = {
   sectionPreload: 'Startup preload',
   sectionRuntime: 'Runtime',
+  sectionUserInfoMaxId: 'User ID range',
   sectionHotRestart: 'Hot restart',
   hotRestartPhase1Time: 'Phase 1 duration',
   hotRestartPhase1TimeTip: 'Hot restart phase 1 fixed wait (seconds): fork after this duration while the old process keeps flushing. Default 60. Takes effect after hot or cold restart.',
@@ -76,6 +85,13 @@ const en = {
   fetchCfgFailed: 'Failed to load config',
   saveSuccessRestart: 'Saved. Metric collection changes apply immediately; restart for other runtime settings as noted.',
   saveFailed: 'Save failed',
+  userInfoMaxId: 'Max user ID (allocator)',
+  userInfoMaxIdTip: 'Maps to user_max_ids.max_id; next registration gets max+1 = {nextId}. Takes effect immediately after save.',
+  userInfoDbMaxId: 'Current MAX(user_infos.id)',
+  userInfoDbMaxIdTip: 'Read-only MAX(user_infos.id) in a sane ID range (excludes UINT64_MAX test rows). Configured max must not be below this or the current allocator.',
+  userInfoMaxIdRequired: 'Please enter max user ID',
+  userInfoMaxIdMin: 'Minimum is 1000000',
+  userInfoMaxIdBelowDb: 'Must not be below current MAX(user_infos.id) ({min})',
 }
 
 const es = {
@@ -115,6 +131,14 @@ const es = {
   fetchCfgFailed: 'Error al cargar la configuración',
   saveSuccessRestart: 'Guardado. La recopilación se aplica de inmediato; reinicie para otros ajustes indicados.',
   saveFailed: 'Error al guardar',
+  sectionUserInfoMaxId: 'User ID range',
+  userInfoMaxId: 'Max user ID (allocator)',
+  userInfoMaxIdTip: 'Maps to user_max_ids.max_id; next registration gets max+1 = {nextId}. Takes effect immediately after save.',
+  userInfoDbMaxId: 'Current MAX(user_infos.id)',
+  userInfoDbMaxIdTip: 'Read-only MAX(user_infos.id) in a sane ID range (excludes UINT64_MAX test rows). Configured max must not be below this or the current allocator.',
+  userInfoMaxIdRequired: 'Please enter max user ID',
+  userInfoMaxIdMin: 'Minimum is 1000000',
+  userInfoMaxIdBelowDb: 'Must not be below current MAX(user_infos.id) ({min})',
 }
 
 const pt = {
@@ -154,6 +178,14 @@ const pt = {
   fetchCfgFailed: 'Falha ao carregar configuração',
   saveSuccessRestart: 'Salvo. A coleta é aplicada imediatamente; reinicie para os demais ajustes indicados.',
   saveFailed: 'Falha ao salvar',
+  sectionUserInfoMaxId: 'User ID range',
+  userInfoMaxId: 'Max user ID (allocator)',
+  userInfoMaxIdTip: 'Maps to user_max_ids.max_id; next registration gets max+1 = {nextId}. Takes effect immediately after save.',
+  userInfoDbMaxId: 'Current MAX(user_infos.id)',
+  userInfoDbMaxIdTip: 'Read-only MAX(user_infos.id) in a sane ID range (excludes UINT64_MAX test rows). Configured max must not be below this or the current allocator.',
+  userInfoMaxIdRequired: 'Please enter max user ID',
+  userInfoMaxIdMin: 'Minimum is 1000000',
+  userInfoMaxIdBelowDb: 'Must not be below current MAX(user_infos.id) ({min})',
 }
 
 const hi = {
@@ -193,6 +225,14 @@ const hi = {
   fetchCfgFailed: 'कॉन्फ़िग लोड विफल',
   saveSuccessRestart: 'सहेजा गया। मेट्रिक संग्रह तुरंत लागू होता है; अन्य सेटिंग के लिए निर्देशानुसार रीस्टार्ट करें।',
   saveFailed: 'सहेजना विफल',
+  sectionUserInfoMaxId: 'User ID range',
+  userInfoMaxId: 'Max user ID (allocator)',
+  userInfoMaxIdTip: 'Maps to user_max_ids.max_id; next registration gets max+1 = {nextId}. Takes effect immediately after save.',
+  userInfoDbMaxId: 'Current MAX(user_infos.id)',
+  userInfoDbMaxIdTip: 'Read-only MAX(user_infos.id) in a sane ID range (excludes UINT64_MAX test rows). Configured max must not be below this or the current allocator.',
+  userInfoMaxIdRequired: 'Please enter max user ID',
+  userInfoMaxIdMin: 'Minimum is 1000000',
+  userInfoMaxIdBelowDb: 'Must not be below current MAX(user_infos.id) ({min})',
 }
 
 const id = {
@@ -232,6 +272,14 @@ const id = {
   fetchCfgFailed: 'Gagal memuat konfigurasi',
   saveSuccessRestart: 'Disimpan. Pengumpulan metrik berlaku segera; restart untuk pengaturan lain sesuai petunjuk.',
   saveFailed: 'Gagal menyimpan',
+  sectionUserInfoMaxId: 'User ID range',
+  userInfoMaxId: 'Max user ID (allocator)',
+  userInfoMaxIdTip: 'Maps to user_max_ids.max_id; next registration gets max+1 = {nextId}. Takes effect immediately after save.',
+  userInfoDbMaxId: 'Current MAX(user_infos.id)',
+  userInfoDbMaxIdTip: 'Read-only MAX(user_infos.id) in a sane ID range (excludes UINT64_MAX test rows). Configured max must not be below this or the current allocator.',
+  userInfoMaxIdRequired: 'Please enter max user ID',
+  userInfoMaxIdMin: 'Minimum is 1000000',
+  userInfoMaxIdBelowDb: 'Must not be below current MAX(user_infos.id) ({min})',
 }
 
 export const serverRuntimeCfgMessages = definePageMessages(zh, en, es, pt, hi, id)

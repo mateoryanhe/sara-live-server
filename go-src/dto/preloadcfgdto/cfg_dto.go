@@ -15,6 +15,8 @@ type PreloadCfgItem struct {
 	MemoryLimitM                    int     `json:"memoryLimitM"`
 	IpGeoDbPath                     string  `json:"ipGeoDbPath"`
 	ResourceMetricCollectionEnabled bool    `json:"resourceMetricCollectionEnabled"`
+	UserInfoMaxId                   string  `json:"userInfoMaxId" dc:"发号器当前最大 user ID(user_max_ids.max_id)"`
+	UserInfoDbMaxId                 string  `json:"userInfoDbMaxId" dc:"user_infos 表 MAX(id),只读参考"`
 	CreatedAt                       string  `json:"createdAt"`
 	UpdatedAt                       string  `json:"updatedAt"`
 }
@@ -33,6 +35,7 @@ type SavePreloadCfgReq struct {
 	MemoryLimitM                    int     `json:"memoryLimitM" v:"required|min:64|max:32768#内存上限不能为空|内存上限最小64MB|内存上限最大32768MB" dc:"Go堆内存软上限MB"`
 	IpGeoDbPath                     string  `json:"ipGeoDbPath" v:"required|length:1,512#IP库路径不能为空|IP库路径过长" dc:"GeoLite2-Country.mmdb绝对路径"`
 	ResourceMetricCollectionEnabled bool    `json:"resourceMetricCollectionEnabled" dc:"是否采集服务器资源指标"`
+	UserInfoMaxId                   uint64  `json:"userInfoMaxId" v:"required|min:1000000#用户最大ID不能为空|用户最大ID不能小于1000000" dc:"发号器最大 user ID,下一注册为 max+1"`
 }
 
 type SavePreloadCfgRes struct {

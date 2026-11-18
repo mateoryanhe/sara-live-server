@@ -42,6 +42,19 @@
             </div>
           </el-tab-pane>
 
+          <el-tab-pane :label="t('pages.serverRuntimeCfg.sectionUserInfoMaxId')" name="userInfoMaxId">
+            <div class="tab-pane-body">
+              <el-form-item :label="t('pages.serverRuntimeCfg.userInfoDbMaxId')">
+                <span class="readonly-id">{{ formData.userInfoDbMaxId }}</span>
+                <div class="form-tip">{{ t('pages.serverRuntimeCfg.userInfoDbMaxIdTip') }}</div>
+              </el-form-item>
+              <el-form-item :label="t('pages.serverRuntimeCfg.userInfoMaxId')" prop="userInfoMaxId">
+                <el-input-number v-model="formData.userInfoMaxId" :min="1000000" :max="9000000000000000" :precision="0" controls-position="right"/>
+                <div class="form-tip">{{ t('pages.serverRuntimeCfg.userInfoMaxIdTip', {nextId: nextRegisterUserId}) }}</div>
+              </el-form-item>
+            </div>
+          </el-tab-pane>
+
           <el-tab-pane :label="t('pages.serverRuntimeCfg.sectionHotRestart')" name="hotRestart">
             <div class="tab-pane-body">
               <el-form-item :label="t('pages.serverRuntimeCfg.hotRestartAuth')" prop="hotRestartAuth">
@@ -81,7 +94,7 @@ import type {PreloadCfg} from '@/types/api'
 const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref<FormInstance>()
-const activeTab = ref<'preload' | 'runtime' | 'hotRestart'>('preload')
+const activeTab = ref<'preload' | 'runtime' | 'userInfoMaxId' | 'hotRestart'>('preload')
 
 const formData = reactive({
   id: '0',
@@ -92,6 +105,17 @@ const formData = reactive({
   memoryLimitM: 300,
   ipGeoDbPath: '',
   resourceMetricCollectionEnabled: true,
+  userInfoMaxId: 1_000_000,
+  userInfoDbMaxId: '0',
+})
+
+const nextRegisterUserId = computed(() => {
+  try {
+    const maxId = BigInt(Math.trunc(Number(formData.userInfoMaxId)))
+    return (maxId + 1n).toString()
+  } catch {
+    return String(formData.userInfoMaxId)
+  }
 })
 
 const metaInfo = reactive({
@@ -124,6 +148,27 @@ const formRules = computed<FormRules>(() => ({
     {required: true, message: t('pages.serverRuntimeCfg.ipGeoDbPathRequired'), trigger: 'blur'},
     {max: 512, message: t('pages.serverRuntimeCfg.ipGeoDbPathLength'), trigger: 'blur'},
   ],
+  userInfoMaxId: [
+    {required: true, message: t('pages.serverRuntimeCfg.userInfoMaxIdRequired'), trigger: 'change'},
+    {type: 'number', min: 1_000_000, message: t('pages.serverRuntimeCfg.userInfoMaxIdMin'), trigger: 'change'},
+    {
+      validator: (_rule, value, callback) => {
+        try {
+          const n = BigInt(Math.trunc(Number(value)))
+          const dbMax = BigInt(formData.userInfoDbMaxId || '0')
+          if (n < dbMax) {
+            callback(new Error(t('pages.serverRuntimeCfg.userInfoMaxIdBelowDb', {min: formData.userInfoDbMaxId})))
+            return
+          }
+        } catch {
+          callback(new Error(t('pages.serverRuntimeCfg.userInfoMaxIdRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
 }))
 
 const applyCfg = (cfg: PreloadCfg | null | undefined) => {
@@ -135,6 +180,10 @@ const applyCfg = (cfg: PreloadCfg | null | undefined) => {
   formData.memoryLimitM = Number(cfg?.memoryLimitM) || 300
   formData.ipGeoDbPath = cfg?.ipGeoDbPath || ''
   formData.resourceMetricCollectionEnabled = cfg?.resourceMetricCollectionEnabled !== false
+  formData.userInfoMaxId = Number(cfg?.userInfoMaxId) || 1_000_000
+  formData.userInfoDbMaxId = cfg?.userInfoDbMaxId != null && String(cfg.userInfoDbMaxId) !== ''
+      ? String(cfg.userInfoDbMaxId)
+      : '0'
   metaInfo.createdAt = cfg?.createdAt || ''
   metaInfo.updatedAt = cfg?.updatedAt || ''
 }
@@ -158,8 +207,11 @@ const handleSave = async () => {
     if (!valid) {
       const hotRestartKeys = ['hotRestartAuth', 'hotRestartFlushTimeout', 'hotRestartExitTimeout'] as const
       const runtimeKeys = ['memoryLimitM', 'ipGeoDbPath'] as const
+      const userIdKeys = ['userInfoMaxId'] as const
       if (fields && hotRestartKeys.some((k) => fields[k])) {
         activeTab.value = 'hotRestart'
+      } else if (fields && userIdKeys.some((k) => fields[k])) {
+        activeTab.value = 'userInfoMaxId'
       } else if (fields && runtimeKeys.some((k) => fields[k])) {
         activeTab.value = 'runtime'
       } else if (fields) {
@@ -177,6 +229,7 @@ const handleSave = async () => {
         memoryLimitM: formData.memoryLimitM,
         ipGeoDbPath: formData.ipGeoDbPath.trim(),
         resourceMetricCollectionEnabled: formData.resourceMetricCollectionEnabled,
+        userInfoMaxId: formData.userInfoMaxId,
       })
       if (response?.success) {
         ElMessage.success(t('pages.serverRuntimeCfg.saveSuccessRestart'))
@@ -253,5 +306,10 @@ onMounted(() => {
   margin-top: 8px;
   padding-top: 16px;
   border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.readonly-id {
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
 }
 </style>

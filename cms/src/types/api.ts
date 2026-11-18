@@ -1327,6 +1327,8 @@ export interface PreloadCfg {
     memoryLimitM?: number
     ipGeoDbPath?: string
     resourceMetricCollectionEnabled: boolean
+    userInfoMaxId?: string
+    userInfoDbMaxId?: string
     createdAt?: string
     updatedAt?: string
 }
@@ -1344,6 +1346,7 @@ export interface SavePreloadCfgReq {
     memoryLimitM: number
     ipGeoDbPath: string
     resourceMetricCollectionEnabled: boolean
+    userInfoMaxId: number
 }
 
 export interface SavePreloadCfgRes {
