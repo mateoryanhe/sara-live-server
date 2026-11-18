@@ -57,6 +57,7 @@ type GetUserExtRes struct {
 	CancelCodeExpireAt    *time.Time            `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
 	FirstRecharge         bool                  `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
 	EmailBound            bool                  `json:"emailBound" dc:"是否已绑定邮箱"`
+	Email                 string                `json:"email" dc:"已绑定邮箱(user_exts.email),未绑定为空"`
 	FirebaseBound         bool                  `json:"firebaseBound" dc:"是否已绑定Firebase账号"`
 	InviterId             uint64                `json:"inviterId,string" dc:"邀请者用户ID(0为无)"`
 	ShortVideoViewCount   uint64                `json:"shortVideoViewCount" dc:"累计短视频观看人数"`

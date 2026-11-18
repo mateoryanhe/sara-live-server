@@ -38,6 +38,7 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		shortVideoTotalIncome = authorStat.TotalDiamondIncome
 	}
 	info := userinfodao.GetUserInfoByUserId(targetUserId)
+	boundEmail := strings.TrimSpace(ext.Email)
 	return &userinfodto.GetUserExtRes{
 		UserId:                targetUserId,
 		Channel:               channel,
@@ -51,7 +52,8 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		CancelCode:            ext.CancelCode,
 		CancelCodeExpireAt:    ext.CancelCodeExpireAt,
 		FirstRecharge:         ext.FirstRecharge,
-		EmailBound:            strings.TrimSpace(ext.Email) != "",
+		EmailBound:            boundEmail != "",
+		Email:                 boundEmail,
 		FirebaseBound:         strings.TrimSpace(ext.FirebaseUID) != "",
 		InviterId:             ext.InviterId,
 		ShortVideoViewCount:   shortVideoViewCount,
