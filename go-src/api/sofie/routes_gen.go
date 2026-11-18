@@ -25,6 +25,9 @@ func Init() {
 		{Path: "/signInByH5Device", Handler: jsonHandler((&controller.AuthController{}).H5DeviceLogin)},
 		{Path: "/resetMobileSecret", Handler: jsonHandler((&controller.AuthController{}).PhoneResetPassword)},
 	})
+	httpserver.RegNonAuthAppRouteGroup("/sofie/attribution", []httpserver.AppRoute{
+		{Path: "/fetchAppsFlyerCfg", Handler: jsonHandler((&controller.AppsFlyerAppController{}).GetCfgForApp)},
+	})
 	httpserver.RegAppRouteGroup("/sofie/bonus", []httpserver.AppRoute{
 		{Path: "/fetchFirstPay", Handler: jsonHandler((&controller.FirstRechargeActivityAppController{}).FirstRechargeActivityCfgForApp)},
 	})

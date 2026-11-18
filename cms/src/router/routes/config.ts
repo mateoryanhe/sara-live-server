@@ -111,6 +111,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'Firebase登录'},
         },
         {
+            path: 'apps-flyer-cfg',
+            name: 'AppsFlyerCfgManagement',
+            component: () => import('@/views/config/apps-flyer-cfg.vue'),
+            meta: {title: 'AppsFlyer配置'},
+        },
+        {
             path: 'firebase-push',
             name: 'FirebasePushCfgManagement',
             component: () => import('@/views/config/firebase-push.vue'),

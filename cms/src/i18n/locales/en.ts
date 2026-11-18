@@ -142,6 +142,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   UserReportRecordManagement: 'User reports',
   GooglePlayCfgManagement: 'Google Play',
   FirebaseCfgManagement: 'Firebase Login',
+  AppsFlyerCfgManagement: 'AppsFlyer',
   FirebasePushCfgManagement: 'Firebase Push',
   GameActivityCfgManagement: 'Game Activity',
   MetaPixelCfgManagement: 'Meta Pixel (Server)',

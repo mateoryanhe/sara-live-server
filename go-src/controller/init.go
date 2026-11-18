@@ -58,6 +58,8 @@ func Init() {
 	initCfEmailCMSController()                       // 邮件SMTP发信配置(CMS)
 	initFirebaseCMSController()                      // Firebase登录配置(CMS)
 	initFirebaseAppController()                      // Firebase客户端配置(App,无需鉴权)
+	initAppsFlyerCMSController()                     // AppsFlyer配置(CMS)
+	initAppsFlyerAppController()                     // AppsFlyer配置(App,读缓存,免登录)
 	initFirebasePushCMSController()                  // Firebase推送配置(CMS)
 	initGameActivityCMSController()                  // 游戏活动配置(CMS)
 	initActivityAppController()                      // 活动配置(App,路径不含游戏字眼)

@@ -103,6 +103,7 @@ import {sofiePrivacyPolicyMessages} from './sofie-privacy-policy'
 import {auditCodeMessages} from './audit-code'
 import {googlePlayMessages} from './google-play'
 import {firebaseMessages} from './firebase'
+import {appsFlyerCfgMessages} from './apps-flyer-cfg'
 import {firebasePushMessages} from './firebase-push'
 import {gameActivityMessages} from './game-activity'
 import {metaPixelMessages} from './meta-pixel'
@@ -244,6 +245,7 @@ const pageMessageBuilders = [
   ['auditCode', auditCodeMessages],
   ['googlePlay', googlePlayMessages],
   ['firebase', firebaseMessages],
+  ['appsFlyerCfg', appsFlyerCfgMessages],
   ['firebasePush', firebasePushMessages],
   ['gameActivity', gameActivityMessages],
   ['haipay', haipayMessages],

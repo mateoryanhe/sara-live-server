@@ -12,6 +12,7 @@ func Init() {
 	initCountryFlagCfg()
 	initCfEmailCfg()
 	initFirebaseCfg()
+	initAppsFlyerCfg()
 	initFirebasePushCfg()
 	initGameActivityCfg()
 	initMetaPixelCfg()

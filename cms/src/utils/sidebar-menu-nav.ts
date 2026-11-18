@@ -83,6 +83,7 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
         || path === '/config/app-pkg-list'
         || path === '/config/app-version-cfg'
         || path === '/config/firebase'
+        || path === '/config/apps-flyer-cfg'
         || path === '/config/privacy-policy'
         || path === '/config/sofie-privacy-policy'
         || path === '/config/audit-code'

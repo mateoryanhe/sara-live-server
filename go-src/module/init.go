@@ -13,6 +13,7 @@ import (
 	"xr-game-server/module/apkpromotionchannel"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/appversioncfg"
+	"xr-game-server/module/appsflyercfg"
 	"xr-game-server/module/attrreport"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
@@ -80,6 +81,7 @@ func Init() {
 	firebasepush.Init()
 	gameactivity.Init()
 	metapixel.Init()
+	appsflyercfg.Init()
 	attrreport.Init()
 	preload.Init()
 	currencylog.Init()

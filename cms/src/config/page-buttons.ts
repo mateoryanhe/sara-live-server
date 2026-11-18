@@ -109,6 +109,7 @@ const CONFIG_PAGES = new Set([
     'AuditCodeCfgManagement',
     'GooglePlayCfgManagement',
     'FirebaseCfgManagement',
+    'AppsFlyerCfgManagement',
     'FirebasePushCfgManagement',
     'GameActivityCfgManagement',
     'MetaPixelCfgManagement',

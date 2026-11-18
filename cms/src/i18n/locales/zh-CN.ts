@@ -150,6 +150,7 @@ const menu = {
   UserReportRecordManagement: '用户举报记录',
   GooglePlayCfgManagement: 'Google Play',
   FirebaseCfgManagement: 'Firebase登录',
+  AppsFlyerCfgManagement: 'AppsFlyer配置',
   FirebasePushCfgManagement: 'Firebase推送',
   GameActivityCfgManagement: '游戏活动配置',
   MetaPixelCfgManagement: 'Meta Pixel 上报',

@@ -705,7 +705,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('FirebasePushCfgManagement') || hasMenuPermission('GameActivityCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ChannelDownloadLandingDeployManagement') || hasMenuPermission('ShareActivityDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
+            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('AppsFlyerCfgManagement') || hasMenuPermission('FirebasePushCfgManagement') || hasMenuPermission('GameActivityCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ChannelDownloadLandingDeployManagement') || hasMenuPermission('ShareActivityDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
             index="/frontend-module">
           <template #title>
             <el-icon>
@@ -714,7 +714,7 @@ const hasMenuPermission = (moduleName: string) => {
             <span>{{ t('menu.ConfigDeployGroup') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('FirebasePushCfgManagement') || hasMenuPermission('GameActivityCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
+              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('AppsFlyerCfgManagement') || hasMenuPermission('FirebasePushCfgManagement') || hasMenuPermission('GameActivityCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
               index="/frontend-module/config">
             <template #title>
               <el-icon>
@@ -757,6 +757,12 @@ const hasMenuPermission = (moduleName: string) => {
                 <Key/>
               </el-icon>
               <span>{{ t('menu.FirebaseCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('AppsFlyerCfgManagement')" index="/config/apps-flyer-cfg">
+              <el-icon>
+                <Promotion/>
+              </el-icon>
+              <span>{{ t('menu.AppsFlyerCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('FirebasePushCfgManagement')" index="/config/firebase-push">
               <el-icon>

@@ -41,6 +41,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 			unsettledTotalIncome = income.TotalIncome
 		}
 	}
+	countryDisplay := resolveUserCountryDisplay(targetUserId)
 	ret := &userinfodto.GetUserInfoRes{
 		UserId:        data.ID,
 		Nickname:      data.Nickname,
@@ -61,7 +62,8 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
 		TotalIncome:   unsettledTotalIncome,
 		Age:           calcAge(data.Birthday),
-		FlagIcon:      ResolveUserFlagIcon(targetUserId),
+		FlagIcon:      countryDisplay.FlagIcon,
+		CountryNameEn: countryDisplay.CountryNameEn,
 	}
 	if req.UserId == 0 {
 		now := time.Now()
@@ -87,9 +89,70 @@ func resolveFollowStatus(viewerId, targetUserId uint64) uint8 {
 	return followstatus.NotFollowing
 }
 
+type userCountryDisplay struct {
+	FlagIcon      string
+	CountryNameEn string
+}
+
+// resolveUserCountryDisplay 优先注册国,空则登录国;解析国旗 URL 与英文国名。
+func resolveUserCountryDisplay(userId uint64) userCountryDisplay {
+	locations := userloginlocationdao.GetByUserIds([]uint64{userId})
+	loc := locations[userId]
+	if loc == nil {
+		return userCountryDisplay{}
+	}
+	code := pickUserCountryCode(loc.RegisterCountry, loc.LoginCountry)
+	if code == "" {
+		return userCountryDisplay{}
+	}
+	var out userCountryDisplay
+	if c, ok := country.Get(code); ok {
+		out.CountryNameEn = c.NameEn
+	}
+	if rel := country.RelPath(code, countryflagdeploy.CurrentVersion()); rel != "" {
+		out.FlagIcon = upload.GetUrlByName(rel)
+	}
+	return out
+}
+
+func pickUserCountryCode(registerCountry, loginCountry string) string {
+	code := strings.TrimSpace(registerCountry)
+	if code == "" {
+		code = strings.TrimSpace(loginCountry)
+	}
+	if !country.Exists(code) {
+		return ""
+	}
+	return code
+}
+
 // ResolveUserFlagIcon 优先注册国,空则登录国;拼当前国旗版本完整 URL。
 func ResolveUserFlagIcon(userId uint64) string {
 	return ResolveUserFlagIcons([]uint64{userId})[userId]
+}
+
+// ResolveUserCountryNameEn 国家英文全称(静态表 NameEn)。
+func ResolveUserCountryNameEn(userId uint64) string {
+	return ResolveUserCountryNameEns([]uint64{userId})[userId]
+}
+
+// ResolveUserCountryNameEns 批量解析国家英文全称。
+func ResolveUserCountryNameEns(userIds []uint64) map[uint64]string {
+	result := make(map[uint64]string, len(userIds))
+	locations := userloginlocationdao.GetByUserIds(userIds)
+	for userId, location := range locations {
+		if location == nil {
+			continue
+		}
+		code := pickUserCountryCode(location.RegisterCountry, location.LoginCountry)
+		if code == "" {
+			continue
+		}
+		if c, ok := country.Get(code); ok {
+			result[userId] = c.NameEn
+		}
+	}
+	return result
 }
 
 // ResolveUserFlagIcons 批量解析用户国旗完整 URL，列表接口只查询一次登录地域表。
@@ -98,11 +161,11 @@ func ResolveUserFlagIcons(userIds []uint64) map[uint64]string {
 	locations := userloginlocationdao.GetByUserIds(userIds)
 	version := countryflagdeploy.CurrentVersion()
 	for userId, location := range locations {
-		code := strings.TrimSpace(location.RegisterCountry)
-		if code == "" {
-			code = strings.TrimSpace(location.LoginCountry)
+		if location == nil {
+			continue
 		}
-		if !country.Exists(code) {
+		code := pickUserCountryCode(location.RegisterCountry, location.LoginCountry)
+		if code == "" {
 			continue
 		}
 		rel := country.RelPath(code, version)

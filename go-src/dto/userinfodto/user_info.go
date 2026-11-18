@@ -35,6 +35,7 @@ type GetUserInfoRes struct {
 	TotalIncome   float64 `json:"totalIncome" dc:"未结算累计总收益(钻石，包含社交流水及游戏金币折算收益)"`
 	Age           int64   `json:"age"`
 	FlagIcon      string  `json:"flagIcon" dc:"国旗完整URL(按注册/登录国家简码+当前国旗版本,无则空)"`
+	CountryNameEn string  `json:"countryNameEn" dc:"国家英文全称(静态国家表NameEn,与flagIcon同源简码,无则空)"`
 }
 
 // GetUserExtReq 查询用户扩展信息

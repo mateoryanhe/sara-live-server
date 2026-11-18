@@ -201,6 +201,7 @@ APIS = [
     ("/customerService/cfg", "no", "(&controller.CustomerServiceAppController{}).Cfg", "客服配置", "help", "fetchContact"),
     ("/fiatCurrency/fiatCurrencyListForApp", "no", "(&controller.FiatCurrencyAppController{}).FiatCurrencyListForApp", "法币列表", "money", "browseFiats"),
     ("/firebase/getClientCfgForApp", "no", "(&controller.FirebaseAppController{}).GetClientCfgForApp", "Firebase客户端配置", "googleAuth", "fetchClientCfg"),
+    ("/appsFlyer/getCfgForApp", "no", "(&controller.AppsFlyerAppController{}).GetCfgForApp", "AppsFlyer配置", "attribution", "fetchAppsFlyerCfg"),
     ("/coinMerchantRechargeCfg/coinMerchantRechargeCfgListForApp", "yes", "(&controller.CoinMerchantRechargeCfgAppController{}).CoinMerchantRechargeCfgList", "币商充值档位", "dealer", "browsePackages"),
     ("/coinMerchantRechargeCfg/paymentRegionList", "yes", "(&controller.CoinMerchantRechargeCfgAppController{}).PaymentRegionList", "币商支付区域", "dealer", "browsePayRegions"),
     ("/sysInfo/cfg", "no", "(&controller.SysInfoController{}).GetInfo", "系统配置", "boot", "loadConfig"),

@@ -355,6 +355,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('AppPkgManagement'),
                 page('AppVersionCfgManagement'),
                 page('FirebaseCfgManagement'),
+                page('AppsFlyerCfgManagement'),
                 page('FirebasePushCfgManagement'),
                 page('GameActivityCfgManagement'),
                 page('PrivacyPolicyCfgManagement'),
