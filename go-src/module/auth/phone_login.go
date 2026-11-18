@@ -56,6 +56,7 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
+	publishAppLoginEvent(ctx, account.ID)
 
 	return &authdto.PhoneLoginRes{
 		Token: fmt.Sprintf("%v.%s", account.ID, tokenStr),

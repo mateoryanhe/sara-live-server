@@ -90,6 +90,7 @@ func EmailLogin(ctx context.Context, req *authdto.EmailLoginReq) (*authdto.Email
 		userinfodao.SaveRegisterClientPlatform(ctx, account.ID)
 		event.Pub(gameevent.RegisterEvent, ev)
 	}
+	publishAppLoginEvent(ctx, account.ID)
 
 	return &authdto.EmailLoginRes{
 		Token:     fmt.Sprintf("%v.%s", account.ID, tokenStr),

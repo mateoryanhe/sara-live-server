@@ -144,8 +144,13 @@ func SaveRegisterClientPlatform(ctx context.Context, userId uint64) string {
 	if userId == 0 {
 		return ""
 	}
-	platform := gameevent.NormalizeStatClientPlatform(httpserver.ClientPlatformFromContext(ctx))
-	if platform == "" {
+	return TryBackfillRegisterClientPlatform(userId, gameevent.NormalizeStatClientPlatform(httpserver.ClientPlatformFromContext(ctx)))
+}
+
+// TryBackfillRegisterClientPlatform 当 register_client_platform 为空时按 X-Platform 补写(仅一次).
+func TryBackfillRegisterClientPlatform(userId uint64, platform string) string {
+	platform = strings.TrimSpace(platform)
+	if userId == 0 || platform == "" {
 		return ""
 	}
 	ext := GetUserExtByUserId(userId)

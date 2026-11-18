@@ -90,6 +90,7 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 		userinfodao.SaveRegisterClientPlatform(ctx, account.ID)
 		event.Pub(gameevent.RegisterEvent, ev)
 	}
+	publishAppLoginEvent(ctx, account.ID)
 
 	return &authdto.DeviceLoginRes{
 		Token:     fmt.Sprintf("%v.%s", account.ID, tokenStr),

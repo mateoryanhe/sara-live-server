@@ -53,6 +53,7 @@ func CoinMerchantLogin(ctx context.Context, req *authdto.CoinMerchantLoginReq) (
 		userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 		userinfodao.SaveRegisterInfo(account.ID, req.DeviceInfo)
 	}
+	publishAppLoginEvent(ctx, account.ID)
 
 	return &authdto.CoinMerchantLoginRes{
 		Token: fmt.Sprintf("%v.%s", account.ID, tokenStr),

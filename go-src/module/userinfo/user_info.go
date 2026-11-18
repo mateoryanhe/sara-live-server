@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 	"time"
-	"xr-game-server/core/event"
 	"xr-game-server/gameevent"
 
 	"xr-game-server/constants/country"
@@ -69,7 +68,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		now := time.Now()
 		data.SetLastLoginTime(&now)
 		userinfodao.PublishUserInfo(data)
-		event.Pub(gameevent.LoginEvent, authUserId)
+		gameevent.PublishLoginEvent(ctx, authUserId)
 	}
 	return ret, nil
 }

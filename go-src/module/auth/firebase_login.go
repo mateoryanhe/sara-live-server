@@ -86,6 +86,7 @@ func FirebaseLogin(ctx context.Context, req *authdto.FirebaseLoginReq) (*authdto
 		userinfodao.SaveRegisterClientPlatform(ctx, account.ID)
 		event.Pub(gameevent.RegisterEvent, ev)
 	}
+	publishAppLoginEvent(ctx, account.ID)
 
 	return &authdto.FirebaseLoginRes{
 		Token:     fmt.Sprintf("%v.%s", account.ID, tokenStr),

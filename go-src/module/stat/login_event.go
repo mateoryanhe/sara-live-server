@@ -19,8 +19,8 @@ func onLoginEvent(data any) {
 }
 
 func consumeLoginJob(job *statJob) {
-	userId, ok := job.Payload.(uint64)
-	if !ok || userId == 0 {
+	userId, ok := gameevent.ParseLoginEventUserId(job.Payload)
+	if !ok {
 		return
 	}
 	now := job.At
