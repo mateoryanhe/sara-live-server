@@ -244,6 +244,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
 import type {FormInstance, FormRules, UploadFile, UploadFiles, UploadUserFile} from 'element-plus'
 import {ElMessage} from 'element-plus'
+import {confirmZipDeploy} from '@/utils/confirm-zip-deploy'
 import {useI18n} from 'vue-i18n'
 import type {
   CompleteStaticSiteFileUploadRes,
@@ -513,6 +514,19 @@ const handleDeploy = async () => {
   }
   if (!selectedFile.value.name.toLowerCase().endsWith('.zip')) {
     ElMessage.error(t('pages.officialSiteDeploy.zipOnly'))
+    return
+  }
+
+  const confirmed = await confirmZipDeploy({
+    t,
+    siteLabel: t(props.titleKey),
+    file: selectedFile.value,
+    domain: deployInfo.value?.domain || mappingForm.domain,
+    deployPath: deployInfo.value?.deployPath || mappingForm.deployPath,
+    urlPrefix: deployInfo.value?.urlPrefix,
+    uploadMode: props.enableChunkedZipUpload ? 'chunked' : 'direct',
+  })
+  if (!confirmed) {
     return
   }
 

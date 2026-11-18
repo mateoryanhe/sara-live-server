@@ -120,6 +120,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
 import type {FormInstance, FormRules, UploadFile, UploadFiles} from 'element-plus'
 import {ElMessage} from 'element-plus'
+import {confirmZipDeploy} from '@/utils/confirm-zip-deploy'
 import {useI18n} from 'vue-i18n'
 import {shareActivityDeployApi} from '@/api/modules/share-activity-deploy'
 import type {DeployShareActivityZipRes, ShareActivityDeployInfo} from '@/api/modules/share-activity-deploy'
@@ -224,6 +225,18 @@ const handleDeploy = async () => {
   const fileName = selectedFile.value.name.toLowerCase()
   if (!fileName.endsWith('.zip')) {
     ElMessage.error(t('pages.shareActivityDeploy.zipOnly'))
+    return
+  }
+
+  const confirmed = await confirmZipDeploy({
+    t,
+    siteLabel: t('menu.ShareActivityDeployManagement'),
+    file: selectedFile.value,
+    domain: formData.domain || deployInfo.value?.domain,
+    deployPath: formData.deployPath || deployInfo.value?.deployPath,
+    urlPrefix: deployInfo.value?.urlPrefix,
+  })
+  if (!confirmed) {
     return
   }
 

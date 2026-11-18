@@ -24,4 +24,9 @@ const elementLocale = computed(() => getElementPlusLocale(locale.value as CmsLoc
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
+
+.zip-deploy-confirm-dialog .el-message-box__message {
+  line-height: 1.65;
+  white-space: pre-line;
+}
 </style>

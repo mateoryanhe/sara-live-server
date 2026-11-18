@@ -122,6 +122,7 @@ import {countryFlagDeployMessages} from './country-flag-deploy'
 import {thirdPayDeployMessages} from './third-pay-deploy'
 import {userWithdrawDeployMessages} from './user-withdraw-deploy'
 import {officialSiteDeployMessages} from './official-site-deploy'
+import {deployZipConfirmMessages} from './deploy-zip-confirm'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
 import {processDownLogMessages} from './process-down-log'
@@ -262,6 +263,7 @@ const pageMessageBuilders = [
   ['thirdPayDeploy', thirdPayDeployMessages],
   ['userWithdrawDeploy', userWithdrawDeployMessages],
   ['officialSiteDeploy', officialSiteDeployMessages],
+  ['deployZipConfirm', deployZipConfirmMessages],
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],
   ['processDownLog', processDownLogMessages],

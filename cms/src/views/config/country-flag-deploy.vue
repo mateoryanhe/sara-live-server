@@ -137,6 +137,7 @@ import {computed, onMounted, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
 import type {UploadFile, UploadFiles} from 'element-plus'
 import {ElMessage} from 'element-plus'
+import {confirmZipDeploy} from '@/utils/confirm-zip-deploy'
 import {useI18n} from 'vue-i18n'
 import {countryFlagDeployApi} from '@/api/modules/country-flag-deploy'
 import type {
@@ -221,6 +222,17 @@ const handleDeploy = async () => {
   const fileName = selectedFile.value.name.toLowerCase()
   if (!fileName.endsWith('.zip')) {
     ElMessage.error(t('pages.countryFlagDeploy.zipOnly'))
+    return
+  }
+
+  const confirmed = await confirmZipDeploy({
+    t,
+    siteLabel: t('menu.CountryFlagDeployManagement'),
+    file: selectedFile.value,
+    deployPath: deployInfo.value?.deployPath,
+    urlPrefix: deployInfo.value?.urlPrefix,
+  })
+  if (!confirmed) {
     return
   }
 

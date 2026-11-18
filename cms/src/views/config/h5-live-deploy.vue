@@ -144,6 +144,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
 import type {FormInstance, FormRules, UploadFile, UploadFiles} from 'element-plus'
 import {ElMessage} from 'element-plus'
+import {confirmZipDeploy} from '@/utils/confirm-zip-deploy'
 import {useI18n} from 'vue-i18n'
 import {h5LiveDeployApi} from '@/api/modules/h5-live-deploy'
 import type {DeployH5LiveZipRes, H5LiveDeployInfo} from '@/api/modules/h5-live-deploy'
@@ -271,6 +272,18 @@ const handleDeploy = async () => {
   const fileName = selectedFile.value.name.toLowerCase()
   if (!fileName.endsWith('.zip')) {
     ElMessage.error(t('pages.h5LiveDeploy.zipOnly'))
+    return
+  }
+
+  const confirmed = await confirmZipDeploy({
+    t,
+    siteLabel: t('menu.H5LiveDeployManagement'),
+    file: selectedFile.value,
+    domain: formData.domain || deployInfo.value?.domain,
+    deployPath: formData.deployPath || deployInfo.value?.deployPath,
+    urlPrefix: deployInfo.value?.urlPrefix,
+  })
+  if (!confirmed) {
     return
   }
 

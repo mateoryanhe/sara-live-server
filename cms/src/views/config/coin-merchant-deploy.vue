@@ -144,6 +144,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
 import type {FormInstance, FormRules, UploadFile, UploadFiles} from 'element-plus'
 import {ElMessage} from 'element-plus'
+import {confirmZipDeploy} from '@/utils/confirm-zip-deploy'
 import {useI18n} from 'vue-i18n'
 import {coinMerchantDeployApi} from '@/api/modules/coin-merchant-deploy'
 import type {DeployCoinMerchantZipRes, CoinMerchantDeployInfo} from '@/api/modules/coin-merchant-deploy'
@@ -271,6 +272,18 @@ const handleDeploy = async () => {
   const fileName = selectedFile.value.name.toLowerCase()
   if (!fileName.endsWith('.zip')) {
     ElMessage.error(t('pages.coinMerchantDeploy.zipOnly'))
+    return
+  }
+
+  const confirmed = await confirmZipDeploy({
+    t,
+    siteLabel: t('menu.CoinMerchantDeployManagement'),
+    file: selectedFile.value,
+    domain: formData.domain || deployInfo.value?.domain,
+    deployPath: formData.deployPath || deployInfo.value?.deployPath,
+    urlPrefix: deployInfo.value?.urlPrefix,
+  })
+  if (!confirmed) {
     return
   }
 

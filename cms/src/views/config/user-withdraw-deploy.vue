@@ -116,6 +116,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
 import type {FormInstance, FormRules, UploadFile, UploadFiles} from 'element-plus'
 import {ElMessage} from 'element-plus'
+import {confirmZipDeploy} from '@/utils/confirm-zip-deploy'
 import {useI18n} from 'vue-i18n'
 import {userWithdrawDeployApi} from '@/api/modules/user-withdraw-deploy'
 import type {DeployUserWithdrawZipRes, UserWithdrawDeployInfo} from '@/api/modules/user-withdraw-deploy'
@@ -212,6 +213,18 @@ const handleDeploy = async () => {
   const fileName = selectedFile.value.name.toLowerCase()
   if (!fileName.endsWith('.zip')) {
     ElMessage.error(t('pages.userWithdrawDeploy.zipOnly'))
+    return
+  }
+
+  const confirmed = await confirmZipDeploy({
+    t,
+    siteLabel: t('menu.UserWithdrawDeployManagement'),
+    file: selectedFile.value,
+    domain: formData.domain || deployInfo.value?.domain,
+    deployPath: formData.deployPath || deployInfo.value?.deployPath,
+    urlPrefix: deployInfo.value?.urlPrefix,
+  })
+  if (!confirmed) {
     return
   }
 
