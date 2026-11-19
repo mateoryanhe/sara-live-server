@@ -56,6 +56,9 @@ func handleUploadAnchorVideo(r *ghttp.Request) {
 	res, err := anchorvideo.AddVideoFromStoredFile(r.Context(), form.storedName, form.price, form.description, form.cover, form.fileType, form.duration)
 	if err != nil {
 		upload.DeleteUploadedFile(form.storedName)
+		if form.cover != "" {
+			upload.DeleteUploadedFile(form.cover)
+		}
 		r.SetError(err)
 		return
 	}
@@ -76,9 +79,15 @@ func parseUploadAnchorVideoMultipartWithUploader(ctx context.Context, r *ghttp.R
 	}
 	form = &uploadAnchorVideoForm{}
 	defer func() {
-		if err != nil && form != nil && form.storedName != "" {
-			upload.DeleteUploadedFile(form.storedName)
-			form.storedName = ""
+		if err != nil && form != nil {
+			if form.storedName != "" {
+				upload.DeleteUploadedFile(form.storedName)
+				form.storedName = ""
+			}
+			if form.cover != "" {
+				upload.DeleteUploadedFile(form.cover)
+				form.cover = ""
+			}
 		}
 	}()
 
@@ -127,12 +136,20 @@ func parseUploadAnchorVideoMultipartWithUploader(ctx context.Context, r *ghttp.R
 			}
 			form.description = string(raw)
 		case "cover":
-			raw, readErr := readAnchorVideoMultipartRaw(part, 4096)
-			part.Close()
-			if readErr != nil {
+			if strings.TrimSpace(part.FileName()) == "" {
+				part.Close()
+				break
+			}
+			if form.cover != "" {
+				part.Close()
 				return form, errercode.CreateCode(errercode.InvalidParam)
 			}
-			form.cover = raw
+			storedCover, upErr := upload.StreamUploadAnchorVideoCoverPartContext(ctx, part, int64(upload.GetAppImageMaxSize()))
+			part.Close()
+			if upErr != nil {
+				return form, mapAnchorVideoCoverMultipartErr(upErr)
+			}
+			form.cover = storedCover
 		case "fileType":
 			raw, readErr := readAnchorVideoMultipartRaw(part, 256)
 			part.Close()
@@ -195,6 +212,20 @@ func mapAnchorVideoMultipartErr(err error) error {
 	}
 	if upload.IsUploadVideoFileTooLarge(err) {
 		return errercode.CreateCode(errercode.ShortVideoFileTooLarge)
+	}
+	return errercode.CreateCode(errercode.InvalidParam)
+}
+
+func mapAnchorVideoCoverMultipartErr(err error) error {
+	if err == nil {
+		return nil
+	}
+	var bizErr *errercode.XError
+	if errors.As(err, &bizErr) {
+		return err
+	}
+	if upload.IsUploadImageFileTooLarge(err) {
+		return errercode.CreateCode(errercode.AppImageFileTooLarge)
 	}
 	return errercode.CreateCode(errercode.InvalidParam)
 }

@@ -224,8 +224,7 @@ func SoftDeleteVideos(anchorId uint64, videoIds []uint64) []*entity.AnchorVideo 
 		newList = append(newList, item)
 	}
 	listCacheMgr.PublishList(gctx.New(), listCacheKey(anchorId), newList)
-	// 与库对齐一次,避免缓存与软删状态漂移
-	RefreshVideoListCache(anchorId)
+	// 勿在此处 RefreshVideoListCache: is_deleted 经 syndb 异步落库,立即读库会把已删条目写回列表缓存
 	return deleted
 }
 

@@ -16,7 +16,7 @@ type VideoListReq struct {
 type VideoItem struct {
 	Id          uint64  `json:"id,string" dc:"视频ID"`
 	Video       string  `json:"video" dc:"视频完整URL"`
-	Cover       string  `json:"cover" dc:"封面(原样返回)"`
+	Cover       string  `json:"cover" dc:"封面完整URL(未上传则为空)"`
 	FileType    string  `json:"fileType" dc:"文件类型(原样返回)"`
 	Duration    uint32  `json:"duration" dc:"视频秒数"`
 	Price       float64 `json:"price" dc:"钻石价格(0=免费)"`
@@ -49,7 +49,7 @@ type UploadVideoReq struct {
 	File        *ghttp.UploadFile `json:"file" type:"file" v:"required#请选择视频" dc:"视频文件(mp4,仅1个)"`
 	Price       float64           `json:"price" v:"required#请选择价格" dc:"钻石价格(0=免费)"`
 	Description string            `json:"description" dc:"描述(可空,最多200字)"`
-	Cover       string            `json:"cover" dc:"封面(可空,原样存储)"`
+	Cover       *ghttp.UploadFile `json:"cover" type:"file" dc:"封面文件(可空,不校验类型,入云桶)"`
 	FileType    string            `json:"fileType" dc:"文件类型(可空,原样存储)"`
 	Duration    string            `json:"duration" dc:"视频秒数(可空,原样解析为整数,非法则为0)"`
 }
@@ -58,7 +58,7 @@ type UploadVideoReq struct {
 type UploadVideoRes struct {
 	Id          uint64  `json:"id,string" dc:"视频ID"`
 	Video       string  `json:"video" dc:"视频完整URL"`
-	Cover       string  `json:"cover" dc:"封面(原样返回)"`
+	Cover       string  `json:"cover" dc:"封面完整URL(未上传则为空)"`
 	FileType    string  `json:"fileType" dc:"文件类型(原样返回)"`
 	Duration    uint32  `json:"duration" dc:"视频秒数"`
 	Price       float64 `json:"price" dc:"钻石价格"`
@@ -76,7 +76,7 @@ type UpdateVideoReq struct {
 type UpdateVideoRes struct {
 	Id          uint64  `json:"id,string" dc:"视频ID"`
 	Video       string  `json:"video" dc:"视频完整URL"`
-	Cover       string  `json:"cover" dc:"封面(原样返回)"`
+	Cover       string  `json:"cover" dc:"封面完整URL(未上传则为空)"`
 	FileType    string  `json:"fileType" dc:"文件类型(原样返回)"`
 	Duration    uint32  `json:"duration" dc:"视频秒数"`
 	Price       float64 `json:"price" dc:"钻石价格"`

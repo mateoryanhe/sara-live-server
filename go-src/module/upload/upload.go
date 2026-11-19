@@ -288,6 +288,19 @@ func StreamUploadImagePartContext(ctx context.Context, part *multipart.Part, max
 	return streamUploadMultipartPart(ctx, part, StoreCatImages, allowedImageExt, maxBytes, errImageFileTooLarge)
 }
 
+// StreamUploadAnchorVideoCoverPartContext 主播相册视频封面:不校验扩展名,入云桶/本地,返回存储相对路径.
+func StreamUploadAnchorVideoCoverPartContext(ctx context.Context, part *multipart.Part, maxBytes int64) (string, error) {
+	if part == nil || strings.TrimSpace(part.FileName()) == "" {
+		return "", errUploadFileEmpty
+	}
+	ext := strings.ToLower(filepath.Ext(part.FileName()))
+	if ext == "" {
+		ext = ".bin"
+	}
+	name, _, err := storeUploadedContentContext(ctx, part, -1, StoreCatImages, ext, maxBytes, errImageFileTooLarge)
+	return name, err
+}
+
 func streamUploadMultipartPart(ctx context.Context, part *multipart.Part, category string, allowedExt map[string]struct{}, maxBytes int64, tooLargeErr error) (string, error) {
 	if part == nil || strings.TrimSpace(part.FileName()) == "" {
 		return "", errors.New("upload file is empty")

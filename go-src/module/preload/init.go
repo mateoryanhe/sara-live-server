@@ -15,6 +15,7 @@ func Init() {
 	cfg.ApplyMemoryLimit(cfgdao.GetMemoryLimitM())
 	preloadRecentLoginUsers(cfgdao.GetRecentLoginPreloadLimit())
 	preloadLiveRoomGameRecommends()
+	preloadAnchorAlbum()
 }
 
 func preloadLiveRoomGameRecommends() {

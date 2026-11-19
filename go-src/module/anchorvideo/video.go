@@ -94,7 +94,7 @@ func isVideoPaidForViewer(viewerId uint64, row *entity.AnchorVideo, purchased ma
 }
 
 // AddVideoFromStoredFile 写入单个相册视频;price=0 免费,>0 为自定义钻石价;description 可空.
-// cover/fileType 原样入库; duration 为视频秒数.
+// cover 为封面对象存储路径(可空); fileType 原样入库; duration 为视频秒数.
 func AddVideoFromStoredFile(ctx context.Context, storedName string, price float64, description, cover, fileType string, duration uint32) (*anchorvideodto.UploadVideoRes, error) {
 	storedName = strings.TrimSpace(storedName)
 	if storedName == "" {
@@ -189,6 +189,9 @@ func DeleteVideo(ctx context.Context, req *anchorvideodto.DeleteVideoReq) (*anch
 			continue
 		}
 		upload.DeleteUploadedFile(row.Video)
+		if strings.TrimSpace(row.Cover) != "" {
+			upload.DeleteUploadedFile(row.Cover)
+		}
 		deletedIds = append(deletedIds, row.ID)
 	}
 	return &anchorvideodto.DeleteVideoRes{
@@ -204,10 +207,18 @@ func toVideoItem(row *entity.AnchorVideo) *anchorvideodto.VideoItem {
 	return &anchorvideodto.VideoItem{
 		Id:          row.ID,
 		Video:       upload.GetUrlByName(row.Video),
-		Cover:       row.Cover,
+		Cover:       coverURL(row.Cover),
 		FileType:    row.FileType,
 		Duration:    row.Duration,
 		Price:       row.Price,
 		Description: row.Description,
 	}
+}
+
+func coverURL(stored string) string {
+	stored = strings.TrimSpace(stored)
+	if stored == "" {
+		return ""
+	}
+	return upload.GetUrlByName(stored)
 }

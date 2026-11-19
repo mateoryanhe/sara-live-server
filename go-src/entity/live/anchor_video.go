@@ -27,7 +27,7 @@ type AnchorVideo struct {
 	migrate.MoreModel
 	AnchorId    uint64  `gorm:"index:idx_av_anchor_created,priority:1;default:0;comment:主播用户ID" json:"anchorId"`
 	Video       string  `gorm:"size:255;default:'';comment:视频资源名" json:"video"`
-	Cover       string  `gorm:"size:512;default:'';comment:封面(原样存储)" json:"cover"`
+	Cover       string  `gorm:"size:512;default:'';comment:封面对象存储路径" json:"cover"`
 	FileType    string  `gorm:"size:128;default:'';comment:文件类型(原样存储)" json:"fileType"`
 	Duration    uint32  `gorm:"default:0;comment:视频秒数" json:"duration"`
 	Price       float64 `gorm:"type:decimal(10,4);default:0;comment:钻石价格" json:"price"`
