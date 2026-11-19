@@ -71,7 +71,7 @@ const hasMenuPermission = (moduleName: string) => {
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement') || hasMenuPermission('TrackingShortVideoManagement') || hasMenuPermission('TrackingVoiceChatRoomManagement') || hasMenuPermission('TrackingRechargeManagement') || hasMenuPermission('TrackingDownloadManagement')"
+            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement') || hasMenuPermission('TrackingShortVideoManagement') || hasMenuPermission('TrackingVoiceChatRoomManagement') || hasMenuPermission('TrackingRechargeManagement') || hasMenuPermission('TrackingDownloadManagement') || hasMenuPermission('TrackingEmailAccountManagement')"
             index="/tracking">
           <template #title>
             <el-icon>
@@ -120,6 +120,12 @@ const hasMenuPermission = (moduleName: string) => {
               <DataLine/>
             </el-icon>
             <span>{{ t('menu.TrackingDownloadManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TrackingEmailAccountManagement')" index="/tracking/email-account">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.TrackingEmailAccountManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

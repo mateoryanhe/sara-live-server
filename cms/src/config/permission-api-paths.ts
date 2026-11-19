@@ -58,6 +58,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingRechargeManagement:export': '/trackingEvent/getChargePanelEnterTrend',
 
     TrackingDownloadManagement: '/trackingEvent/getH5DownloadTrend',
+    TrackingEmailAccountManagement: '/trackingEvent/getEmailAccountTrend',
+    'TrackingEmailAccountManagement:view': '/trackingEvent/getEmailAccountTrend',
+    'TrackingEmailAccountManagement:export': '/trackingEvent/getEmailAccountTrend',
     'TrackingDownloadManagement:view': '/trackingEvent/getH5DownloadTrend',
     'TrackingDownloadManagement:officialSiteTrend': '/trackingEvent/getOfficialSiteDownloadTrend',
     'TrackingDownloadManagement:shareShortLinkTrend': '/trackingEvent/getShareShortLinkClickTrend',

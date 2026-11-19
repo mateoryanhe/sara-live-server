@@ -27,7 +27,7 @@ type LiveRoomListItem struct {
 	TagId              string  `json:"tagId" dc:"直播间标签ID"`
 	TagName            string  `json:"tagName" dc:"直播间标签名称"`
 	Billing            float64 `json:"billing" dc:"视频通话价格(每分钟钻石)"`
-	AllowCallIcon      bool    `json:"allowCallIcon" dc:"电话图标;CMS关1v1房间时一律false;语聊/秀场/游戏等见私聊与充值规则"`
+	AllowCallIcon      bool    `json:"allowCallIcon" dc:"1v1通话按钮;CMS oneToOneLiveRoomEnabled且主播one_to_one_rooms上架"`
 	CreateAt           int64   `json:"createAt" dc:"创建时间(秒)"`
 	AnchorNickname     string  `json:"anchorNickname" dc:"主播昵称"`
 	AnchorAvatar       string  `json:"anchorAvatar" dc:"主播头像URL(已拼资源域名)"`

@@ -159,6 +159,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('TrackingVoiceChatRoomManagement'),
             page('TrackingRechargeManagement'),
             page('TrackingDownloadManagement'),
+            page('TrackingEmailAccountManagement'),
         ],
     },
     {

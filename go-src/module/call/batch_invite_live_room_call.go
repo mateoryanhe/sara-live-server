@@ -15,6 +15,7 @@ import (
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/livecfg"
+	"xr-game-server/module/liveroom"
 	"xr-game-server/module/upload"
 )
 
@@ -75,7 +76,7 @@ func BatchInviteLiveRoomCall(ctx context.Context, req *calldto.BatchInviteLiveRo
 		targetIds = append(targetIds, userId)
 	}
 
-	item := buildLiveRoomCallInviteItem(anchorId, cfg)
+	item := buildLiveRoomCallInviteItem(anchorId)
 	invited := 0
 	for _, userId := range targetIds {
 		onlineId := liveentity.BuildLiveRoomOnlineId(userId, anchorId)
@@ -98,7 +99,7 @@ func BatchInviteLiveRoomCall(ctx context.Context, req *calldto.BatchInviteLiveRo
 	}, nil
 }
 
-func buildLiveRoomCallInviteItem(anchorId uint64, cfg *liveentity.LiveRoomCfg) *calldto.CallInvitePushItem {
+func buildLiveRoomCallInviteItem(anchorId uint64) *calldto.CallInvitePushItem {
 	item := &calldto.CallInvitePushItem{
 		RoomId:   strconv.FormatUint(anchorId, 10),
 		AnchorId: strconv.FormatUint(anchorId, 10),
@@ -106,10 +107,8 @@ func buildLiveRoomCallInviteItem(anchorId uint64, cfg *liveentity.LiveRoomCfg) *
 		CallType: callentity.CallOrderTypeVideo,
 		Message:  liveRoomCallInviteMessage,
 	}
-	if cfg != nil {
-		item.Ticket = livecfg.AppLiveRoomCallTicketPrice(cfg.Ticket)
-		item.Billing = cfg.Billing
-	}
+	item.Ticket = 0
+	item.Billing = liveroom.OneToOneVideoCallBillingPerMinute(anchorId)
 	if u := userinfodao.GetUserInfoByUserId(anchorId); u != nil {
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(anchorId, u.Avatar)

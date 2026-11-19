@@ -77,6 +77,7 @@
               <el-option :value="2" :label="t('pages.videoCallLogList.statusAnswered')"/>
               <el-option :value="3" :label="t('pages.videoCallLogList.statusInCall')"/>
               <el-option :value="4" :label="t('pages.videoCallLogList.statusEnded')"/>
+              <el-option :value="41" :label="t('pages.videoCallLogList.statusEndedRingHangup')"/>
               <el-option :value="5" :label="t('pages.videoCallLogList.statusRejected')"/>
               <el-option :value="6" :label="t('pages.videoCallLogList.statusCallTimeout')"/>
               <el-option :value="7" :label="t('pages.videoCallLogList.statusHeartTimeout')"/>

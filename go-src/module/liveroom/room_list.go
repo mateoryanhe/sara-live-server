@@ -166,7 +166,7 @@ func toLiveRoomListItem(ctx context.Context, room *liveentity.LiveRoom, userId u
 	if cfg != nil {
 		item.Category = normalizeLiveRoomCategory(cfg.Category)
 		item.VoiceChatMicSeatCount = voiceChatMicSeatCountForAPI(cfg)
-		item.Billing = cfg.Billing
+		item.Billing = OneToOneVideoCallBillingPerMinute(room.ID)
 		item.AllowCallIcon = allowShowCallIcon(ctx, room, cfg, userId)
 		if cfg.TagId > 0 {
 			item.TagId = strconv.FormatUint(cfg.TagId, 10)

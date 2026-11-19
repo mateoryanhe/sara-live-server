@@ -107,7 +107,7 @@ func GetById(id uint64) *entity.AnchorVideo {
 }
 
 // TryAddVideo 主播新增单个视频;已满当前上限返回 nil
-func TryAddVideo(anchorId uint64, video string, price float64, description string) *entity.AnchorVideo {
+func TryAddVideo(anchorId uint64, video string, price float64, description, cover, fileType string, duration uint32) *entity.AnchorVideo {
 	if rowCacheMgr == nil || listCacheMgr == nil || anchorId == 0 || video == "" {
 		return nil
 	}
@@ -120,7 +120,7 @@ func TryAddVideo(anchorId uint64, video string, price float64, description strin
 	if len(list) >= maxN {
 		return nil
 	}
-	row := entity.NewAnchorVideo(anchorId, video, price, description)
+	row := entity.NewAnchorVideo(anchorId, video, price, description, cover, fileType, duration)
 	rowCacheMgr.PublishRow(gctx.New(), row.ID, row)
 
 	newList := make([]*entity.AnchorVideo, 0, len(list)+1)

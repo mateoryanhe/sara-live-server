@@ -54,6 +54,7 @@
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
+| `TrackingEmailAccountManagement`（邮箱绑定/注册） | `email_account` | **按 user_id**：`user_ext.email` 从空首次写入 +1（`bindEmail` / 邮箱新号注册写 ext）；同用户重复登录不计；注销后同邮箱新 user_id 再计一次；**仅日维度** | `POST /trackingEvent/getEmailAccountTrend` |
 | `TrackingHotLiveRoomJoinManagement`（秀场直播间） | `hot_live_room_join` | 观众 `joinRoom` 成功且 `live_room_cfgs.category=1`(秀场/Hot)，不含主播本人；每次 +1；`JoinRoom` Pub `ShowcaseLiveRoomJoinTrackingEvent`，`module/tracking` 队列异步消费 | `POST /trackingEvent/getHotLiveRoomJoinTrend` |
 | 同上页 **Tab「直播首帧画面渲染完成」** | `live_first_frame_rendered` | 秀场(category=1)、直播中；App `POST /liveRoom/reportLiveFirstFrameRendered`（Sofie `POST /sofie/studio/notifyLiveFirstFrameReady`）；不含主播；每次成功 +1 | `POST /trackingEvent/getLiveFirstFrameRenderTrend` |
 | 同上页 **Tab「退出直播间」** | `hot_live_room_leave` | 秀场(category=1)；`leaveRoom` 成功 +1，不含主播；仅主动退房 API（非踢出/心跳清理） | `POST /trackingEvent/getHotLiveRoomLeaveTrend` |

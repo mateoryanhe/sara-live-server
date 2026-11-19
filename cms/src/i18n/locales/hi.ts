@@ -12,6 +12,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   TrackingVoiceChatRoomManagement: 'Voice chat room',
   TrackingRechargeManagement: 'Recharge',
   TrackingDownloadManagement: 'Downloads',
+  TrackingEmailAccountManagement: 'ईमेल बाइंड/रजिस्टर',
   TrackingMinuteLiveActivityManagement: 'उपयोगकर्ता इवेंट',
   UserManagement: 'उपयोगकर्ता',
   WithdrawManagement: 'निकासी',

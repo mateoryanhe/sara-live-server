@@ -47,6 +47,9 @@ const (
 	CallOrderStatusBillingFailed uint8 = 8 // 钻石不足已结束
 )
 
+// CallOrderCMSFilterStatusEndedRingHangup CMS 筛选用虚拟状态(不入库): DB status=4 且 answer_time 为空
+const CallOrderCMSFilterStatusEndedRingHangup uint8 = 41
+
 const (
 	CallOrderCallerId            db.TbCol = "caller_id"
 	CallOrderReceiverId          db.TbCol = "receiver_id"
@@ -153,6 +156,14 @@ func (m *CallOrder) GetStatus() uint8 {
 
 func (m *CallOrder) StatusText() string {
 	return CallOrderStatusText(m.GetStatus())
+}
+
+// CMSStatusText CMS 展示状态文案；status=4 且无接听时间时为响铃中主动挂断。
+func (m *CallOrder) CMSStatusText() string {
+	if m != nil && m.Status == CallOrderStatusEnded && m.AnswerTime == nil {
+		return "响铃中主动挂断"
+	}
+	return m.StatusText()
 }
 
 func (m *CallOrder) HasEnded() bool {

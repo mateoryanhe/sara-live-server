@@ -11,6 +11,7 @@ const menu = {
   TrackingVoiceChatRoomManagement: '语聊房',
   TrackingRechargeManagement: '充值',
   TrackingDownloadManagement: '下载量',
+  TrackingEmailAccountManagement: '邮箱绑定/注册',
   TrackingMinuteLiveActivityManagement: '用户事件',
   UserManagement: '用户管理',
   WithdrawManagement: '提现',

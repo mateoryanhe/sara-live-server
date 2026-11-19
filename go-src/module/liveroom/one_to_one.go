@@ -6,18 +6,30 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/constants/common"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/push"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	liveentity "xr-game-server/entity/live"
-	"xr-game-server/core/push"
 	"xr-game-server/errercode"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/upload"
 )
 
 func IsOneToOneOnShelf(anchorId uint64) bool {
 	return liveroomdao.IsOneToOneOnShelf(anchorId)
+}
+
+// OneToOneVideoCallBillingPerMinute 1v1 视频通话(source=1、3)每分钟钻石价，统一取自 one_to_one_rooms.billing。
+func OneToOneVideoCallBillingPerMinute(anchorId uint64) float64 {
+	row := liveroomdao.GetOneToOneRoom(anchorId)
+	if row == nil {
+		return 0
+	}
+	return row.Billing
 }
 
 // overlayOneToOneListItem 用 1v1 独立资料覆盖列表中的展示字段(计费仍以 one_to_one_rooms 为准)。
@@ -97,6 +109,42 @@ func profileFromCMSUpdateReq(req *liveroomdto.CMSUpdateOneToOneRoomReq) oneToOne
 		Title:   req.Title,
 		Cover:   req.Cover,
 		TagId:   req.TagId,
+	}
+}
+
+// maybeAutoOpenOneToOneFromCreateLiveRoom 完善直播间资料时:通话分钟价>0且接受所有人,且未开通1v1则自动开通并上架;已上架则仅同步计费.
+func maybeAutoOpenOneToOneFromCreateLiveRoom(ctx context.Context, anchorId uint64, req *liveroomdto.CreateLiveRoomReq, coverName string, room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg) {
+	if req == nil || anchorId == 0 || room == nil || cfg == nil {
+		return
+	}
+	if !livecfg.IsOneToOneLiveRoomEnabled() {
+		return
+	}
+	if req.Billing <= common.Zero {
+		return
+	}
+	if cfg.PrivateInviteType != liveentity.LiveRoomPrivateInviteAll {
+		return
+	}
+	profile := oneToOneRoomProfile{
+		Billing: req.Billing,
+		Title:   room.Title,
+		TagId:   cfg.TagId,
+	}
+	if coverName != "" {
+		profile.Cover = coverName
+	} else if room.Cover != "" {
+		profile.Cover = room.Cover
+	}
+	existing := liveroomdao.GetOneToOneRoom(anchorId)
+	if existing == nil {
+		if _, err := enrollOneToOneRoom(anchorId, profile); err != nil {
+			g.Log().Warningf(ctx, "auto open one_to_one from createRoom anchorId=%d err=%v", anchorId, err)
+		}
+		return
+	}
+	if existing.IsOnShelf() && existing.Billing != profile.Billing {
+		existing.SetBilling(profile.Billing)
 	}
 }
 

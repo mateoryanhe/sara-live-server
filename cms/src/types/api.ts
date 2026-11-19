@@ -98,6 +98,11 @@ export interface HotLiveRoomJoinTrendRes {
     monthly: TrackingEventTrendPoint[]
 }
 
+export interface EmailAccountTrendRes {
+    todayVal: number
+    daily: TrackingEventTrendPoint[]
+}
+
 export interface MinuteLiveActivityTrendQuery {
     startTime?: number
     endTime?: number

@@ -71,7 +71,13 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 		m = m.Where(colPrefix+string(entity.CallOrderSource)+" = ?", f.Source)
 	}
 	if f.Status > 0 {
-		m = m.Where(colPrefix+string(entity.CallOrderStatusCol)+" = ?", f.Status)
+		switch f.Status {
+		case entity.CallOrderCMSFilterStatusEndedRingHangup:
+			m = m.Where(colPrefix+string(entity.CallOrderStatusCol)+" = ?", entity.CallOrderStatusEnded).
+				Where(colPrefix + string(entity.CallOrderAnswerTime) + " IS NULL")
+		default:
+			m = m.Where(colPrefix+string(entity.CallOrderStatusCol)+" = ?", f.Status)
+		}
 	}
 	if f.CallType > 0 {
 		m = m.Where(colPrefix+string(entity.CallOrderCallType)+" = ?", f.CallType)

@@ -492,7 +492,7 @@ type GetLiveRoomRes struct {
 	Ticket                      float64 `json:"ticket" dc:"直播间来源视频通话门票价格(钻石;CMS关闭「视频通话扣门票」时下发的值为0)"`
 	Billing                     float64 `json:"billing" dc:"视频通话价格(每分钟钻石)"`
 	PrivateInviteType           uint8   `json:"privateInviteType" dc:"视频通话邀请类型(1=接受所有人,3=拒绝所有人)"`
-	AllowCallIcon               bool    `json:"allowCallIcon" dc:"电话图标;CMS关1v1房间时一律false;语聊/秀场/游戏等见私聊与充值规则"`
+	AllowCallIcon               bool    `json:"allowCallIcon" dc:"1v1通话按钮;CMS oneToOneLiveRoomEnabled且主播one_to_one_rooms上架"`
 	CreateAt                    int64   `json:"createAt" dc:"创建时间(秒)"`
 	OnlineCount                 int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
 	TotalVideoCallIncome        float64 `json:"totalVideoCallIncome" dc:"累计视频通话收益(仅主播本人查询时返回)"`

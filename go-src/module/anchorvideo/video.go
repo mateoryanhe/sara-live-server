@@ -94,7 +94,8 @@ func isVideoPaidForViewer(viewerId uint64, row *entity.AnchorVideo, purchased ma
 }
 
 // AddVideoFromStoredFile 写入单个相册视频;price=0 免费,>0 为自定义钻石价;description 可空.
-func AddVideoFromStoredFile(ctx context.Context, storedName string, price float64, description string) (*anchorvideodto.UploadVideoRes, error) {
+// cover/fileType 原样入库; duration 为视频秒数.
+func AddVideoFromStoredFile(ctx context.Context, storedName string, price float64, description, cover, fileType string, duration uint32) (*anchorvideodto.UploadVideoRes, error) {
 	storedName = strings.TrimSpace(storedName)
 	if storedName == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -117,7 +118,7 @@ func AddVideoFromStoredFile(ctx context.Context, storedName string, price float6
 	if anchorvideodao.CountVideos(userId) >= anchorvideodao.MaxVideos() {
 		return nil, errercode.CreateCode(errercode.AnchorVideoLimit)
 	}
-	row := anchorvideodao.TryAddVideo(userId, storedName, price, description)
+	row := anchorvideodao.TryAddVideo(userId, storedName, price, description, cover, fileType, duration)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.AnchorVideoLimit)
 	}
@@ -125,6 +126,9 @@ func AddVideoFromStoredFile(ctx context.Context, storedName string, price float6
 	return &anchorvideodto.UploadVideoRes{
 		Id:          item.Id,
 		Video:       item.Video,
+		Cover:       item.Cover,
+		FileType:    item.FileType,
+		Duration:    item.Duration,
 		Price:       item.Price,
 		Description: item.Description,
 	}, nil
@@ -158,6 +162,9 @@ func UpdateVideo(ctx context.Context, req *anchorvideodto.UpdateVideoReq) (*anch
 	return &anchorvideodto.UpdateVideoRes{
 		Id:          item.Id,
 		Video:       item.Video,
+		Cover:       item.Cover,
+		FileType:    item.FileType,
+		Duration:    item.Duration,
 		Price:       item.Price,
 		Description: item.Description,
 	}, nil
@@ -197,6 +204,9 @@ func toVideoItem(row *entity.AnchorVideo) *anchorvideodto.VideoItem {
 	return &anchorvideodto.VideoItem{
 		Id:          row.ID,
 		Video:       upload.GetUrlByName(row.Video),
+		Cover:       row.Cover,
+		FileType:    row.FileType,
+		Duration:    row.Duration,
 		Price:       row.Price,
 		Description: row.Description,
 	}

@@ -68,10 +68,8 @@ func EmailLogin(ctx context.Context, req *authdto.EmailLoginReq) (*authdto.Email
 	accountdao.PublishAccountList(account.OpenId, account.Channel)
 
 	userinfodao.GetUserInfoByUserId(account.ID)
-	ext := userinfodao.GetUserExtByUserId(account.ID)
-	if isNewUser && ext != nil && normalizeEmailKey(ext.Email) == "" {
-		ext.SetEmail(email)
-		userinfodao.PublishUserExt(ext)
+	if isNewUser {
+		setUserExtEmailFirstWrite(account.ID, email)
 	}
 
 	tokenStr := xrtoken.AddAppToken(account.ID)

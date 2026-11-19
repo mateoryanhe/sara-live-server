@@ -141,6 +141,10 @@ func (c *TrackingEventCMSController) GetShareShortLinkClickTrend(ctx context.Con
 	return tracking.GetCMSShareShortLinkClickTrend(ctx, req)
 }
 
+func (c *TrackingEventCMSController) GetEmailAccountTrend(ctx context.Context, req *trackingdto.CMSEmailAccountTrendReq) (*trackingdto.CMSEmailAccountTrendRes, error) {
+	return tracking.GetCMSEmailAccountTrend(ctx, req)
+}
+
 func (c *TrackingEventCMSController) GetMinuteLiveActivityTrend(ctx context.Context, req *trackingdto.CMSMinuteLiveActivityTrendReq) (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
 	return minuteactivity.GetCMSMinuteLiveActivityTrend(ctx, req)
 }

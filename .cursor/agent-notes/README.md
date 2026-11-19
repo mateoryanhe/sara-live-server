@@ -22,6 +22,13 @@
 
 - 目录 `D:\company-code\yl`，远程 `mateoryanhe/yuliao`；语聊测试发版见该仓 `pub-tool/DEPLOY.md`
 
+### 双仓改代码约定（2026-11-19，用户）
+
+- **直播 / 语聊各开独立对话**；默认**只改当前 Cursor 工作区对应仓库**的代码与 CMS。
+- **不要**在未点名时顺手改姊妹仓、不要默认双仓同步 diff。
+- 仅当用户明确说「yl 也改」「语聊也改」「两个仓都改」等，才去另一目录改代码。
+- 日报/周报、只读核对另一仓 `git log`/`status` 仍可按 `dual-repos-yuliao-sara.mdc` 做，不算改代码。
+
 ## SSH
 
 | Host | 用户 | 用途 |

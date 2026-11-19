@@ -179,7 +179,7 @@ func videoCallLogToCSVRow(v *callentity.CallOrder, nicknameMap map[uint64]string
 	}
 	return []string{
 		formatCSVUint(v.ID),
-		v.StatusText(),
+		v.CMSStatusText(),
 		callSourceText(v.Source),
 		formatCSVUint(v.CallerId),
 		callerNickname,

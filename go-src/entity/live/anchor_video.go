@@ -15,6 +15,9 @@ const (
 const (
 	AnchorVideoAnchorId    db.TbCol = "anchor_id"
 	AnchorVideoVideo       db.TbCol = "video"
+	AnchorVideoCover       db.TbCol = "cover"
+	AnchorVideoFileType    db.TbCol = "file_type"
+	AnchorVideoDuration    db.TbCol = "duration"
 	AnchorVideoPrice       db.TbCol = "price"
 	AnchorVideoDescription db.TbCol = "description"
 )
@@ -24,13 +27,16 @@ type AnchorVideo struct {
 	migrate.MoreModel
 	AnchorId    uint64  `gorm:"index:idx_av_anchor_created,priority:1;default:0;comment:主播用户ID" json:"anchorId"`
 	Video       string  `gorm:"size:255;default:'';comment:视频资源名" json:"video"`
+	Cover       string  `gorm:"size:512;default:'';comment:封面(原样存储)" json:"cover"`
+	FileType    string  `gorm:"size:128;default:'';comment:文件类型(原样存储)" json:"fileType"`
+	Duration    uint32  `gorm:"default:0;comment:视频秒数" json:"duration"`
 	Price       float64 `gorm:"type:decimal(10,4);default:0;comment:钻石价格" json:"price"`
 	Description string  `gorm:"size:200;default:'';comment:描述(可空)" json:"description"`
 	// CreatedAt 覆盖嵌入字段以建复合索引
 	CreatedAt time.Time `gorm:"index:idx_av_anchor_created,priority:2" json:"createdAt"`
 }
 
-func NewAnchorVideo(anchorId uint64, video string, price float64, description string) *AnchorVideo {
+func NewAnchorVideo(anchorId uint64, video string, price float64, description, cover, fileType string, duration uint32) *AnchorVideo {
 	ret := &AnchorVideo{}
 	ret.ID = snowflake.GetId()
 	now := time.Now()
@@ -38,6 +44,9 @@ func NewAnchorVideo(anchorId uint64, video string, price float64, description st
 	ret.SetUpdatedAt(now)
 	ret.SetAnchorId(anchorId)
 	ret.SetVideo(video)
+	ret.SetCover(cover)
+	ret.SetFileType(fileType)
+	ret.SetDuration(duration)
 	ret.SetPrice(price)
 	ret.SetDescription(description)
 	return ret
@@ -51,6 +60,21 @@ func (r *AnchorVideo) SetAnchorId(v uint64) {
 func (r *AnchorVideo) SetVideo(v string) {
 	r.Video = v
 	syndb.AddData(TbAnchorVideo, AnchorVideoVideo, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *AnchorVideo) SetCover(v string) {
+	r.Cover = v
+	syndb.AddData(TbAnchorVideo, AnchorVideoCover, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *AnchorVideo) SetFileType(v string) {
+	r.FileType = v
+	syndb.AddData(TbAnchorVideo, AnchorVideoFileType, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *AnchorVideo) SetDuration(v uint32) {
+	r.Duration = v
+	syndb.AddData(TbAnchorVideo, AnchorVideoDuration, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *AnchorVideo) SetPrice(v float64) {
@@ -97,6 +121,9 @@ func initAnchorVideo() {
 	syndb.RegQuick(TbAnchorVideo, db.DeletedAtName)
 	syndb.RegQuick(TbAnchorVideo, AnchorVideoAnchorId)
 	syndb.RegQuick(TbAnchorVideo, AnchorVideoVideo)
+	syndb.RegQuick(TbAnchorVideo, AnchorVideoCover)
+	syndb.RegQuick(TbAnchorVideo, AnchorVideoFileType)
+	syndb.RegQuick(TbAnchorVideo, AnchorVideoDuration)
 	syndb.RegQuick(TbAnchorVideo, AnchorVideoPrice)
 	syndb.RegQuick(TbAnchorVideo, AnchorVideoDescription)
 	migrate.AutoMigrate(&AnchorVideo{})

@@ -163,7 +163,7 @@ func GetOneToOneDailyFreeSeconds() uint32 {
 	return getLiveCfgCache().OneToOneDailyFreeSeconds
 }
 
-// GetLiveRoomCallMinTotalRechargeUSD 直播间 allowCallIcon 最低累计充值(USD)
+// GetLiveRoomCallMinTotalRechargeUSD CMS 保留字段：历史为 allowCallIcon 充值门槛，当前未用于通话按钮展示。
 func GetLiveRoomCallMinTotalRechargeUSD() float64 {
 	return getLiveCfgCache().LiveRoomCallMinTotalRechargeUsd
 }
@@ -193,7 +193,7 @@ func IsVoiceChatLiveRoomEnabled() bool {
 	return getLiveCfgCache().VoiceChatLiveRoomEnabled
 }
 
-// IsOneToOneLiveRoomEnabled App 是否展示 1v1 房间页面/入口；未配置时默认关闭。
+// IsOneToOneLiveRoomEnabled App 1v1 总开关：1v1 房间页/入口及直播间 allowCallIcon；未配置时默认关闭。
 func IsOneToOneLiveRoomEnabled() bool {
 	return getLiveCfgCache().OneToOneLiveRoomEnabled
 }

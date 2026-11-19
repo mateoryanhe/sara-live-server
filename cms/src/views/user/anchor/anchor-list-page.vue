@@ -70,9 +70,10 @@
         </el-form-item>
 
         <el-form-item v-if="visibilityScoped" :label="t('pages.anchorList.liveStatus')">
-          <el-select v-model="searchForm.liveStatus" clearable :placeholder="t('common.all')" style="width: 140px">
-            <el-option :label="t('common.live')" :value="1"/>
-            <el-option :label="t('common.offline')" :value="0"/>
+          <el-select v-model="searchForm.liveStatus" style="width: 140px">
+            <el-option :value="ALL_LIVE_STATUS" :label="t('common.all')"/>
+            <el-option :value="1" :label="t('common.live')"/>
+            <el-option :value="0" :label="t('common.offline')"/>
           </el-select>
         </el-form-item>
 
@@ -640,6 +641,9 @@ const defaultBanApplyTime = () => formatServerNowPlusDays(7)
 
 const disabledDate = (time: Date) => time.getTime() < Date.now()
 
+/** 与 platform-anchor-list 一致：-1 表示不按直播状态过滤 */
+const ALL_LIVE_STATUS = -1
+
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
 const LIVE_ROOM_CATEGORY_VOICE_CHAT = 5
@@ -701,7 +705,9 @@ const fetchList = async () => {
 
       ...(visibilityScoped.value ? {visibilityScoped: true} : {}),
 
-      ...(searchForm.liveStatus !== undefined ? {liveStatus: searchForm.liveStatus} : {}),
+      ...(searchForm.liveStatus !== undefined && searchForm.liveStatus >= 0
+          ? {liveStatus: searchForm.liveStatus}
+          : {}),
 
     })
 

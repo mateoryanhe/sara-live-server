@@ -58,11 +58,12 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
 
+	pricePerMinute := liveroom.OneToOneVideoCallBillingPerMinute(anchorId)
 	skipDiamondPrecheck := livecfg.GetOneToOneDailyFreeSeconds() > 0 &&
 		isOrdinaryViewer(callerId) &&
 		liveroomdao.IsOneToOneDailyFreeAvailable(callerId, anchorId)
-	if cfg.Billing > 0 && !skipDiamondPrecheck {
-		if err := wallet.CanPayWithGoldExchange(callerId, cfg.Billing); err != nil {
+	if pricePerMinute > 0 && !skipDiamondPrecheck {
+		if err := wallet.CanPayWithGoldExchange(callerId, pricePerMinute); err != nil {
 			return nil, err
 		}
 	}
@@ -74,8 +75,8 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		entity.CallOrderTypeVideo,
 		entity.CallOrderSourceLiveRoom,
 		strconv.FormatUint(room.LiveRecordId, 10),
-		cfg.Ticket,
-		cfg.Billing,
+		0,
+		pricePerMinute,
 	)
 	calldao.AddOrderToCache(order)
 	trackActiveCallOrder(order.ID)

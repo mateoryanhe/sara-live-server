@@ -45,6 +45,7 @@ var (
 	h5DownloadTrackingQueue               = gqueue.NewTQueue[*gameevent.H5DownloadTrackingEventData]()
 	officialSiteDownloadTrackingQueue     = gqueue.NewTQueue[*gameevent.OfficialSiteDownloadTrackingEventData]()
 	shareShortLinkClickTrackingQueue      = gqueue.NewTQueue[*gameevent.ShareShortLinkClickTrackingEventData]()
+	emailAccountTrackingQueue             = gqueue.NewTQueue[*gameevent.EmailAccountTrackingEventData]()
 )
 
 func initTrackingQueue() {
@@ -81,6 +82,7 @@ func initTrackingQueue() {
 	event.Sub(gameevent.H5DownloadTrackingEvent, onH5DownloadTrackingEvent)
 	event.Sub(gameevent.OfficialSiteDownloadTrackingEvent, onOfficialSiteDownloadTrackingEvent)
 	event.Sub(gameevent.ShareShortLinkClickTrackingEvent, onShareShortLinkClickTrackingEvent)
+	event.Sub(gameevent.EmailAccountTrackingEvent, onEmailAccountTrackingEvent)
 }
 
 func onShowcaseLiveRoomJoinTrackingEvent(data any) {
@@ -315,6 +317,14 @@ func onShareShortLinkClickTrackingEvent(data any) {
 	shareShortLinkClickTrackingQueue.Push(ev)
 }
 
+func onEmailAccountTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.EmailAccountTrackingEventData)
+	if !ok || ev == nil {
+		return
+	}
+	emailAccountTrackingQueue.Push(ev)
+}
+
 func onOfflineGameRoomPlayTrackingEvent(data any) {
 	ev, ok := data.(*gameevent.OfflineGameRoomPlayTrackingEventData)
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 {
@@ -363,7 +373,8 @@ func trackingQueueIdle() bool {
 		h5DownloadTrackingQueue.Len() == 0 &&
 		officialSiteDownloadTrackingQueue.Len() == 0 &&
 		shareShortLinkClickTrackingQueue.Len() == 0 &&
-		offlineGameRoomPlayTrackingQueue.Len() == 0
+		offlineGameRoomPlayTrackingQueue.Len() == 0 &&
+		emailAccountTrackingQueue.Len() == 0
 }
 
 func drainTrackingTQueue[T any](q *gqueue.TQueue[T], handle func(T)) {
@@ -468,5 +479,8 @@ func drainTrackingQueue() {
 	})
 	drainTrackingTQueue(shareShortLinkClickTrackingQueue, func(ev *gameevent.ShareShortLinkClickTrackingEventData) {
 		recordShareShortLinkClick(ev.StatAt)
+	})
+	drainTrackingTQueue(emailAccountTrackingQueue, func(ev *gameevent.EmailAccountTrackingEventData) {
+		recordEmailAccount(ev.StatAt)
 	})
 }

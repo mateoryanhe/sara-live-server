@@ -12,7 +12,7 @@ type LiveCfgItem struct {
 	VideoCallTicketEnabled          bool    `json:"videoCallTicketEnabled"`
 	AudienceListRefreshSeconds      uint32  `json:"audienceListRefreshSeconds"`
 	OneToOneDailyFreeSeconds        uint32  `json:"oneToOneDailyFreeSeconds" dc:"1v1观众对单主播每日免费通话秒数(0=关闭)"`
-	LiveRoomCallMinTotalRechargeUsd float64 `json:"liveRoomCallMinTotalRechargeUsd" dc:"直播间allowCallIcon最低累计充值(USD)"`
+	LiveRoomCallMinTotalRechargeUsd float64 `json:"liveRoomCallMinTotalRechargeUsd" dc:"历史配置项(当前不控制allowCallIcon)"`
 	ShowcaseLiveRoomEnabled         bool    `json:"showcaseLiveRoomEnabled" dc:"App是否展示秀场直播间入口(category=1)"`
 	AudienceGameListHidden          bool    `json:"audienceGameListHidden" dc:"开启后非主播用户App游戏列表与直播间推荐游戏为空"`
 	AnchorGameListHidden            bool    `json:"anchorGameListHidden" dc:"开启后主播用户App游戏列表与直播间推荐游戏为空"`
@@ -37,7 +37,7 @@ type SaveLiveCfgReq struct {
 	VideoCallTicketEnabled          *bool   `json:"videoCallTicketEnabled" dc:"直播间视频通话接通是否扣门票;不传时保留原值,首次保存默认开启"`
 	AudienceListRefreshSeconds      uint32  `json:"audienceListRefreshSeconds" v:"required|min:1#在线观众列表刷新时间不能为空|在线观众列表刷新时间不能小于1秒" dc:"在线观众列表刷新间隔(秒),默认300"`
 	OneToOneDailyFreeSeconds        uint32  `json:"oneToOneDailyFreeSeconds" dc:"1v1观众对单主播每日免费通话秒数(0=关闭,默认30)"`
-	LiveRoomCallMinTotalRechargeUsd float64 `json:"liveRoomCallMinTotalRechargeUsd" v:"min:0#累计充值门槛不能小于0" dc:"直播间视频通话按钮显示最低累计充值(USD),默认10"`
+	LiveRoomCallMinTotalRechargeUsd float64 `json:"liveRoomCallMinTotalRechargeUsd" v:"min:0#累计充值门槛不能小于0" dc:"保留字段(当前不控制allowCallIcon),默认10"`
 	ShowcaseLiveRoomEnabled         *bool   `json:"showcaseLiveRoomEnabled" dc:"App是否展示秀场入口;不传时保留原值,首次保存默认关闭"`
 	AudienceGameListHidden          *bool   `json:"audienceGameListHidden" dc:"开启后非主播用户游戏列表为空;不传时保留原值,首次保存默认关闭"`
 	AnchorGameListHidden            *bool   `json:"anchorGameListHidden" dc:"开启后主播用户游戏列表为空;不传时保留原值,首次保存默认关闭"`

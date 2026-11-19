@@ -139,6 +139,7 @@ import {trackingShortVideoMessages} from './tracking-short-video'
 import {trackingVoiceChatRoomMessages} from './tracking-voice-chat-room'
 import {trackingRechargeMessages} from './tracking-recharge'
 import {trackingDownloadMessages} from './tracking-download'
+import {trackingEmailAccountMessages} from './tracking-email-account'
 import {trackingMinuteLiveActivityMessages} from './tracking-minute-live-activity'
 import {shareAppDownloadMessages} from './share-app-download'
 
@@ -281,6 +282,7 @@ const pageMessageBuilders = [
   ['trackingVoiceChatRoom', trackingVoiceChatRoomMessages],
   ['trackingRecharge', trackingRechargeMessages],
   ['trackingDownload', trackingDownloadMessages],
+  ['trackingEmailAccount', trackingEmailAccountMessages],
   ['trackingMinuteLiveActivity', trackingMinuteLiveActivityMessages],
   ['shareAppDownload', shareAppDownloadMessages],
 ] as const

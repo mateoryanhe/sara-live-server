@@ -1,5 +1,10 @@
 import request from '../request'
-import type {HotLiveRoomJoinTrendRes, MinuteLiveActivityTrendQuery, MinuteLiveActivityTrendRes} from '@/types/api'
+import type {
+    EmailAccountTrendRes,
+    HotLiveRoomJoinTrendRes,
+    MinuteLiveActivityTrendQuery,
+    MinuteLiveActivityTrendRes,
+} from '@/types/api'
 
 export const trackingEventApi = {
     getHotLiveRoomJoinTrend: () => {
@@ -97,6 +102,9 @@ export const trackingEventApi = {
     },
     getMinuteLiveActivityTrend: (data: MinuteLiveActivityTrendQuery) => {
         return request.post<MinuteLiveActivityTrendRes>('/trackingEvent/getMinuteLiveActivityTrend', data)
+    },
+    getEmailAccountTrend: () => {
+        return request.post<EmailAccountTrendRes>('/trackingEvent/getEmailAccountTrend', {})
     },
 }
 

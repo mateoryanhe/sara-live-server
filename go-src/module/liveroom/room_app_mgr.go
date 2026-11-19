@@ -165,6 +165,7 @@ func createRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveR
 			return nil, err
 		}
 		liveroomdao.FlushRoomCache(existing)
+		maybeAutoOpenOneToOneFromCreateLiveRoom(ctx, anchorId, req, coverName, existing, cfg)
 		return &liveroomdto.CreateLiveRoomRes{
 			RoomId:  strconv.FormatUint(existing.ID, 10),
 			GuildId: strconv.FormatUint(existing.GuildId, 10),
@@ -193,6 +194,7 @@ func createRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveR
 	if err := applyLiveRoomGameRecommends(room.ID, category, req.GameCodes); err != nil {
 		return nil, err
 	}
+	maybeAutoOpenOneToOneFromCreateLiveRoom(ctx, anchorId, req, coverName, room, cfg)
 
 	return &liveroomdto.CreateLiveRoomRes{
 		RoomId:  strconv.FormatUint(room.ID, 10),
@@ -273,18 +275,8 @@ func calcAge(birthday *time.Time) int {
 	return age
 }
 
-// ViewerCanUseLiveRoomCall 累计充值满 10 USD 可使用直播间 1v1 通话
-func ViewerCanUseLiveRoomCall(userId uint64) bool {
-	if userId == 0 {
-		return false
-	}
-	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
-	return stat != nil && stat.TotalRecharge >= livecfg.GetLiveRoomCallMinTotalRechargeUSD()
-}
-
-// CanInitiateLiveRoomCall 当前用户是否可向该直播间发起 1v1 通话
-// 暂不校验累计充值满 10 USD(AllowCallIcon 仍校验,便于客户端隐藏入口)
-// CMS「1v1 房间」关闭时一律不可发起(与 allowCallIcon 一致)
+// CanInitiateLiveRoomCall 当前用户是否可向该直播间发起 1v1 通话(含类目/私聊邀请等规则)；
+// 直播间按钮展示见 allowShowCallIcon(总开关 + 主播 1v1 上架)。
 func CanInitiateLiveRoomCall(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
 	if !livecfg.IsOneToOneLiveRoomEnabled() {
 		return false
@@ -305,41 +297,16 @@ func canInitiateLiveRoomCallBase(room *liveentity.LiveRoom, cfg *liveentity.Live
 	return true
 }
 
-// allowShowCallIconForRoom 秀场/游戏/语聊(category=1,2,5): 普通主播或「不接受任何人」不展示; 其余均展示(不校验充值)
-func allowShowCallIconForRoom(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg) bool {
-	anchor := userinfodao.GetUserInfoByUserId(room.ID)
-	if anchor == nil {
-		return false
-	}
-	if anchor.UserType == userentity.UserTypeAnchor {
-		return false
-	}
-	if liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category) == liveentity.LiveRoomPrivateInviteReject {
-		return false
-	}
-	return true
-}
-
-func allowShowCallIcon(ctx context.Context, room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+// allowShowCallIcon App 直播间 1v1 通话按钮(语聊/秀场/游戏等)是否展示：
+// CMS 1v1 模块总开关开启，且该主播 one_to_one_rooms 已上架(开通 1v1 视频通话).
+func allowShowCallIcon(_ context.Context, room *liveentity.LiveRoom, _ *liveentity.LiveRoomCfg, _ uint64) bool {
 	if !livecfg.IsOneToOneLiveRoomEnabled() {
 		return false
 	}
-	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
+	if room == nil || room.ID == 0 {
 		return false
 	}
-	cat := normalizeLiveRoomCategory(cfg.Category)
-	if cat == liveentity.LiveRoomCategoryHot ||
-		cat == liveentity.LiveRoomCategoryGame ||
-		cat == liveentity.LiveRoomCategoryVoiceChat {
-		return allowShowCallIconForRoom(room, cfg)
-	}
-	if !canInitiateLiveRoomCallBase(room, cfg, userId) {
-		return false
-	}
-	if httpserver.IsWebClientPlatform(ctx) {
-		return true
-	}
-	return ViewerCanUseLiveRoomCall(userId)
+	return IsOneToOneOnShelf(room.ID)
 }
 
 // GetRoom 查询直播间(公开接口,任意登录用户可调用)
@@ -371,8 +338,8 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		VoiceChatMicSeatCount: voiceChatMicSeatCountForAPI(cfg),
 		TagId:             strconv.FormatUint(cfg.TagId, 10),
 		TagName:           getRoomTagName(cfg.TagId),
-		Ticket:            livecfg.AppLiveRoomCallTicketPrice(cfg.Ticket),
-		Billing:           cfg.Billing,
+		Ticket:            0,
+		Billing:           OneToOneVideoCallBillingPerMinute(room.ID),
 		PrivateInviteType: liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category),
 		AllowCallIcon:     allowShowCallIcon(ctx, room, cfg, userId),
 		CreateAt:          room.CreatedAt.Unix(),

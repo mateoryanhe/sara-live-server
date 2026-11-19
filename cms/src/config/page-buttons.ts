@@ -226,6 +226,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     TrackingVoiceChatRoomManagement: TRACKING_TREND_PAGE_BUTTONS,
     TrackingRechargeManagement: TRACKING_TREND_PAGE_BUTTONS,
     TrackingDownloadManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingEmailAccountManagement: TRACKING_TREND_PAGE_BUTTONS,
     UserList: [
         BTN.view,
         BTN.search,

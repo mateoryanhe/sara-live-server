@@ -31,6 +31,9 @@ type uploadAnchorVideoForm struct {
 	storedName  string
 	price       float64
 	description string
+	cover       string
+	fileType    string
+	duration    uint32
 	hasPrice    bool
 }
 
@@ -50,7 +53,7 @@ func handleUploadAnchorVideo(r *ghttp.Request) {
 		r.SetError(err)
 		return
 	}
-	res, err := anchorvideo.AddVideoFromStoredFile(r.Context(), form.storedName, form.price, form.description)
+	res, err := anchorvideo.AddVideoFromStoredFile(r.Context(), form.storedName, form.price, form.description, form.cover, form.fileType, form.duration)
 	if err != nil {
 		upload.DeleteUploadedFile(form.storedName)
 		r.SetError(err)
@@ -123,6 +126,27 @@ func parseUploadAnchorVideoMultipartWithUploader(ctx context.Context, r *ghttp.R
 				return form, errercode.CreateCode(errercode.InvalidParam)
 			}
 			form.description = string(raw)
+		case "cover":
+			raw, readErr := readAnchorVideoMultipartRaw(part, 4096)
+			part.Close()
+			if readErr != nil {
+				return form, errercode.CreateCode(errercode.InvalidParam)
+			}
+			form.cover = raw
+		case "fileType":
+			raw, readErr := readAnchorVideoMultipartRaw(part, 256)
+			part.Close()
+			if readErr != nil {
+				return form, errercode.CreateCode(errercode.InvalidParam)
+			}
+			form.fileType = raw
+		case "duration":
+			raw, readErr := readAnchorVideoMultipartRaw(part, 64)
+			part.Close()
+			if readErr != nil {
+				return form, errercode.CreateCode(errercode.InvalidParam)
+			}
+			form.duration = parseAnchorVideoDurationRaw(raw)
 		default:
 			isUnexpectedFile := strings.TrimSpace(part.FileName()) != ""
 			part.Close()
@@ -135,6 +159,30 @@ func parseUploadAnchorVideoMultipartWithUploader(ctx context.Context, r *ghttp.R
 		return form, errercode.CreateCode(errercode.InvalidParam)
 	}
 	return form, nil
+}
+
+func readAnchorVideoMultipartRaw(part *multipart.Part, max int64) (string, error) {
+	if part == nil {
+		return "", errercode.CreateCode(errercode.InvalidParam)
+	}
+	raw, err := io.ReadAll(io.LimitReader(part, max))
+	if err != nil {
+		return "", err
+	}
+	return string(raw), nil
+}
+
+// parseAnchorVideoDurationRaw 不作业务校验:能解析为非负整数则入库,否则为 0.
+func parseAnchorVideoDurationRaw(raw string) uint32 {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return 0
+	}
+	v, err := strconv.ParseUint(raw, 10, 32)
+	if err != nil {
+		return 0
+	}
+	return uint32(v)
 }
 
 func mapAnchorVideoMultipartErr(err error) error {

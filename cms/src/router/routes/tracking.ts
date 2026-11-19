@@ -47,5 +47,11 @@ export const trackingRoutes: RouteRecordRaw = {
             component: () => import('@/views/tracking/download.vue'),
             meta: {title: '下载量'},
         },
+        {
+            path: 'email-account',
+            name: 'TrackingEmailAccountManagement',
+            component: () => import('@/views/tracking/email-account.vue'),
+            meta: {title: '邮箱绑定/注册'},
+        },
     ],
 }

@@ -44,7 +44,6 @@ func BindEmail(ctx context.Context, req *authdto.BindEmailReq) (*authdto.BindEma
 		return nil, err
 	}
 
-	ext.SetEmail(email)
-	userinfodao.PublishUserExt(ext)
+	setUserExtEmailFirstWrite(userId, email)
 	return &authdto.BindEmailRes{Success: true}, nil
 }

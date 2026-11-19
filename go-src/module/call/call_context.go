@@ -79,6 +79,6 @@ func resolveOneToOneRoomCallContext(callerId, targetId uint64) (*oneToOneRoomCal
 		anchorId:       anchorId,
 		audienceId:     audienceId,
 		orderParams:    orderParams,
-		pricePerMinute: oneToOne.Billing,
+		pricePerMinute: liveroom.OneToOneVideoCallBillingPerMinute(anchorId),
 	}, nil
 }

@@ -69,7 +69,7 @@ func callOrderStatusText(o *entity.CallOrder) string {
 	if o == nil {
 		return ""
 	}
-	return o.StatusText()
+	return o.CMSStatusText()
 }
 
 func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string, profileMap map[uint64]*userentity.UserInfo) *calldto.CMSVideoCallLogItem {

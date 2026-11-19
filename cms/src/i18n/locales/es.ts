@@ -12,6 +12,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   TrackingVoiceChatRoomManagement: 'Sala de voz',
   TrackingRechargeManagement: 'Recarga',
   TrackingDownloadManagement: 'Descargas',
+  TrackingEmailAccountManagement: 'Correo vinculado/registro',
   TrackingMinuteLiveActivityManagement: 'Eventos de usuario',
   UserManagement: 'Usuarios',
   WithdrawManagement: 'Retiro',

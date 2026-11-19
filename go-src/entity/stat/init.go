@@ -124,4 +124,5 @@ func Init() {
 	initMonthlyGameOnlinePeakStat()
 	initSystemTotalStat()
 	initMinuteLiveActivityStat()
+	initDailyEmailAccountStat()
 }
