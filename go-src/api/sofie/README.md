@@ -58,6 +58,7 @@
 | `studio` | 贡献榜 | 需要登录 | `POST /liveRoom/contributionRank` | `POST /sofie/studio/browseContribution` |
 | `studio` | 查询直播间 | 需要登录 | `POST /liveRoom/get` | `POST /sofie/studio/fetchBooth` |
 | `studio` | 直播间列表 | 需要登录 | `POST /liveRoom/roomList` | `POST /sofie/studio/browseBooths` |
+| `studio` | 批量查询主播状态 | 需要登录 | `POST /liveRoom/batchAnchorStatus` | `POST /sofie/studio/fetchHostStates` |
 | `studio` | 1v1房间列表 | 需要登录 | `POST /liveRoom/oneToOneRoomList` | `POST /sofie/studio/browseDirectBooths` |
 | `studio` | 合并直播间与1v1列表 | 需要登录 | `POST /liveRoom/mergedRoomList` | `POST /sofie/studio/browseMergedBooths` |
 | `studio` | 服务器在线普通用户 | 需要登录 | `POST /liveRoom/serverOnlineNormalUserList` | `POST /sofie/studio/browseOnlineNormals` |

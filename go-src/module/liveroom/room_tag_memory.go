@@ -129,6 +129,7 @@ func toAppLiveRoomTagItem(tag *entity.LiveRoomTag) *liveroomdto.AppLiveRoomTagIt
 	return &liveroomdto.AppLiveRoomTagItem{
 		ID:        strconv.FormatUint(tag.ID, 10),
 		Name:      tag.Name,
+		Code:      tag.Code,
 		Sort:      tag.Sort,
 		IsSpecial: tag.IsSpecial,
 	}

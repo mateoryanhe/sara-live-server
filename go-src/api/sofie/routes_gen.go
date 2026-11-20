@@ -230,6 +230,7 @@ func Init() {
 		{Path: "/browseContribution", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetContributionRank)},
 		{Path: "/fetchBooth", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetRoom)},
 		{Path: "/browseBooths", Handler: jsonHandler((&controller.LiveRoomAppController{}).RoomList)},
+		{Path: "/fetchHostStates", Handler: jsonHandler((&controller.LiveRoomAppController{}).BatchAnchorStatus)},
 		{Path: "/browseDirectBooths", Handler: jsonHandler((&controller.LiveRoomAppController{}).OneToOneRoomList)},
 		{Path: "/browseMergedBooths", Handler: jsonHandler((&controller.LiveRoomAppController{}).MergedRoomList)},
 		{Path: "/browseOnlineNormals", Handler: jsonHandler((&controller.LiveRoomAppController{}).ServerOnlineNormalUserList)},

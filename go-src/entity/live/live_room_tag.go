@@ -13,6 +13,7 @@ const (
 type LiveRoomTag struct {
 	migrate.OneModel
 	Name      string `gorm:"size:64;comment:标签名称" json:"name"`
+	Code      string `gorm:"size:64;default:'';comment:标签编码(前端稳定标识)" json:"code"`
 	Sort      int    `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
 	IsSpecial bool   `gorm:"default:0;comment:是否特殊" json:"isSpecial"`
 }

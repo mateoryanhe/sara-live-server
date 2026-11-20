@@ -2,6 +2,7 @@ package liveroomdao
 
 import (
 	"strconv"
+	"strings"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity/live"
@@ -13,6 +14,21 @@ import (
 func GetRoomTagById(id uint64) *entity.LiveRoomTag {
 	var row entity.LiveRoomTag
 	if err := g.DB().Model(string(entity.TbLiveRoomTag)).Where("id = ?", id).Scan(&row); err != nil {
+		return nil
+	}
+	if row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+func GetRoomTagByCode(code string) *entity.LiveRoomTag {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return nil
+	}
+	var row entity.LiveRoomTag
+	if err := g.DB().Model(string(entity.TbLiveRoomTag)).Where("code = ?", code).Scan(&row); err != nil {
 		return nil
 	}
 	if row.ID == 0 {
@@ -58,7 +74,7 @@ func DeleteRoomTag(id uint64) error {
 }
 
 func GetRoomTagList(req *liveroomdto.LiveRoomTagListReq) (int, []*liveroomdto.LiveRoomTagListRes) {
-	sql := `select id, name, sort, is_special, created_at, updated_at
+	sql := `select id, name, code, sort, is_special, created_at, updated_at
             from live_room_tags
             where 1=1 `
 	param := make([]any, 0)

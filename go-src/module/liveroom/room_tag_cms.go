@@ -3,6 +3,7 @@ package liveroom
 import (
 	"context"
 	"strconv"
+	"strings"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
@@ -23,12 +24,31 @@ func GetAppLiveRoomNormalTagList(_ context.Context, _ *liveroomdto.AppLiveRoomNo
 	return &liveroomdto.AppLiveRoomTagListRes{List: getAppRoomTagNormalList()}, nil
 }
 
+func normalizeLiveRoomTagCode(code string) string {
+	return strings.TrimSpace(code)
+}
+
+func validateLiveRoomTagCodeUnique(code string, excludeID uint64) error {
+	code = normalizeLiveRoomTagCode(code)
+	if code == "" {
+		return nil
+	}
+	if existing := liveroomdao.GetRoomTagByCode(code); existing != nil && existing.ID != excludeID {
+		return errercode.CreateCode(errercode.LiveRoomTagExist)
+	}
+	return nil
+}
+
 func CreateLiveRoomTag(_ context.Context, req *liveroomdto.CreateLiveRoomTagReq) (*liveroomdto.CreateLiveRoomTagRes, error) {
 	if existing := liveroomdao.GetRoomTagByName(req.Name); existing != nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomTagExist)
 	}
+	if err := validateLiveRoomTagCodeUnique(req.Code, 0); err != nil {
+		return nil, err
+	}
 	row := &entity.LiveRoomTag{
 		Name:      req.Name,
+		Code:      normalizeLiveRoomTagCode(req.Code),
 		Sort:      req.Sort,
 		IsSpecial: req.IsSpecial,
 	}
@@ -47,7 +67,11 @@ func UpdateLiveRoomTag(_ context.Context, req *liveroomdto.UpdateLiveRoomTagReq)
 	if existing := liveroomdao.GetRoomTagByName(req.Name); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.LiveRoomTagExist)
 	}
+	if err := validateLiveRoomTagCodeUnique(req.Code, req.ID); err != nil {
+		return nil, err
+	}
 	row.Name = req.Name
+	row.Code = normalizeLiveRoomTagCode(req.Code)
 	row.Sort = req.Sort
 	row.IsSpecial = req.IsSpecial
 	if err := liveroomdao.UpdateRoomTag(row); err != nil {

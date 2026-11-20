@@ -14,6 +14,7 @@
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.liveRoomTagList.tagName')" prop="name" min-width="160"/>
+          <el-table-column :label="t('pages.liveRoomTagList.tagCode')" prop="code" min-width="120"/>
           <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
           <el-table-column :label="t('pages.liveRoomTagList.isSpecial')" prop="isSpecial" width="100">
             <template #default="{ row }">
@@ -49,6 +50,10 @@
         <el-form-item :label="t('pages.liveRoomTagList.tagName')" prop="name">
           <el-input v-model="currentRow.name" maxlength="64" :placeholder="t('pages.liveRoomTagList.tagNamePlaceholder')" show-word-limit/>
         </el-form-item>
+        <el-form-item :label="t('pages.liveRoomTagList.tagCode')" prop="code">
+          <el-input v-model="currentRow.code" maxlength="64" :placeholder="t('pages.liveRoomTagList.tagCodePlaceholder')" show-word-limit/>
+          <div class="form-tip">{{ t('pages.liveRoomTagList.tagCodeTip') }}</div>
+        </el-form-item>
         <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
           <div class="form-tip">{{ t('pages.liveRoomTagList.sortHigherFirst') }}</div>
@@ -75,6 +80,7 @@ import type {LiveRoomTag} from '@/types/api'
 interface TagForm {
   id: string
   name: string
+  code: string
   sort: number
   isSpecial: boolean
 }
@@ -92,6 +98,7 @@ const dialogTitle = ref('')
 const defaultForm = (): TagForm => ({
   id: '',
   name: '',
+  code: '',
   sort: 0,
   isSpecial: false
 })
@@ -102,6 +109,9 @@ const formRules = computed<FormRules>(() => ({
   name: [
     {required: true, message: t('pages.liveRoomTagList.nameRequired'), trigger: 'blur'},
     {max: 64, message: t('pages.liveRoomTagList.nameMaxLength'), trigger: 'blur'},
+  ],
+  code: [
+    {max: 64, message: t('pages.liveRoomTagList.codeMaxLength'), trigger: 'blur'},
   ]
 }))
 
@@ -143,6 +153,7 @@ const handleEdit = (row: LiveRoomTag) => {
   currentRow.value = {
     id: row.id,
     name: row.name,
+    code: row.code || '',
     sort: Number(row.sort) || 0,
     isSpecial: !!row.isSpecial
   }
@@ -156,6 +167,7 @@ const handleSave = async () => {
       await liveRoomTagApi.updateLiveRoomTag({
         id: currentRow.value.id,
         name: currentRow.value.name,
+        code: currentRow.value.code,
         sort: currentRow.value.sort,
         isSpecial: currentRow.value.isSpecial
       })
@@ -163,6 +175,7 @@ const handleSave = async () => {
     } else {
       await liveRoomTagApi.createLiveRoomTag({
         name: currentRow.value.name,
+        code: currentRow.value.code,
         sort: currentRow.value.sort,
         isSpecial: currentRow.value.isSpecial
       })

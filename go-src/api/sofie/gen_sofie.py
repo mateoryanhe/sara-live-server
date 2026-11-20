@@ -61,6 +61,7 @@ APIS = [
     ("/liveRoom/contributionRank", "yes", "(&controller.LiveRoomAppController{}).GetContributionRank", "贡献榜", "studio", "browseContribution"),
     ("/liveRoom/get", "yes", "(&controller.LiveRoomAppController{}).GetRoom", "查询直播间", "studio", "fetchBooth"),
     ("/liveRoom/roomList", "yes", "(&controller.LiveRoomAppController{}).RoomList", "直播间列表", "studio", "browseBooths"),
+    ("/liveRoom/batchAnchorStatus", "yes", "(&controller.LiveRoomAppController{}).BatchAnchorStatus", "批量查询主播状态", "studio", "fetchHostStates"),
     ("/liveRoom/oneToOneRoomList", "yes", "(&controller.LiveRoomAppController{}).OneToOneRoomList", "1v1房间列表", "studio", "browseDirectBooths"),
     ("/liveRoom/mergedRoomList", "yes", "(&controller.LiveRoomAppController{}).MergedRoomList", "合并直播间与1v1列表", "studio", "browseMergedBooths"),
     ("/liveRoom/serverOnlineNormalUserList", "yes", "(&controller.LiveRoomAppController{}).ServerOnlineNormalUserList", "服务器在线普通用户", "studio", "browseOnlineNormals"),

@@ -13,6 +13,7 @@ type LiveRoomTagListReq struct {
 type LiveRoomTagListRes struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
+	Code      string `json:"code"`
 	Sort      int    `json:"sort"`
 	IsSpecial bool   `json:"isSpecial"`
 	CreatedAt string `json:"createdAt"`
@@ -22,6 +23,7 @@ type LiveRoomTagListRes struct {
 type CreateLiveRoomTagReq struct {
 	g.Meta    `path:"/createLiveRoomTag" method:"post" summary:"创建直播间标签" tags:"直播间标签"`
 	Name      string `json:"name" v:"required|length:1,64#标签名称不能为空|标签名称长度需在1-64字符" dc:"标签名称"`
+	Code      string `json:"code" v:"length:0,64#标签编码长度需在0-64字符" dc:"标签编码(前端稳定标识)"`
 	Sort      int    `json:"sort" dc:"排序值(越大越靠前)"`
 	IsSpecial bool   `json:"isSpecial" dc:"是否特殊"`
 }
@@ -34,6 +36,7 @@ type UpdateLiveRoomTagReq struct {
 	g.Meta    `path:"/updateLiveRoomTag" method:"post" summary:"修改直播间标签" tags:"直播间标签"`
 	ID        uint64 `json:"id" v:"required#标签ID不能为空" dc:"标签ID"`
 	Name      string `json:"name" v:"required|length:1,64#标签名称不能为空|标签名称长度需在1-64字符" dc:"标签名称"`
+	Code      string `json:"code" v:"length:0,64#标签编码长度需在0-64字符" dc:"标签编码(前端稳定标识)"`
 	Sort      int    `json:"sort" dc:"排序值(越大越靠前)"`
 	IsSpecial bool   `json:"isSpecial" dc:"是否特殊"`
 }
@@ -62,6 +65,7 @@ type AppLiveRoomNormalTagListReq struct {
 type AppLiveRoomTagItem struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
+	Code      string `json:"code"`
 	Sort      int    `json:"sort"`
 	IsSpecial bool   `json:"isSpecial,omitempty"`
 }

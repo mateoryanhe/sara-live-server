@@ -146,6 +146,11 @@ func (c *LiveRoomAppController) RoomList(ctx context.Context, req *liveroomdto.G
 	return liveroom.GetRoomList(ctx, req)
 }
 
+// BatchAnchorStatus 批量查询主播状态
+func (c *LiveRoomAppController) BatchAnchorStatus(ctx context.Context, req *liveroomdto.BatchAnchorStatusReq) (*liveroomdto.BatchAnchorStatusRes, error) {
+	return liveroom.BatchAnchorStatus(ctx, req)
+}
+
 // OneToOneRoomList 分页查询1v1房间列表；可按 WebSocket 在线过滤，排序为在线优先、同态下开播优先。
 func (c *LiveRoomAppController) OneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomListReq) (res *liveroomdto.GetOneToOneRoomListRes, err error) {
 	return liveroom.GetOneToOneRoomList(ctx, req)

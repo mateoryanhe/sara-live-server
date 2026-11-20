@@ -65,6 +65,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/liveRoom/contributionRank", NewPath: "/sofie/studio/browseContribution", Tag: "studio", Summary: "贡献榜"},
 	{OldMethod: "post", OldPath: "/liveRoom/get", NewPath: "/sofie/studio/fetchBooth", Tag: "studio", Summary: "查询直播间"},
 	{OldMethod: "post", OldPath: "/liveRoom/roomList", NewPath: "/sofie/studio/browseBooths", Tag: "studio", Summary: "直播间列表"},
+	{OldMethod: "post", OldPath: "/liveRoom/batchAnchorStatus", NewPath: "/sofie/studio/fetchHostStates", Tag: "studio", Summary: "批量查询主播状态"},
 	{OldMethod: "post", OldPath: "/liveRoom/oneToOneRoomList", NewPath: "/sofie/studio/browseDirectBooths", Tag: "studio", Summary: "1v1房间列表"},
 	{OldMethod: "post", OldPath: "/liveRoom/mergedRoomList", NewPath: "/sofie/studio/browseMergedBooths", Tag: "studio", Summary: "合并直播间与1v1列表"},
 	{OldMethod: "post", OldPath: "/liveRoom/serverOnlineNormalUserList", NewPath: "/sofie/studio/browseOnlineNormals", Tag: "studio", Summary: "服务器在线普通用户"},

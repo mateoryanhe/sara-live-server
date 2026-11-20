@@ -39,11 +39,14 @@ func OneToOneRoomCall(ctx context.Context, req *calldto.OneToOneRoomCallReq) (*c
 	if err != nil {
 		return nil, err
 	}
-	skipDiamondPrecheck := livecfg.GetOneToOneDailyFreeSeconds() > 0 &&
-		liveroomdao.IsOneToOneDailyFreeAvailable(callCtx.audienceId, callCtx.anchorId)
-	if callCtx.pricePerMinute > 0 && !skipDiamondPrecheck {
-		if err := wallet.CanPayWithGoldExchange(callCtx.audienceId, callCtx.pricePerMinute); err != nil {
-			return nil, err
+	// 主播主叫：建单前不校验观众余额，延后至 acceptCall / confirmCall。
+	if callCtx.anchorId != callerId {
+		skipDiamondPrecheck := livecfg.GetOneToOneDailyFreeSeconds() > 0 &&
+			liveroomdao.IsOneToOneDailyFreeAvailable(callCtx.audienceId, callCtx.anchorId)
+		if callCtx.pricePerMinute > 0 && !skipDiamondPrecheck {
+			if err := wallet.CanPayWithGoldExchange(callCtx.audienceId, callCtx.pricePerMinute); err != nil {
+				return nil, err
+			}
 		}
 	}
 
