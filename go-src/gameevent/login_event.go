@@ -3,7 +3,9 @@ package gameevent
 import (
 	"context"
 
+	"xr-game-server/constants/lang"
 	"xr-game-server/core/event"
+	"xr-game-server/core/httpserver"
 )
 
 // LoginEvent App 用户登录成功(含 getUserInfo 拉取本人信息).
@@ -13,12 +15,14 @@ const LoginEvent event.Type = "LoginEvent"
 type LoginEventData struct {
 	UserId         uint64
 	ClientPlatform string // 请求头 X-Platform 规范化: android / ios / web
+	ClientLang     lang.Lang // X-Language / Accept-Language
 }
 
 func NewLoginEventDataFromCtx(ctx context.Context, userId uint64) *LoginEventData {
 	return &LoginEventData{
 		UserId:         userId,
 		ClientPlatform: StatClientPlatformFromCtx(ctx),
+		ClientLang:     httpserver.GetLangFromContext(ctx),
 	}
 }
 

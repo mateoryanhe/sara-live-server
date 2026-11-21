@@ -66,6 +66,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AppPkgManagement: 'Paket App',
   RandomNicknameManagement: 'Nama Panggilan Acak',
   CustomerServiceCfgManagement: 'Layanan Pelanggan',
+  AudienceOnlineAnchorGreetManagement: 'Sapa audiensi online',
   WalletExchangeCfgManagement: 'Konfigurasi Dasar Settlement',
   PaymentCountryCfgManagement: 'Konfigurasi Penerimaan Pengguna',
   CoinMerchantPaymentCountryCfgManagement: 'Konfigurasi Penerimaan Dealer',

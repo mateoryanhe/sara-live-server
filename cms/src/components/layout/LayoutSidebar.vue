@@ -2,7 +2,7 @@
 import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {nextTick, ref} from 'vue'
-import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, DataLine, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, Link, List, Lock, Medal, Microphone, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet, Warning} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Calendar, ChatDotRound, Coin, Collection, CollectionTag, Cpu, CreditCard, DataLine, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, Link, List, Lock, Medal, Microphone, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet, Warning} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {prefetchRouteChunk} from '@/utils/route-prefetch'
 import {isSidebarRoutableIndex, resolveSidebarSubmenusToOpen} from '@/utils/sidebar-menu-nav'
@@ -221,7 +221,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('OneToOneRoomManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildAnchorListManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
+            v-if="hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('OneToOneRoomManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildAnchorListManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('AudienceOnlineAnchorGreetManagement')"
             index="/anchor-guild">
           <template #title>
             <el-icon>
@@ -264,6 +264,12 @@ const hasMenuPermission = (moduleName: string) => {
               <Service/>
             </el-icon>
             <span>{{ t('menu.CustomerServiceCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AudienceOnlineAnchorGreetManagement')" index="/operation/customer-service/audience-online-anchor-greet-cfg">
+            <el-icon>
+              <ChatDotRound/>
+            </el-icon>
+            <span>{{ t('menu.AudienceOnlineAnchorGreetManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('LiveRoomRecycleBinManagement')" index="/user/anchor/live-room-recycle-bin">
             <el-icon>

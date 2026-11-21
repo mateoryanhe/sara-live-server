@@ -4,6 +4,7 @@ import (
 	"xr-game-server/dao/anchorphotodao"
 	"xr-game-server/dao/anchorvideodao"
 	"xr-game-server/module/accountcfg"
+	"xr-game-server/module/audienceonlinegreet"
 	"xr-game-server/module/activity"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/aliyunmoderation"
@@ -132,6 +133,7 @@ func Init() {
 	simulatordevicewhitelist.Init()
 	simulatorblacklistlog.Init()
 	customerservice.Init()
+	audienceonlinegreet.Init()
 	anchornosalarysharecfg.Init()
 	liverevenuesharecfg.Init()
 	logquery.Init()

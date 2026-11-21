@@ -2433,6 +2433,44 @@ export interface SaveCustomerServiceCfgRes {
     id: string
 }
 
+export interface AudienceOnlineAnchorGreetCfg {
+    id?: string
+    enabled?: boolean
+    anchorCount?: number
+    intervalMinSec?: number
+    intervalMaxSec?: number
+    contentsEn?: string[]
+    contentsEs?: string[]
+    contentsPt?: string[]
+    contentsHi?: string[]
+    contentsId?: string[]
+    usingBuiltinContents?: boolean
+    builtinContentsEn?: string[]
+    builtinContentsEs?: string[]
+    builtinContentsPt?: string[]
+    builtinContentsHi?: string[]
+    builtinContentsId?: string[]
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface GetAudienceOnlineAnchorGreetCfgRes {
+    cfg: AudienceOnlineAnchorGreetCfg | null
+}
+
+export interface SaveAudienceOnlineAnchorGreetCfgReq {
+    id?: number | string
+    enabled?: boolean
+    anchorCount: number
+    intervalMinSec?: number
+    intervalMaxSec?: number
+}
+
+export interface SaveAudienceOnlineAnchorGreetCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface WalletExchangeCfg {
     id: string
     goldToDiamondRate: number

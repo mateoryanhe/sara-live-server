@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -14,8 +15,23 @@ import (
 // AcceptLanguageHeader 客户端语言协商头(标准 HTTP 头)
 const AcceptLanguageHeader = "Accept-Language"
 
+// XLanguageHeader App 自定义语言头(优先于 Accept-Language)
+const XLanguageHeader = "X-Language"
+
+// XLangueHeader 兼容旧拼写 X-Langue
+const XLangueHeader = "X-Langue"
+
 // GetLang 从请求头中解析客户端语言,未传或不识别时回落到默认语言
 func GetLang(r *ghttp.Request) lang.Lang {
+	if r == nil {
+		return lang.DefaultLang
+	}
+	if raw := strings.TrimSpace(r.GetHeader(XLanguageHeader)); raw != "" {
+		return lang.Parse(raw)
+	}
+	if raw := strings.TrimSpace(r.GetHeader(XLangueHeader)); raw != "" {
+		return lang.Parse(raw)
+	}
 	return lang.Parse(r.GetHeader(AcceptLanguageHeader))
 }
 

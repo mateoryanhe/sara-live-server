@@ -200,6 +200,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('OneToOneRoomManagement'),
             page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
             page('CustomerServiceCfgManagement'),
+            page('AudienceOnlineAnchorGreetManagement'),
             page('LiveRoomRecycleBinManagement'),
             page('GuildRecycleBinManagement'),
         ],

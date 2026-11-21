@@ -38,6 +38,7 @@ import {rechargeCfgListMessages} from './recharge-cfg-list'
 import {appPkgListMessages} from './app-pkg-list'
 import {randomNicknameCfgMessages} from './random-nickname-cfg'
 import {customerServiceCfgMessages} from './customer-service-cfg'
+import {audienceOnlineAnchorGreetMessages} from './audience-online-anchor-greet'
 import {walletExchangeCfgMessages} from './wallet-exchange-cfg'
 import {effectiveLiveCfgMessages} from './effective-live-cfg'
 import {platformAnchorSettlementCfgMessages} from './platform-anchor-settlement-cfg'
@@ -182,6 +183,7 @@ const pageMessageBuilders = [
   ['appPkgList', appPkgListMessages],
   ['randomNicknameCfg', randomNicknameCfgMessages],
   ['customerServiceCfg', customerServiceCfgMessages],
+  ['audienceOnlineAnchorGreet', audienceOnlineAnchorGreetMessages],
   ['walletExchangeCfg', walletExchangeCfgMessages],
   ['effectiveLiveCfg', effectiveLiveCfgMessages],
   ['platformAnchorSettlementCfg', platformAnchorSettlementCfgMessages],

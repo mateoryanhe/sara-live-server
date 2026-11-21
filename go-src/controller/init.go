@@ -73,6 +73,7 @@ func Init() {
 	initGooglePlayWebhookController()                // Google Play RTDN Webhook
 	initHaiPayWebhookController()                    // HaiPay代收回调
 	initCustomerServiceCMSController()               // 客服联系配置(CMS)
+	initAudienceOnlineAnchorGreetCMSController()       // 观众上线主播招呼(CMS)
 	initCustomerServiceAppController()               // 客服联系配置(App)
 	initWalletCMSController()                        // 钱包配置(CMS)
 	initFiatCurrencyCMSController()                  // 法币配置(CMS)

@@ -41,37 +41,14 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 		return nil, errercode.CreateCode(errercode.PrivateMessageUserBlocked)
 	}
 
-	msg := entity.NewUserMessage(senderId, req.ReceiverId, content)
-
-	//往发送者写入消息
-	pushItem := buildPrivateMessagePushItem(msg)
-	senderSession := entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(senderId, req.ReceiverId))
-	push.Data(senderId, cmd.PrivateMessagePush, pushItem)
-
-	//往接收者写入消息
-	receiverSession := entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(req.ReceiverId, senderId))
-
-	push.Data(req.ReceiverId, cmd.PrivateMessagePush, pushItem)
-	//刷新未读消息缓存
-	unReadData := messagedao.GetUnReadByUserId(req.ReceiverId)
-	unReadData.AddPrivateUnread(1)
-	messagedao.PublishMessageUnread(unReadData)
-
-	receiverUnreadDetail := messagedao.GetUnreadDetailByReceiverSender(senderId, req.ReceiverId)
-	receiverUnreadDetail.AddUnread(1)
-	messagedao.MarkMutualPrivateChat(senderId, req.ReceiverId)
-	messagedao.FlushUnreadDetailCache(receiverUnreadDetail)
-	prependPrivateMessageUnreadListCache(req.ReceiverId, senderId, msg, receiverSession.ID, receiverUnreadDetail.UnreadCount)
-
-	senderUnreadDetail := messagedao.GetUnreadDetailByReceiverSender(req.ReceiverId, senderId)
-	prependPrivateMessageUnreadListCache(senderId, req.ReceiverId, msg, senderSession.ID, senderUnreadDetail.UnreadCount)
-
-	prependPrivateMessageBySenderCache(senderId, req.ReceiverId, senderSession.ID, msg)
-	prependPrivateMessageBySenderCache(req.ReceiverId, senderId, receiverSession.ID, msg)
+	msg, senderSessionId := DeliverPrivateMessage(senderId, req.ReceiverId, content)
+	if msg == nil || senderSessionId == 0 {
+		return nil, errercode.CreateCode(errercode.SysError)
+	}
 
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
-		SessionId: senderSession.ID,
+		SessionId: senderSessionId,
 		Success:   true,
 	}, nil
 }
@@ -258,6 +235,45 @@ func ClearAllPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearA
 		ClearedCount:  clearedCount,
 		PrivateUnread: 0,
 	}, nil
+}
+
+// DeliverPrivateMessage 服务端代发私信(不走内容审核);拉黑关系时跳过并返回 nil。
+func DeliverPrivateMessage(senderId, receiverId uint64, content string) (*entity.UserMessage, uint64) {
+	content = strings.TrimSpace(content)
+	if content == "" || senderId == 0 || receiverId == 0 || senderId == receiverId {
+		return nil, 0
+	}
+	if userinfodao.FindUserInfoByUserId(receiverId) == nil {
+		return nil, 0
+	}
+	if livefollowdao.IsBlocked(senderId, receiverId) || livefollowdao.IsBlocked(receiverId, senderId) {
+		return nil, 0
+	}
+
+	msg := entity.NewUserMessage(senderId, receiverId, content)
+	pushItem := buildPrivateMessagePushItem(msg)
+	senderSession := entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(senderId, receiverId))
+	push.Data(senderId, cmd.PrivateMessagePush, pushItem)
+
+	receiverSession := entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(receiverId, senderId))
+	push.Data(receiverId, cmd.PrivateMessagePush, pushItem)
+
+	unReadData := messagedao.GetUnReadByUserId(receiverId)
+	unReadData.AddPrivateUnread(1)
+	messagedao.PublishMessageUnread(unReadData)
+
+	receiverUnreadDetail := messagedao.GetUnreadDetailByReceiverSender(senderId, receiverId)
+	receiverUnreadDetail.AddUnread(1)
+	messagedao.MarkMutualPrivateChat(senderId, receiverId)
+	messagedao.FlushUnreadDetailCache(receiverUnreadDetail)
+	prependPrivateMessageUnreadListCache(receiverId, senderId, msg, receiverSession.ID, receiverUnreadDetail.UnreadCount)
+
+	senderUnreadDetail := messagedao.GetUnreadDetailByReceiverSender(receiverId, senderId)
+	prependPrivateMessageUnreadListCache(senderId, receiverId, msg, senderSession.ID, senderUnreadDetail.UnreadCount)
+
+	prependPrivateMessageBySenderCache(senderId, receiverId, senderSession.ID, msg)
+	prependPrivateMessageBySenderCache(receiverId, senderId, receiverSession.ID, msg)
+	return msg, senderSession.ID
 }
 
 func buildPrivateMessagePushItem(msg *entity.UserMessage) *messagedto.PrivateMessagePushItem {

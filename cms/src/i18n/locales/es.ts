@@ -66,6 +66,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AppPkgManagement: 'Paquetes de app',
   RandomNicknameManagement: 'Apodos aleatorios',
   CustomerServiceCfgManagement: 'Atención al cliente',
+  AudienceOnlineAnchorGreetManagement: 'Saludo al conectar (audiencia)',
   WalletExchangeCfgManagement: 'Config. base de liquidación',
   PaymentCountryCfgManagement: 'Cobros de usuarios',
   CoinMerchantPaymentCountryCfgManagement: 'Cobros de distribuidores',

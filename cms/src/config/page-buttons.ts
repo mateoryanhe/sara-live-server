@@ -126,6 +126,7 @@ const CONFIG_PAGES = new Set([
     'LiveCfgManagement',
     'RandomNicknameManagement',
     'CustomerServiceCfgManagement',
+    'AudienceOnlineAnchorGreetManagement',
     'WalletExchangeCfgManagement',
     'ShortVideoCfgManagement',
     'GamePlatformCfgManagement',

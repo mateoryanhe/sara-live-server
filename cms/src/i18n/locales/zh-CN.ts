@@ -63,6 +63,7 @@ const menu = {
   AppPkgManagement: 'App包管理',
   RandomNicknameManagement: '随机昵称库',
   CustomerServiceCfgManagement: '客服联系配置',
+  AudienceOnlineAnchorGreetManagement: '观众上线主播招呼',
   WalletExchangeCfgManagement: '结算基础配置',
   PaymentCountryCfgManagement: '普通用户代收支付配置',
   CoinMerchantPaymentCountryCfgManagement: '经销商代收支付配置',

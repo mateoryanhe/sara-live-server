@@ -223,6 +223,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '客服联系配置', parentTitle: '主播与工会管理'},
         },
         {
+            path: 'customer-service/audience-online-anchor-greet-cfg',
+            name: 'AudienceOnlineAnchorGreetManagement',
+            component: () => import('@/views/operation/customer-service/audience-online-anchor-greet-cfg.vue'),
+            meta: {title: '观众上线主播招呼', parentTitle: '主播与工会管理'},
+        },
+        {
             path: 'wallet/wallet-exchange-cfg',
             name: 'WalletExchangeCfgManagement',
             component: () => import('@/views/operation/wallet/wallet-exchange-cfg.vue'),

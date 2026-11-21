@@ -422,6 +422,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     CustomerServiceCfgManagement: '/customerService/getCustomerServiceCfg',
     'CustomerServiceCfgManagement:view': '/customerService/getCustomerServiceCfg',
     'CustomerServiceCfgManagement:save': '/customerService/saveCustomerServiceCfg',
+    AudienceOnlineAnchorGreetManagement: '/audienceOnlineAnchorGreet/getAudienceOnlineAnchorGreetCfg',
+    'AudienceOnlineAnchorGreetManagement:view': '/audienceOnlineAnchorGreet/getAudienceOnlineAnchorGreetCfg',
+    'AudienceOnlineAnchorGreetManagement:save': '/audienceOnlineAnchorGreet/saveAudienceOnlineAnchorGreetCfg',
 
     WalletExchangeCfgManagement: '/wallet/getWalletExchangeCfg',
     'WalletExchangeCfgManagement:view': '/wallet/getWalletExchangeCfg',
