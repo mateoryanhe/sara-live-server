@@ -429,6 +429,7 @@ export interface OneToOneRoomItem {
     liveRoomStatus?: number
     status?: number
     billing?: number
+    callCount?: number
     updatedAt?: string | null
 }
 
@@ -1250,6 +1251,7 @@ export interface FirstRechargePrivilegeItem {
     descPt?: string
     descHi?: string
     descId?: string
+    descAr?: string
 }
 
 export interface FirstRechargeActivityCfg {
@@ -1262,11 +1264,14 @@ export interface FirstRechargeActivityCfg {
     titlePt?: string
     titleHi?: string
     titleId?: string
+    titleAr?: string
     rechargeBtnTextEn?: string
     rechargeBtnTextEs?: string
     rechargeBtnTextPt?: string
     rechargeBtnTextHi?: string
     rechargeBtnTextId?: string
+    rechargeBtnTextAr?: string
+    firstRechargeRatio?: number
     privileges?: FirstRechargePrivilegeItem[]
     createdAt?: string
     updatedAt?: string
@@ -1285,11 +1290,14 @@ export interface SaveFirstRechargeActivityCfgReq {
     titlePt?: string
     titleHi?: string
     titleId?: string
+    titleAr?: string
     rechargeBtnTextEn?: string
     rechargeBtnTextEs?: string
     rechargeBtnTextPt?: string
     rechargeBtnTextHi?: string
     rechargeBtnTextId?: string
+    rechargeBtnTextAr?: string
+    firstRechargeRatio?: number
     privileges?: FirstRechargePrivilegeItem[]
 }
 

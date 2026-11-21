@@ -45,6 +45,14 @@ if not exist "node_modules\" (
   echo.
 )
 
+netstat -ano | findstr ":5174" | findstr LISTENING >nul 2>&1
+if not errorlevel 1 (
+  echo.
+  echo WARN: port 5174 is already in use. Vite strictPort will fail unless you free it.
+  echo       Run pub-tool\cms-local\stop.bat  or close the old CMS dev terminal.
+  echo.
+)
+
 echo Starting: npm run dev
 echo Tip: keep local Go API on %CMS_API_HINT% (config/local address 9443)
 echo.

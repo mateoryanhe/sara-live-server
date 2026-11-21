@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -16,7 +17,8 @@ const (
 	OneToOneRoomBilling  db.TbCol = "billing"
 	OneToOneRoomTitle db.TbCol = "title"
 	OneToOneRoomCover db.TbCol = "cover"
-	OneToOneRoomTagId db.TbCol = "tag_id"
+	OneToOneRoomTagId     db.TbCol = "tag_id"
+	OneToOneRoomCallCount db.TbCol = "call_count"
 )
 
 const (
@@ -32,7 +34,8 @@ type OneToOneRoom struct {
 	Billing   float64   `gorm:"type:decimal(10,4);default:0;comment:1v1通话每分钟钻石" json:"billing"`
 	Title     string    `gorm:"size:128;default:'';comment:1v1房间标题" json:"title"`
 	Cover string `gorm:"size:255;default:'';comment:1v1封面(对象名)" json:"cover"`
-	TagId uint64 `gorm:"default:0;comment:标签ID" json:"tagId"`
+	TagId     uint64 `gorm:"default:0;comment:标签ID" json:"tagId"`
+	CallCount uint64 `gorm:"default:0;comment:累计1v1视频通话接通次数" json:"callCount"`
 }
 
 func NewOneToOneRoom(anchorId uint64) *OneToOneRoom {
@@ -96,6 +99,16 @@ func (r *OneToOneRoom) SetTagId(v uint64) {
 	})
 }
 
+func (r *OneToOneRoom) AddCallCount(n uint64) {
+	if r == nil || n == 0 {
+		return
+	}
+	r.CallCount = math.Add(r.CallCount, n)
+	syndb.AddData(TbOneToOneRoom, OneToOneRoomCallCount, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.CallCount,
+	})
+}
+
 func (r *OneToOneRoom) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddData(TbOneToOneRoom, db.CreatedAtName, &syndb.ColData{
@@ -129,5 +142,6 @@ func initOneToOneRoom() {
 	syndb.RegQuick(TbOneToOneRoom, OneToOneRoomTitle)
 	syndb.RegQuick(TbOneToOneRoom, OneToOneRoomCover)
 	syndb.RegQuick(TbOneToOneRoom, OneToOneRoomTagId)
+	syndb.RegQuick(TbOneToOneRoom, OneToOneRoomCallCount)
 	migrate.AutoMigrate(&OneToOneRoom{})
 }

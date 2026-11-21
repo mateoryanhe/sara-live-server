@@ -41,6 +41,15 @@ func AddOneToOneRoomToCache(row *entity.OneToOneRoom) {
 	oneToOneRoomCache.Set(row.ID, row)
 }
 
+// AddOneToOneRoomCallCount 主播 1v1 视频通话接通成功后累计次数(无行则忽略)。
+func AddOneToOneRoomCallCount(anchorId uint64) {
+	row := GetOneToOneRoom(anchorId)
+	if row == nil {
+		return
+	}
+	row.AddCallCount(1)
+}
+
 func CreateOneToOneRoom(anchorId uint64, billing float64) *entity.OneToOneRoom {
 	if anchorId == 0 {
 		return nil

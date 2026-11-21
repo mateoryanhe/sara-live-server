@@ -55,6 +55,7 @@ type GetOneToOneRoomRes struct {
 	TagId   string `json:"tagId" dc:"标签ID"`
 	TagName      string  `json:"tagName" dc:"标签名称"`
 	OnlineStatus uint8   `json:"onlineStatus" dc:"主播WebSocket在线状态(1=在线,2=离线)"`
+	CallCount    uint64  `json:"callCount" dc:"累计1v1视频通话接通次数"`
 }
 
 // StartLiveReq 开播(主播自身)

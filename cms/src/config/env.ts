@@ -9,7 +9,7 @@ interface EnvConfig {
 
 const config: Record<string, EnvConfig> = {
     development: {
-        BASE_API: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8898',
+        BASE_API: import.meta.env.VITE_API_BASE_URL || '/local-api',
         ENV: 'development',
         TIMEOUT: 30000,
         SUCCESS_CODE: 200,

@@ -73,6 +73,9 @@
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.oneToOneRoomList.billing')" prop="billing" width="120"/>
+        <el-table-column :label="t('pages.oneToOneRoomList.callCount')" prop="callCount" width="120">
+          <template #default="{ row }">{{ row.callCount ?? 0 }}</template>
+        </el-table-column>
         <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="170">
           <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
         </el-table-column>

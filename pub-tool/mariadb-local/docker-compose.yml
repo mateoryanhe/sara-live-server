@@ -1,0 +1,23 @@
+# 直播 sara-live-server 专用（3391）；语聊 yuliao 用 3390
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: sara-live-mariadb
+    restart: unless-stopped
+    ports:
+      - "3391:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Appledev882116
+      MYSQL_DATABASE: live_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: Appledev882116
+      TZ: UTC
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:
+    name: sara_live_mariadb_data

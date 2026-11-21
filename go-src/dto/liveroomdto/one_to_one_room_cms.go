@@ -26,6 +26,7 @@ type CMSOneToOneRoomItem struct {
 	LiveRoomStatus uint8      `json:"liveRoomStatus" dc:"直播间上下架(0下架,1上架)"`
 	Status         uint8      `json:"status" dc:"1v1上下架(0下架,1上架)"`
 	Billing        float64    `json:"billing" dc:"1v1通话每分钟钻石"`
+	CallCount      uint64     `json:"callCount" dc:"累计1v1视频通话接通次数"`
 	UpdatedAt      *time.Time `json:"updatedAt"`
 }
 

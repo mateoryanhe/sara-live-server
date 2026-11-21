@@ -111,6 +111,14 @@
                   <el-input v-model="formData.rechargeBtnTextId" clearable maxlength="64" show-word-limit/>
                 </el-form-item>
               </el-tab-pane>
+              <el-tab-pane label="العربية" name="ar">
+                <el-form-item :label="t('pages.firstRechargeActivityCfg.titleAr')">
+                  <el-input v-model="formData.titleAr" clearable dir="rtl" maxlength="128" show-word-limit/>
+                </el-form-item>
+                <el-form-item :label="t('pages.firstRechargeActivityCfg.rechargeBtnTextAr')">
+                  <el-input v-model="formData.rechargeBtnTextAr" clearable dir="rtl" maxlength="64" show-word-limit/>
+                </el-form-item>
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
 
@@ -221,6 +229,11 @@
               <el-input v-model="privilegeForm.descId" clearable maxlength="256" show-word-limit type="textarea" :rows="3"/>
             </el-form-item>
           </el-tab-pane>
+          <el-tab-pane label="العربية" name="ar">
+            <el-form-item :label="t('pages.firstRechargeActivityCfg.privilegeDescAr')">
+              <el-input v-model="privilegeForm.descAr" clearable dir="rtl" maxlength="256" show-word-limit type="textarea" :rows="3"/>
+            </el-form-item>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
       <template #footer>
@@ -265,11 +278,13 @@ const formData = reactive({
   titlePt: '',
   titleHi: '',
   titleId: '',
+  titleAr: '',
   rechargeBtnTextEn: '',
   rechargeBtnTextEs: '',
   rechargeBtnTextPt: '',
   rechargeBtnTextHi: '',
   rechargeBtnTextId: '',
+  rechargeBtnTextAr: '',
   firstRechargeRatio: 10,
 })
 
@@ -283,6 +298,7 @@ const privilegeForm = reactive({
   descPt: '',
   descHi: '',
   descId: '',
+  descAr: '',
 })
 
 const metaInfo = reactive({
@@ -305,6 +321,7 @@ const clonePrivilegeList = (list?: FirstRechargePrivilegeItem[]) => {
     descPt: item.descPt || '',
     descHi: item.descHi || '',
     descId: item.descId || '',
+    descAr: item.descAr || '',
   }))
 }
 
@@ -317,11 +334,13 @@ const applyCfg = (cfg: FirstRechargeActivityCfg | null | undefined) => {
   formData.titlePt = cfg?.titlePt || ''
   formData.titleHi = cfg?.titleHi || ''
   formData.titleId = cfg?.titleId || ''
+  formData.titleAr = cfg?.titleAr || ''
   formData.rechargeBtnTextEn = cfg?.rechargeBtnTextEn || ''
   formData.rechargeBtnTextEs = cfg?.rechargeBtnTextEs || ''
   formData.rechargeBtnTextPt = cfg?.rechargeBtnTextPt || ''
   formData.rechargeBtnTextHi = cfg?.rechargeBtnTextHi || ''
   formData.rechargeBtnTextId = cfg?.rechargeBtnTextId || ''
+  formData.rechargeBtnTextAr = cfg?.rechargeBtnTextAr || ''
   formData.firstRechargeRatio = cfg?.firstRechargeRatio ?? 10
   privilegeList.value = clonePrivilegeList(cfg?.privileges)
   metaInfo.createdAt = cfg?.createdAt || ''
@@ -398,6 +417,7 @@ const resetPrivilegeDialog = () => {
   privilegeForm.descPt = ''
   privilegeForm.descHi = ''
   privilegeForm.descId = ''
+  privilegeForm.descAr = ''
   privilegeIconPreviewUrl.value = ''
   privilegeLangTab.value = 'en'
 }
@@ -412,6 +432,7 @@ const openPrivilegeDialog = (row?: FirstRechargePrivilegeItem, index?: number) =
     privilegeForm.descPt = row.descPt || ''
     privilegeForm.descHi = row.descHi || ''
     privilegeForm.descId = row.descId || ''
+    privilegeForm.descAr = row.descAr || ''
     privilegeIconPreviewUrl.value = row.icon || ''
   }
   privilegeDialogVisible.value = true
@@ -426,6 +447,7 @@ const confirmPrivilegeDialog = () => {
     descPt: privilegeForm.descPt.trim(),
     descHi: privilegeForm.descHi.trim(),
     descId: privilegeForm.descId.trim(),
+    descAr: privilegeForm.descAr.trim(),
   }
   if (privilegeEditIndex.value == null) {
     privilegeList.value.push(item)
@@ -457,11 +479,13 @@ const buildSavePayload = () => ({
   titlePt: formData.titlePt.trim(),
   titleHi: formData.titleHi.trim(),
   titleId: formData.titleId.trim(),
+  titleAr: formData.titleAr.trim(),
   rechargeBtnTextEn: formData.rechargeBtnTextEn.trim(),
   rechargeBtnTextEs: formData.rechargeBtnTextEs.trim(),
   rechargeBtnTextPt: formData.rechargeBtnTextPt.trim(),
   rechargeBtnTextHi: formData.rechargeBtnTextHi.trim(),
   rechargeBtnTextId: formData.rechargeBtnTextId.trim(),
+  rechargeBtnTextAr: formData.rechargeBtnTextAr.trim(),
   firstRechargeRatio: formData.firstRechargeRatio,
   privileges: privilegeList.value.map(item => ({
     iconName: (item.iconName || item.icon || '').trim(),
@@ -470,6 +494,7 @@ const buildSavePayload = () => ({
     descPt: (item.descPt || '').trim(),
     descHi: (item.descHi || '').trim(),
     descId: (item.descId || '').trim(),
+    descAr: (item.descAr || '').trim(),
   })),
 })
 

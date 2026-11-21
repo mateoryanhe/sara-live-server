@@ -202,6 +202,7 @@ func GetOneToOneRoom(_ context.Context, req *liveroomdto.GetOneToOneRoomReq) (*l
 		Billing:      row.Billing,
 		Title:        row.Title,
 		OnlineStatus: onlineStatus,
+		CallCount:    row.CallCount,
 	}
 	if row.Cover != "" {
 		res.Cover = upload.GetUrlByName(row.Cover)
@@ -298,10 +299,11 @@ func CMSSetOneToOneRoomStatus(_ context.Context, req *liveroomdto.CMSSetOneToOne
 
 func buildCMSOneToOneRoomItem(row *liveentity.OneToOneRoom) *liveroomdto.CMSOneToOneRoomItem {
 	item := &liveroomdto.CMSOneToOneRoomItem{
-		UserId:   strconv.FormatUint(row.ID, 10),
-		Status:   row.Status,
-		Billing:  row.Billing,
-		Title:   row.Title,
+		UserId:    strconv.FormatUint(row.ID, 10),
+		Status:    row.Status,
+		Billing:   row.Billing,
+		Title:     row.Title,
+		CallCount: row.CallCount,
 	}
 	if row.Cover != "" {
 		item.Cover = upload.GetUrlByName(row.Cover)

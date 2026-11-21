@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity/call"
 	"xr-game-server/errercode"
@@ -77,6 +78,11 @@ func applyCallAnswerConfirm(ctx context.Context, order *entity.CallOrder, userId
 	order.SetStatus(entity.CallOrderStatusInCall)
 	pushCallStarted(order, now.Unix())
 	pubCall1v1ConnectSuccessTracking(ctx, order, now)
+	if order.CallType == entity.CallOrderTypeVideo {
+		if anchorId, _, ok := resolveRoomCallPartyIds(order.CallerId, order.ReceiverId); ok {
+			liveroomdao.AddOneToOneRoomCallCount(anchorId)
+		}
+	}
 	return true, nil
 }
 

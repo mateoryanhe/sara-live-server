@@ -1,6 +1,6 @@
 server:
   ###系统配置
-  address: 9443  #http服务端口
+  address: 9443  #http服务端口(双仓本地: yuliao=9444, sara=9443)
   openapiPath: "/f9acdb1da4ed11ecc115d613e291af14-api.json" # OpenAPI接口文档地址(仅本地)
   openapiExportAll: false # OpenAPI导出范围:false=仅App端(含推送),true=全部(App+CMS)
   swaggerPath: "/f9acdb1da4ed11ecc115d613e291af14-swagger"  # 旧 App SwaggerUI(仅本地)
@@ -18,7 +18,7 @@ server:
   pprofEnabled: true
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"
   ####自定义配置
-  id: 1  # 雪花算法 node(本地); 各环境必须唯一,范围 1-1023
+  id: 2  # 雪花算法 node(本地); 双仓与 yuliao id=1 错开
   debugEnv: true #是否开启debug环境,不会检查权限
   dumpRouterMap: false
   # 远程环境 staticSites 示例见 config/dev/config.yaml
@@ -54,7 +54,7 @@ database:
     level: "all"
     stdout: true
   default:
-    link: "mysql:appuser:Appledev882116@tcp(127.0.0.1:3390)/live_db"
+    link: "mysql:appuser:Appledev882116@tcp(127.0.0.1:3391)/live_db"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"
     debug: true
 

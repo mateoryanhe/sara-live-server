@@ -545,6 +545,7 @@ func buildOneToOneRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoo
 		}
 		if oneToOne := liveroomdao.GetOneToOneRoom(room.ID); oneToOne != nil {
 			overlayOneToOneListItem(&item.LiveRoomListItem, oneToOne)
+			item.CallCount = oneToOne.CallCount
 		}
 		list = append(list, item)
 	}
@@ -710,6 +711,7 @@ func buildMergedRoomListItems(ctx context.Context, cands []*mergedRoomCandidate,
 				}
 				if row := liveroomdao.GetOneToOneRoom(c.room.ID); row != nil {
 					overlayOneToOneListItem(&one.LiveRoomListItem, row)
+					one.CallCount = row.CallCount
 				}
 				item.OneToOneRoom = one
 			}
