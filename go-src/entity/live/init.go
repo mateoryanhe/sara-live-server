@@ -14,6 +14,7 @@ func Init() {
 	initLiveRevenueShareCfg()
 	initLiveRoomGameRecommend()
 	initLiveRoomOnline()
+	initAnchorAutoOnShelfTask()
 	initVoiceChatMicSeat()
 	initVoiceChatMicApply()
 	initVoiceChatMicSeatTier()

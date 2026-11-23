@@ -49,7 +49,7 @@ func parseUploadAnchorPhotoMultipart(ctx context.Context, r *ghttp.Request) ([]s
 	return parseUploadAnchorPhotoMultipartWithUploader(ctx, r, upload.UploadImagePartForApp)
 }
 
-func parseUploadAnchorPhotoMultipartWithUploader(ctx context.Context, r *ghttp.Request, uploader avatarPartUploader) (storedNames []string, err error) {
+func parseUploadAnchorPhotoMultipartWithUploader(ctx context.Context, r *ghttp.Request, uploader appImagePartUploader) (storedNames []string, err error) {
 	if r == nil || r.Request == nil || uploader == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

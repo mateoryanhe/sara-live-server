@@ -29,6 +29,8 @@ import type {
     BatchOffShelfShowcaseLiveRoomsRes,
     BatchOnShelfShowcaseLiveRoomsRes,
     SetLiveRoomStatusReq,
+    OffShelfLiveRoomWithAutoOnShelfReq,
+    OffShelfLiveRoomWithAutoOnShelfRes,
     SetLiveRoomStatusRes,
     SetRechargeWhitelistReq,
     SetSeniorAnchorReq,
@@ -172,6 +174,10 @@ const accountApi = {
     // 上架/下架主播直播间
     setLiveRoomStatus: (data: SetLiveRoomStatusReq) => {
         return request.post<SetLiveRoomStatusRes>('/account/setLiveRoomStatus', data)
+    },
+
+    offShelfLiveRoomWithAutoOnShelf: (data: OffShelfLiveRoomWithAutoOnShelfReq) => {
+        return request.post<OffShelfLiveRoomWithAutoOnShelfRes>('/account/offShelfLiveRoomWithAutoOnShelf', data)
     },
 
     batchOffShelfShowcaseLiveRooms: () => {

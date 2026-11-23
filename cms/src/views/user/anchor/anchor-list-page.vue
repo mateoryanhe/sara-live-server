@@ -310,7 +310,13 @@
                     {{ t('common.offShelf') }}
                   </el-dropdown-item>
                   <el-dropdown-item
-                      :divided="can('uploadRoomCover') || can('offShelf')"
+                      v-if="offShelfAutoRestore && can('offShelfAutoRestore') && Number(row.status) === 1"
+                      command="offShelfAutoRestore"
+                  >
+                    {{ t('pages.anchorList.offShelfAutoRestore') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                      :divided="can('uploadRoomCover') || can('offShelf') || (offShelfAutoRestore && can('offShelfAutoRestore'))"
                       command="toggleBan"
                   >
                     {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
@@ -444,6 +450,50 @@
     </el-dialog>
 
     <el-dialog
+        v-model="offShelfAutoRestoreDialogVisible"
+        :close-on-click-modal="false"
+        destroy-on-close
+        :title="t('pages.anchorList.offShelfAutoRestoreDialogTitle')"
+        width="480px"
+        @closed="resetOffShelfAutoRestoreForm"
+    >
+      <el-form
+          ref="offShelfAutoRestoreFormRef"
+          :model="offShelfAutoRestoreForm"
+          :rules="offShelfAutoRestoreRules"
+          label-width="120px"
+      >
+        <el-form-item :label="t('pages.anchorList.anchorId')">
+          <el-input v-model="offShelfAutoRestoreForm.anchorId" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('common.nickname')">
+          <el-input v-model="offShelfAutoRestoreForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('pages.anchorList.offShelfAutoRestoreHoursLabel')" prop="autoOnShelfHours">
+          <el-input-number
+              v-model="offShelfAutoRestoreForm.autoOnShelfHours"
+              :max="720"
+              :min="1"
+              :step="1"
+              style="width: 180px"
+          />
+        </el-form-item>
+        <el-alert
+            :closable="false"
+            show-icon
+            :title="t('pages.anchorList.offShelfAutoRestoreHoursHint')"
+            type="info"
+        />
+      </el-form>
+      <template #footer>
+        <el-button @click="offShelfAutoRestoreDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="offShelfAutoRestoreSubmitting" type="warning" @click="submitOffShelfAutoRestore">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
         v-model="roomCoverDialogVisible"
         :title="t('pages.anchorList.uploadRoomCoverTitle')"
         width="440px"
@@ -522,9 +572,11 @@ const props = withDefaults(
       pagePermissionName: string
       menuTitleKey: string
       visibilityScoped?: boolean
+      offShelfAutoRestore?: boolean
     }>(),
     {
       visibilityScoped: false,
+      offShelfAutoRestore: false,
     },
 )
 
@@ -533,6 +585,7 @@ const {t} = useI18n()
 const router = useRouter()
 const menuTitleKey = computed(() => props.menuTitleKey)
 const visibilityScoped = toRef(props, 'visibilityScoped')
+const offShelfAutoRestore = toRef(props, 'offShelfAutoRestore')
 const pagePermissionName = computed(() => props.pagePermissionName)
 const {can} = usePagePermission(pagePermissionName)
 const {canViewUserDetail, openUserDetail} = useUserDetailNav(pagePermissionName)
@@ -967,6 +1020,9 @@ const handleRowCommand = (row: AnchorListItem, command: string) => {
     case 'offShelf':
       void handleOffShelf(row)
       break
+    case 'offShelfAutoRestore':
+      openOffShelfAutoRestoreDialog(row)
+      break
     case 'toggleBan':
       void toggleBanStatus(row)
       break
@@ -1139,6 +1195,88 @@ const handleBatchOnShelfShowcase = async () => {
     ElMessage.error(t('pages.anchorList.batchOnShelfShowcaseFailed'))
   } finally {
     showcaseOnShelfOperating.value = false
+  }
+}
+
+const offShelfAutoRestoreDialogVisible = ref(false)
+const offShelfAutoRestoreSubmitting = ref(false)
+const offShelfAutoRestoreFormRef = ref<InstanceType<typeof ElForm>>()
+const offShelfAutoRestoreForm = reactive({
+  anchorId: '',
+  nickname: '',
+  autoOnShelfHours: 1,
+})
+const offShelfAutoRestoreRules: FormRules = {
+  autoOnShelfHours: [
+    {required: true, message: () => t('pages.anchorList.offShelfAutoRestoreHoursRule'), trigger: 'blur'},
+    {
+      validator: (_rule, value, callback) => {
+        const n = Number(value)
+        if (!Number.isFinite(n) || n < 1 || n > 720) {
+          callback(new Error(t('pages.anchorList.offShelfAutoRestoreHoursRule')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+}
+
+const resetOffShelfAutoRestoreForm = () => {
+  offShelfAutoRestoreForm.anchorId = ''
+  offShelfAutoRestoreForm.nickname = ''
+  offShelfAutoRestoreForm.autoOnShelfHours = 1
+}
+
+const openOffShelfAutoRestoreDialog = (row: AnchorListItem) => {
+  offShelfAutoRestoreForm.anchorId = String(row.id)
+  offShelfAutoRestoreForm.nickname = row.nickname || ''
+  offShelfAutoRestoreForm.autoOnShelfHours = 1
+  offShelfAutoRestoreDialogVisible.value = true
+}
+
+const submitOffShelfAutoRestore = async () => {
+  if (!offShelfAutoRestoreFormRef.value) {
+    return
+  }
+  try {
+    await offShelfAutoRestoreFormRef.value.validate()
+  } catch {
+    return
+  }
+  const hours = Number(offShelfAutoRestoreForm.autoOnShelfHours)
+  try {
+    await ElMessageBox.confirm(
+      t('pages.anchorList.offShelfAutoRestoreConfirm', {
+        id: offShelfAutoRestoreForm.anchorId,
+        hours,
+      }),
+      t('pages.anchorList.offShelfAutoRestoreDialogTitle'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+  } catch {
+    return
+  }
+  offShelfAutoRestoreSubmitting.value = true
+  try {
+    const res = await accountApi.offShelfLiveRoomWithAutoOnShelf({
+      anchorId: offShelfAutoRestoreForm.anchorId,
+      autoOnShelfHours: hours,
+    })
+    const restoreLabel = res?.restoreAt ? formatDate(res.restoreAt) : ''
+    ElMessage.success(t('pages.anchorList.offShelfAutoRestoreSuccess', {time: restoreLabel}))
+    offShelfAutoRestoreDialogVisible.value = false
+    await fetchList()
+  } catch (error) {
+    console.error('off shelf auto restore failed:', error)
+    ElMessage.error(t('pages.anchorList.offShelfAutoRestoreFailed'))
+  } finally {
+    offShelfAutoRestoreSubmitting.value = false
   }
 }
 

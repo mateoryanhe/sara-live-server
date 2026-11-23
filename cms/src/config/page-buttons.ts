@@ -274,7 +274,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'exportShortVideoAuthorSettlementLog', label: '导出短视频作者结算日志'},
     ],
     AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'onShelf', label: '上架'}, {key: 'batchOffShelf', label: '批量下架'}, {key: 'batchOnShelf', label: '批量上架'}, {key: 'batchOffShelfShowcase', label: '批量下架秀场'}, {key: 'batchOnShelfShowcase', label: '批量上架秀场'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
-    GuildAnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'onShelf', label: '上架'}, {key: 'batchOffShelf', label: '批量下架'}, {key: 'batchOnShelf', label: '批量上架'}, {key: 'batchOffShelfShowcase', label: '批量下架秀场'}, {key: 'batchOnShelfShowcase', label: '批量上架秀场'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
+    GuildAnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'offShelfAutoRestore', label: '定时恢复下架'}, {key: 'onShelf', label: '上架'}, {key: 'batchOffShelf', label: '批量下架'}, {key: 'batchOnShelf', label: '批量上架'}, {key: 'batchOffShelfShowcase', label: '批量下架秀场'}, {key: 'batchOnShelfShowcase', label: '批量上架秀场'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
     PlatformAnchorList: [
         BTN.view,
         BTN.search,

@@ -170,6 +170,7 @@ func doOffShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLi
 }
 
 func onShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLiveRoomStatusRes, error) {
+	cancelPendingAnchorAutoOnShelfForAnchor(anchorId)
 	res, err := doOnShelfLiveRoom(ctx, anchorId)
 	if err == nil {
 		RefreshRoomListCache(ctx)

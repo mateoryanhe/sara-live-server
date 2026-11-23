@@ -75,6 +75,7 @@ func Init() {
 	initCustomerServiceCMSController()               // 客服联系配置(CMS)
 	initAudienceOnlineAnchorGreetCMSController()       // 观众上线主播招呼(CMS)
 	initCustomerServiceAppController()               // 客服联系配置(App)
+	initAppSwitchAppController()                     // App 功能开关(需登录)
 	initWalletCMSController()                        // 钱包配置(CMS)
 	initFiatCurrencyCMSController()                  // 法币配置(CMS)
 	initFiatCurrencyAppController()                  // 法币配置(App,无需鉴权)

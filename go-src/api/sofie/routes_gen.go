@@ -83,6 +83,9 @@ func Init() {
 		{Path: "/unlockVideo", Handler: jsonHandler((&controller.AnchorVideoAppController{}).Unlock)},
 		{Path: "/browseVideoPrices", Handler: jsonHandler((&controller.AnchorVideoAppController{}).PriceTierList)},
 	})
+	httpserver.RegAppRouteGroup("/sofie/gates", []httpserver.AppRoute{
+		{Path: "/fetchAppGates", Handler: jsonHandler((&controller.AppSwitchAppController{}).GetAppSwitches)},
+	})
 	httpserver.RegNonAuthAppRouteGroup("/sofie/googleAuth", []httpserver.AppRoute{
 		{Path: "/fetchClientCfg", Handler: jsonHandler((&controller.FirebaseAppController{}).GetClientCfgForApp)},
 	})
@@ -207,6 +210,7 @@ func Init() {
 	httpserver.RegAppRouteGroup("/sofie/studio", []httpserver.AppRoute{
 		{Path: "/openBooth", Handler: controller.HandleCreateLiveRoom},
 		{Path: "/openDirectBooth", Handler: jsonHandler((&controller.LiveRoomAppController{}).CreateOneToOneRoom)},
+		{Path: "/uploadDirectBoothCover", Handler: controller.HandleUploadOneToOneCover},
 		{Path: "/fetchDirectBooth", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetOneToOneRoom)},
 		{Path: "/beginBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StartLive)},
 		{Path: "/endBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StopLive)},

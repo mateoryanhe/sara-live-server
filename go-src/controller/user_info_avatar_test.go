@@ -30,7 +30,7 @@ func TestParseUploadAvatarMultipartStreamsFile(t *testing.T) {
 	httpReq := httptest.NewRequest("POST", "/userInfo/uploadAvatar", &body)
 	httpReq.Header.Set("Content-Type", writer.FormDataContentType())
 	var gotData []byte
-	storedName, err := parseUploadAvatarMultipartWithUploader(
+	storedName, err := parseAppImageMultipartFileWithUploader(
 		context.Background(),
 		&ghttp.Request{Request: httpReq},
 		func(_ context.Context, part *multipart.Part, _ int64) (string, error) {
@@ -39,7 +39,7 @@ func TestParseUploadAvatarMultipartStreamsFile(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf("parseUploadAvatarMultipartWithUploader() error = %v", err)
+		t.Fatalf("parseAppImageMultipartFileWithUploader() error = %v", err)
 	}
 	if storedName != "images/avatar.jpg" {
 		t.Fatalf("storedName = %q", storedName)
@@ -61,7 +61,7 @@ func TestParseUploadAvatarMultipartRequiresFile(t *testing.T) {
 
 	httpReq := httptest.NewRequest("POST", "/userInfo/uploadAvatar", &body)
 	httpReq.Header.Set("Content-Type", writer.FormDataContentType())
-	_, err := parseUploadAvatarMultipartWithUploader(
+	_, err := parseAppImageMultipartFileWithUploader(
 		context.Background(),
 		&ghttp.Request{Request: httpReq},
 		func(context.Context, *multipart.Part, int64) (string, error) {
@@ -70,6 +70,6 @@ func TestParseUploadAvatarMultipartRequiresFile(t *testing.T) {
 		},
 	)
 	if err == nil {
-		t.Fatal("parseUploadAvatarMultipartWithUploader() expected missing file error")
+		t.Fatal("parseAppImageMultipartFileWithUploader() expected missing file error")
 	}
 }

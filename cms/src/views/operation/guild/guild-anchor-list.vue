@@ -2,6 +2,7 @@
   <AnchorListPage
       menu-title-key="GuildAnchorListManagement"
       page-permission-name="GuildAnchorListManagement"
+      :off-shelf-auto-restore="true"
       :visibility-scoped="true"
   />
 </template>

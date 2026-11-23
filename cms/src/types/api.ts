@@ -336,6 +336,20 @@ export interface SetLiveRoomStatusRes {
     status: number
 }
 
+export interface OffShelfLiveRoomWithAutoOnShelfReq {
+    anchorId: string
+    /** 1–720 小时后自动上架 */
+    autoOnShelfHours: number
+}
+
+export interface OffShelfLiveRoomWithAutoOnShelfRes {
+    success: boolean
+    taskId: string
+    status: number
+    restoreAt: string
+    restoreAtUnix: number
+}
+
 export interface BatchOffShelfShowcaseLiveRoomsRes {
     successCount: number
     failCount: number
@@ -2255,6 +2269,7 @@ export interface LiveCfg {
     gameLiveRoomEnabled: boolean
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean
+    personalAnchorAlbumEnabled: boolean
     maxAnchorPhotos: number
     maxAnchorVideos: number
     maxAnchorVideoFileSizeMB: number
@@ -2279,6 +2294,7 @@ export interface SaveLiveCfgReq {
     gameLiveRoomEnabled: boolean
     voiceChatLiveRoomEnabled: boolean
     oneToOneLiveRoomEnabled: boolean
+    personalAnchorAlbumEnabled: boolean
     maxAnchorPhotos: number
     maxAnchorVideos: number
     maxAnchorVideoFileSizeMB: number

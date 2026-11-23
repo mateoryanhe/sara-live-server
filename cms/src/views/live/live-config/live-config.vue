@@ -130,6 +130,11 @@
               <el-switch v-model="formData.voiceChatLiveRoomEnabled"/>
               <span class="form-tip">{{ t('pages.liveConfig.voiceChatLiveRoomEnabledTip') }}</span>
             </el-form-item>
+
+            <el-form-item :label="t('pages.liveConfig.personalAnchorAlbumEnabled')">
+              <el-switch v-model="formData.personalAnchorAlbumEnabled"/>
+              <span class="form-tip">{{ t('pages.liveConfig.personalAnchorAlbumEnabledTip') }}</span>
+            </el-form-item>
           </el-tab-pane>
         </el-tabs>
 
@@ -167,6 +172,7 @@ const formData = reactive({
 	gameLiveRoomEnabled: false,
 	voiceChatLiveRoomEnabled: false,
 	oneToOneLiveRoomEnabled: false,
+	personalAnchorAlbumEnabled: false,
 	audienceListRefreshSeconds: 300,
 	oneToOneDailyFreeSeconds: 30,
   liveRoomCallMinTotalRechargeUsd: 10,
@@ -218,6 +224,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.gameLiveRoomEnabled = false
 	formData.voiceChatLiveRoomEnabled = false
 	formData.oneToOneLiveRoomEnabled = false
+	formData.personalAnchorAlbumEnabled = false
 	formData.audienceGameListHidden = false
 	formData.anchorGameListHidden = false
 	formData.audienceListRefreshSeconds = 300
@@ -237,6 +244,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.gameLiveRoomEnabled = cfg.gameLiveRoomEnabled ?? false
 	formData.voiceChatLiveRoomEnabled = cfg.voiceChatLiveRoomEnabled ?? false
 	formData.oneToOneLiveRoomEnabled = cfg.oneToOneLiveRoomEnabled ?? false
+	formData.personalAnchorAlbumEnabled = cfg.personalAnchorAlbumEnabled ?? false
 	formData.audienceGameListHidden = cfg.audienceGameListHidden ?? false
 	formData.anchorGameListHidden = cfg.anchorGameListHidden ?? false
 	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
@@ -274,6 +282,7 @@ const handleSave = async () => {
 	  gameLiveRoomEnabled: formData.gameLiveRoomEnabled,
 	  voiceChatLiveRoomEnabled: formData.voiceChatLiveRoomEnabled,
 	  oneToOneLiveRoomEnabled: formData.oneToOneLiveRoomEnabled,
+	  personalAnchorAlbumEnabled: formData.personalAnchorAlbumEnabled,
 	  audienceGameListHidden: formData.audienceGameListHidden,
 	  anchorGameListHidden: formData.anchorGameListHidden,
 	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,

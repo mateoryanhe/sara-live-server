@@ -20,6 +20,7 @@ type LiveRoomAppController struct{}
 
 func initLiveRoomAppController() {
 	httpserver.RegAPIHandler(LiveRoomAppUrl, "/create", handleCreateLiveRoom)
+	httpserver.RegAPIHandler(LiveRoomAppUrl, "/uploadOneToOneCover", handleUploadOneToOneCover)
 	httpserver.RegAPI(LiveRoomAppUrl, &LiveRoomAppController{})
 }
 

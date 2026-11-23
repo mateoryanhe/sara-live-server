@@ -7,4 +7,5 @@ func Init() {
 	initServerOnlineNormalUserList()
 	initRoomTagMemory()
 	initAnchorSettlement()
+	initAnchorAutoOnShelfWatch()
 }

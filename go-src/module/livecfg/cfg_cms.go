@@ -27,6 +27,7 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 	gameLiveRoomEnabled := false
 	voiceChatLiveRoomEnabled := false
 	oneToOneLiveRoomEnabled := false
+	personalAnchorAlbumEnabled := false
 	if existing != nil {
 		videoCallTicketEnabled = existing.VideoCallTicketEnabled
 		showcaseLiveRoomEnabled = existing.ShowcaseLiveRoomEnabled
@@ -35,6 +36,7 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 		gameLiveRoomEnabled = existing.GameLiveRoomEnabled
 		voiceChatLiveRoomEnabled = existing.VoiceChatLiveRoomEnabled
 		oneToOneLiveRoomEnabled = existing.OneToOneLiveRoomEnabled
+		personalAnchorAlbumEnabled = existing.PersonalAnchorAlbumEnabled
 	}
 	if req.VideoCallTicketEnabled != nil {
 		videoCallTicketEnabled = *req.VideoCallTicketEnabled
@@ -57,6 +59,9 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 	if req.OneToOneLiveRoomEnabled != nil {
 		oneToOneLiveRoomEnabled = *req.OneToOneLiveRoomEnabled
 	}
+	if req.PersonalAnchorAlbumEnabled != nil {
+		personalAnchorAlbumEnabled = *req.PersonalAnchorAlbumEnabled
+	}
 	row := &entity.LiveCfg{
 		PaidDanmakuPrice:                req.PaidDanmakuPrice,
 		VideoCallTicketEnabled:          videoCallTicketEnabled,
@@ -66,6 +71,7 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 		GameLiveRoomEnabled:             gameLiveRoomEnabled,
 		VoiceChatLiveRoomEnabled:        voiceChatLiveRoomEnabled,
 		OneToOneLiveRoomEnabled:         oneToOneLiveRoomEnabled,
+		PersonalAnchorAlbumEnabled:      personalAnchorAlbumEnabled,
 		AudienceListRefreshSeconds:      NormalizeAudienceListRefreshSeconds(req.AudienceListRefreshSeconds),
 		OneToOneDailyFreeSeconds:        NormalizeOneToOneDailyFreeSeconds(req.OneToOneDailyFreeSeconds),
 		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(req.LiveRoomCallMinTotalRechargeUsd),
@@ -126,6 +132,7 @@ func liveCfgItemFromMemory(meta *entity.LiveCfg) *livecfgdto.LiveCfgItem {
 		GameLiveRoomEnabled:             IsGameLiveRoomEnabled(),
 		VoiceChatLiveRoomEnabled:        IsVoiceChatLiveRoomEnabled(),
 		OneToOneLiveRoomEnabled:         IsOneToOneLiveRoomEnabled(),
+		PersonalAnchorAlbumEnabled:      IsPersonalAnchorAlbumEnabled(),
 		MaxAnchorPhotos:                 GetMaxAnchorPhotos(),
 		MaxAnchorVideos:                 GetMaxAnchorVideos(),
 		MaxAnchorVideoFileSizeMB:        GetMaxAnchorVideoFileSizeMB(),

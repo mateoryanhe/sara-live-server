@@ -35,6 +35,7 @@
 | `profile` | 上传头像 | 需要登录 | `POST /userInfo/uploadAvatar` | `POST /sofie/profile/changePhoto` |
 | `studio` | 创建/更新直播间 | 需要登录 | `POST /liveRoom/create` | `POST /sofie/studio/openBooth` |
 | `studio` | 开通1v1房间 | 需要登录 | `POST /liveRoom/createOneToOne` | `POST /sofie/studio/openDirectBooth` |
+| `studio` | 上传1v1封面 | 需要登录 | `POST /liveRoom/uploadOneToOneCover` | `POST /sofie/studio/uploadDirectBoothCover` |
 | `studio` | 查询1v1房间配置 | 需要登录 | `POST /liveRoom/getOneToOne` | `POST /sofie/studio/fetchDirectBooth` |
 | `studio` | 开播 | 需要登录 | `POST /liveRoom/startLive` | `POST /sofie/studio/beginBroadcast` |
 | `studio` | 下播 | 需要登录 | `POST /liveRoom/stopLive` | `POST /sofie/studio/endBroadcast` |
@@ -197,6 +198,7 @@
 | `release` | App版本查询 | 免登录 | `POST /appVersion/appVersionQuery` | `POST /sofie/release/lookupBuild` |
 | `release` | 查询APK下载链接 | 免登录 | `POST /shareAppDownload/getApkDownloadUrl` | `POST /sofie/release/lookupApkDownload` |
 | `help` | 客服配置 | 免登录 | `POST /customerService/cfg` | `POST /sofie/help/fetchContact` |
+| `gates` | App功能开关 | 需要登录 | `POST /appSwitch/getAppSwitches` | `POST /sofie/gates/fetchAppGates` |
 | `money` | 法币列表 | 免登录 | `POST /fiatCurrency/fiatCurrencyListForApp` | `POST /sofie/money/browseFiats` |
 | `googleAuth` | Firebase客户端配置 | 免登录 | `POST /firebase/getClientCfgForApp` | `POST /sofie/googleAuth/fetchClientCfg` |
 | `attribution` | AppsFlyer配置 | 免登录 | `POST /appsFlyer/getCfgForApp` | `POST /sofie/attribution/fetchAppsFlyerCfg` |

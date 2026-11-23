@@ -30,6 +30,7 @@ type liveCfgSnapshot struct {
 	GameLiveRoomEnabled             bool
 	VoiceChatLiveRoomEnabled        bool
 	OneToOneLiveRoomEnabled         bool
+	PersonalAnchorAlbumEnabled      bool
 	MaxAnchorPhotos                 uint32
 	MaxAnchorVideos                 uint32
 	MaxAnchorVideoFileSizeMB        uint32
@@ -88,6 +89,7 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		GameLiveRoomEnabled:             row.GameLiveRoomEnabled,
 		VoiceChatLiveRoomEnabled:        row.VoiceChatLiveRoomEnabled,
 		OneToOneLiveRoomEnabled:         row.OneToOneLiveRoomEnabled,
+		PersonalAnchorAlbumEnabled:      row.PersonalAnchorAlbumEnabled,
 		MaxAnchorPhotos:                 NormalizeMaxAnchorPhotos(row.MaxAnchorPhotos),
 		MaxAnchorVideos:                 NormalizeMaxAnchorVideos(row.MaxAnchorVideos),
 		MaxAnchorVideoFileSizeMB:        NormalizeMaxAnchorVideoFileSizeMB(row.MaxAnchorVideoFileSizeMB),
@@ -196,6 +198,11 @@ func IsVoiceChatLiveRoomEnabled() bool {
 // IsOneToOneLiveRoomEnabled App 1v1 总开关：1v1 房间页/入口及直播间 allowCallIcon；未配置时默认关闭。
 func IsOneToOneLiveRoomEnabled() bool {
 	return getLiveCfgCache().OneToOneLiveRoomEnabled
+}
+
+// IsPersonalAnchorAlbumEnabled App 是否展示个人主播相册入口；未配置时默认关闭。
+func IsPersonalAnchorAlbumEnabled() bool {
+	return getLiveCfgCache().PersonalAnchorAlbumEnabled
 }
 
 // GetMaxAnchorPhotos 主播相册照片上限；未配置或为 0 时默认 100。

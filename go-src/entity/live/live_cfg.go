@@ -24,6 +24,7 @@ type LiveCfg struct {
 	GameLiveRoomEnabled             bool    `gorm:"default:0;comment:App是否展示游戏直播间入口(category=2)" json:"gameLiveRoomEnabled"`
 	VoiceChatLiveRoomEnabled        bool    `gorm:"default:0;comment:App是否展示语聊房入口(category=5)" json:"voiceChatLiveRoomEnabled"`
 	OneToOneLiveRoomEnabled         bool    `gorm:"default:0;comment:App是否展示1v1房间页面/入口" json:"oneToOneLiveRoomEnabled"`
+	PersonalAnchorAlbumEnabled      bool    `gorm:"default:0;comment:App是否展示个人主播相册入口" json:"personalAnchorAlbumEnabled"`
 	MaxAnchorPhotos                 uint32  `gorm:"default:100;comment:主播相册照片上限" json:"maxAnchorPhotos"`
 	MaxAnchorVideos                 uint32  `gorm:"default:100;comment:主播相册视频上限" json:"maxAnchorVideos"`
 	MaxAnchorVideoFileSizeMB        uint32  `gorm:"default:100;comment:主播相册单个视频大小上限(MB)" json:"maxAnchorVideoFileSizeMB"`

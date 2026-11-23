@@ -23,6 +23,7 @@ func MergeOpenApiRawHandlerRoutes(doc map[string]any) error {
 	schemas := ensureOpenAPIComponentSchemas(doc)
 	mergeCreateLiveRoomOpenAPI(paths, schemas)
 	mergeUploadAvatarOpenAPI(paths, schemas)
+	mergeUploadOneToOneCoverOpenAPI(paths, schemas)
 	mergeUploadAnchorPhotoOpenAPI(paths, schemas)
 	mergeUploadAnchorVideoOpenAPI(paths, schemas)
 	mergeAppPublishShortVideoOpenAPI(paths, schemas)
@@ -102,6 +103,33 @@ func mergeUploadAvatarOpenAPI(paths, schemas map[string]any) {
 			[]string{"用户基础信息"},
 			"服务端 MultipartReader 流式解析; form 字段名须为 file.",
 			reqName,
+			resName,
+		),
+	}
+}
+
+func mergeUploadOneToOneCoverOpenAPI(paths, schemas map[string]any) {
+	resName := openAPISchemaLiveRoomDTO + "UploadOneToOneCoverRes"
+	schemas["UploadOneToOneCoverReq"] = map[string]any{
+		"type":     "object",
+		"required": []any{"file"},
+		"properties": map[string]any{
+			"file": openAPIBinaryProp("1v1封面图片"),
+		},
+	}
+	schemas[resName] = map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"url":   openAPIStringProp("1v1封面完整URL"),
+			"cover": openAPIStringProp("1v1封面对象名(用于 createOneToOne)"),
+		},
+	}
+	paths["/liveRoom/uploadOneToOneCover"] = map[string]any{
+		"post": openAPIMultipartPostOp(
+			"上传1v1房间封面(纯上传)",
+			[]string{"直播间"},
+			"仅主播;不写入头像/相册; form 字段名须为 file; 返回 url 与 cover 对象名.",
+			"UploadOneToOneCoverReq",
 			resName,
 		),
 	}

@@ -61,11 +61,9 @@ func trySendAudienceOnlineAnchorGreets(ctx context.Context, audienceId uint64, c
 
 	anchorIds := selectGreetAnchorIds(cfg)
 	intervalMin, intervalMax := cfg.EffectiveGreetIntervalSec()
-	for i, anchorId := range anchorIds {
-		if i > 0 {
-			if !sleepCtx(ctx, randomQueueDelay(intervalMin, intervalMax)) {
-				return
-			}
+	for _, anchorId := range anchorIds {
+		if !sleepCtx(ctx, randomQueueDelay(intervalMin, intervalMax)) {
+			return
 		}
 		if anchorId == 0 || anchorId == audienceId {
 			continue
@@ -73,7 +71,11 @@ func trySendAudienceOnlineAnchorGreets(ctx context.Context, audienceId uint64, c
 		if !push.IsOnline(anchorId) {
 			continue
 		}
-		content := pickRandomGreetContent(contents)
+		plain := pickRandomGreetContent(contents)
+		if plain == "" {
+			continue
+		}
+		content := message.BuildPrivateTextMessageContent(anchorId, audienceId, plain)
 		if content == "" {
 			continue
 		}

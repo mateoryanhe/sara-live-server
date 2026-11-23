@@ -133,6 +133,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildAnchorListManagement:viewUserDetail': '/account/getUserDetail',
     'GuildAnchorListManagement:viewGuildDetail': '/guild/getGuildDetail',
     'GuildAnchorListManagement:offShelf': '/account/setLiveRoomStatus',
+    'GuildAnchorListManagement:offShelfAutoRestore': '/account/offShelfLiveRoomWithAutoOnShelf',
     'GuildAnchorListManagement:onShelf': '/account/setLiveRoomStatus',
     'GuildAnchorListManagement:batchOffShelf': '/account/setLiveRoomStatus',
     'GuildAnchorListManagement:batchOnShelf': '/account/setLiveRoomStatus',

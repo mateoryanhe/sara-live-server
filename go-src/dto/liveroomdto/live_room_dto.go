@@ -40,6 +40,12 @@ type CreateOneToOneRoomRes struct {
 	RoomId string `json:"roomId" dc:"房间ID(同主播用户ID)"`
 }
 
+// UploadOneToOneCoverRes App 上传 1v1 封面(纯上传,不写头像/相册)
+type UploadOneToOneCoverRes struct {
+	Url   string `json:"url" dc:"1v1封面完整URL"`
+	Cover string `json:"cover" dc:"1v1封面对象名(传给 createOneToOne 的 cover)"`
+}
+
 // GetOneToOneRoomReq App 按主播ID查询 1v1 房间池配置
 type GetOneToOneRoomReq struct {
 	g.Meta   `path:"/getOneToOne" method:"post" summary:"查询1v1房间配置" tags:"直播间"`

@@ -55,6 +55,21 @@ type SetLiveRoomStatusRes struct {
 	Status  uint8 `json:"status" dc:"当前状态(0-下架,1-上架)"`
 }
 
+// OffShelfLiveRoomWithAutoOnShelfReq CMS 下架主播并在指定小时后自动上架
+type OffShelfLiveRoomWithAutoOnShelfReq struct {
+	g.Meta           `path:"/offShelfLiveRoomWithAutoOnShelf" method:"post" summary:"下架主播并定时自动上架" tags:"账号"`
+	AnchorId         uint64 `json:"anchorId" v:"required|min:1#主播ID不能为空|主播ID非法" dc:"主播账号ID"`
+	AutoOnShelfHours uint32 `json:"autoOnShelfHours" v:"required|between:1,720#自动上架小时数不能为空|自动上架小时数需在1到720之间" dc:"多少小时后自动上架"`
+}
+
+type OffShelfLiveRoomWithAutoOnShelfRes struct {
+	Success       bool   `json:"success" dc:"是否成功"`
+	TaskId        uint64 `json:"taskId,string" dc:"自动上架任务ID"`
+	Status        uint8  `json:"status" dc:"当前直播间状态(0下架)"`
+	RestoreAt     string `json:"restoreAt" dc:"计划自动上架时间(RFC3339)"`
+	RestoreAtUnix int64  `json:"restoreAtUnix" dc:"计划自动上架时间(毫秒)"`
+}
+
 // BatchOffShelfShowcaseLiveRoomsReq CMS一键批量下架秀场直播间(category=1)
 type BatchOffShelfShowcaseLiveRoomsReq struct {
 	g.Meta `path:"/batchOffShelfShowcaseLiveRooms" method:"post" summary:"批量下架秀场直播间(category=1)" tags:"账号"`

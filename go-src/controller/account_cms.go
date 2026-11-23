@@ -37,6 +37,11 @@ func (a *AccountController) SetLiveRoomStatus(ctx context.Context, req *accountd
 	return liveroom.SetLiveRoomStatus(ctx, req)
 }
 
+// OffShelfLiveRoomWithAutoOnShelf CMS下架主播并定时自动上架
+func (a *AccountController) OffShelfLiveRoomWithAutoOnShelf(ctx context.Context, req *accountdto.OffShelfLiveRoomWithAutoOnShelfReq) (*accountdto.OffShelfLiveRoomWithAutoOnShelfRes, error) {
+	return liveroom.OffShelfLiveRoomWithAutoOnShelf(ctx, req)
+}
+
 // BatchOffShelfShowcaseLiveRooms CMS一键批量下架秀场直播间(category=1)
 func (a *AccountController) BatchOffShelfShowcaseLiveRooms(ctx context.Context, req *accountdto.BatchOffShelfShowcaseLiveRoomsReq) (*accountdto.BatchOffShelfShowcaseLiveRoomsRes, error) {
 	return liveroom.BatchOffShelfShowcaseLiveRooms(ctx, req)
