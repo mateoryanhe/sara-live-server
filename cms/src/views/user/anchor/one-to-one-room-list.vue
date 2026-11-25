@@ -79,32 +79,42 @@
         <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="170">
           <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="180">
+        <el-table-column fixed="right" :label="t('common.actions')" min-width="220">
           <template #default="{ row }">
-            <el-button
-                v-if="can('edit')"
-                link
-                type="primary"
-                @click="openEdit(row)"
-            >
-              {{ t('common.edit') }}
-            </el-button>
-            <el-button
-                v-if="row.status !== 1 && can('onShelf')"
-                link
-                type="success"
-                @click="handleSetStatus(row, 1)"
-            >
-              {{ t('common.onShelf') }}
-            </el-button>
-            <el-button
-                v-if="row.status === 1 && can('offShelf')"
-                link
-                type="warning"
-                @click="handleSetStatus(row, 0)"
-            >
-              {{ t('common.offShelf') }}
-            </el-button>
+            <div class="action-links">
+              <el-button
+                  v-if="can('edit')"
+                  link
+                  type="primary"
+                  @click="openEdit(row)"
+              >
+                {{ t('common.edit') }}
+              </el-button>
+              <el-button
+                  v-if="row.status !== 1 && can('onShelf')"
+                  link
+                  type="success"
+                  @click="handleSetStatus(row, 1)"
+              >
+                {{ t('common.onShelf') }}
+              </el-button>
+              <el-button
+                  v-if="row.status === 1 && can('offShelf')"
+                  link
+                  type="warning"
+                  @click="handleSetStatus(row, 0)"
+              >
+                {{ t('common.offShelf') }}
+              </el-button>
+              <el-button
+                  v-if="row.liveRoomStatus === 1 && can('offShelfAutoRestore')"
+                  link
+                  type="danger"
+                  @click="openLiveRoomTimedOffShelf(row)"
+              >
+                {{ t('pages.oneToOneRoomList.offShelfAutoRestore') }}
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -121,6 +131,50 @@
         />
       </div>
     </el-card>
+
+    <el-dialog
+        v-model="liveRoomTimedOffShelfVisible"
+        :close-on-click-modal="false"
+        destroy-on-close
+        :title="t('pages.oneToOneRoomList.offShelfAutoRestoreDialogTitle')"
+        width="480px"
+        @closed="resetLiveRoomTimedOffShelfForm"
+    >
+      <el-form
+          ref="liveRoomTimedOffShelfFormRef"
+          :model="liveRoomTimedOffShelfForm"
+          :rules="liveRoomTimedOffShelfRules"
+          label-width="120px"
+      >
+        <el-form-item :label="t('pages.oneToOneRoomList.userId')">
+          <el-input v-model="liveRoomTimedOffShelfForm.anchorId" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('common.nickname')">
+          <el-input v-model="liveRoomTimedOffShelfForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesLabel')" prop="autoOnShelfMinutes">
+          <el-input-number
+              v-model="liveRoomTimedOffShelfForm.autoOnShelfMinutes"
+              :max="43200"
+              :min="1"
+              :step="1"
+              style="width: 160px"
+          />
+        </el-form-item>
+        <el-alert
+            :closable="false"
+            show-icon
+            :title="t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesHint')"
+            type="info"
+        />
+      </el-form>
+      <template #footer>
+        <el-button @click="liveRoomTimedOffShelfVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="liveRoomTimedOffShelfSubmitting" type="warning" @click="submitLiveRoomTimedOffShelf">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog v-model="formVisible" :title="dialogTitle" width="480px">
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
@@ -152,7 +206,7 @@
 import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
-import {oneToOneRoomApi} from '@/api'
+import {accountApi, oneToOneRoomApi} from '@/api'
 import type {OneToOneRoomItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
@@ -279,6 +333,88 @@ const submitForm = async () => {
   }
 }
 
+const liveRoomTimedOffShelfVisible = ref(false)
+const liveRoomTimedOffShelfSubmitting = ref(false)
+const liveRoomTimedOffShelfFormRef = ref<FormInstance>()
+const liveRoomTimedOffShelfForm = reactive({
+  anchorId: '',
+  nickname: '',
+  autoOnShelfMinutes: 60,
+})
+const liveRoomTimedOffShelfRules: FormRules = {
+  autoOnShelfMinutes: [
+    {required: true, message: () => t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesRule'), trigger: 'blur'},
+    {
+      validator: (_rule, value, callback) => {
+        const n = Number(value)
+        if (!Number.isFinite(n) || n < 1 || n > 43200) {
+          callback(new Error(t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesRule')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+}
+
+const resetLiveRoomTimedOffShelfForm = () => {
+  liveRoomTimedOffShelfForm.anchorId = ''
+  liveRoomTimedOffShelfForm.nickname = ''
+  liveRoomTimedOffShelfForm.autoOnShelfMinutes = 60
+}
+
+const openLiveRoomTimedOffShelf = (row: OneToOneRoomItem) => {
+  if (row.liveRoomStatus !== 1) {
+    ElMessage.warning(t('pages.oneToOneRoomList.liveRoomNotOnShelf'))
+    return
+  }
+  liveRoomTimedOffShelfForm.anchorId = row.userId
+  liveRoomTimedOffShelfForm.nickname = row.nickname || ''
+  liveRoomTimedOffShelfForm.autoOnShelfMinutes = 60
+  liveRoomTimedOffShelfVisible.value = true
+}
+
+const submitLiveRoomTimedOffShelf = async () => {
+  if (!liveRoomTimedOffShelfFormRef.value) {
+    return
+  }
+  try {
+    await liveRoomTimedOffShelfFormRef.value.validate()
+  } catch {
+    return
+  }
+  const minutes = Number(liveRoomTimedOffShelfForm.autoOnShelfMinutes)
+  try {
+    await ElMessageBox.confirm(
+        t('pages.oneToOneRoomList.offShelfAutoRestoreConfirm', {
+          id: liveRoomTimedOffShelfForm.anchorId,
+          minutes,
+        }),
+        t('pages.oneToOneRoomList.offShelfAutoRestoreDialogTitle'),
+        {confirmButtonText: t('common.confirm'), cancelButtonText: t('common.cancel'), type: 'warning'},
+    )
+  } catch {
+    return
+  }
+  liveRoomTimedOffShelfSubmitting.value = true
+  try {
+    const res = await accountApi.offShelfLiveRoomWithAutoOnShelf({
+      anchorId: liveRoomTimedOffShelfForm.anchorId,
+      autoOnShelfMinutes: minutes,
+    })
+    const restoreLabel = res?.restoreAt ? formatDate(res.restoreAt) : ''
+    ElMessage.success(t('pages.oneToOneRoomList.offShelfAutoRestoreSuccess', {time: restoreLabel}))
+    liveRoomTimedOffShelfVisible.value = false
+    await fetchList()
+  } catch (error) {
+    console.error('live room timed off shelf failed:', error)
+    ElMessage.error(t('pages.oneToOneRoomList.offShelfAutoRestoreFailed'))
+  } finally {
+    liveRoomTimedOffShelfSubmitting.value = false
+  }
+}
+
 const handleSetStatus = async (row: OneToOneRoomItem, status: number) => {
   const confirmKey = status === 1 ? 'onShelfConfirm' : 'offShelfConfirm'
   const successKey = status === 1 ? 'onShelfSuccess' : 'offShelfSuccess'
@@ -313,5 +449,16 @@ onMounted(fetchList)
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+.action-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: center;
+}
+
+.action-links :deep(.el-button + .el-button) {
+  margin-left: 0;
 }
 </style>

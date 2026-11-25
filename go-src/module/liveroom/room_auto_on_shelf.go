@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	anchorAutoOnShelfMinHours uint32 = 1
-	anchorAutoOnShelfMaxHours uint32 = 720 // 30 天
+	anchorAutoOnShelfMinMinutes uint32 = 1
+	anchorAutoOnShelfMaxMinutes uint32 = 43200 // 30 天
 )
 
 var anchorAutoOnShelfEntries sync.Map // anchorId uint64 -> *gtimer.Entry
@@ -43,13 +43,13 @@ func restorePendingAnchorAutoOnShelfTasks() {
 	}
 }
 
-// OffShelfLiveRoomWithAutoOnShelf CMS 下架主播并在指定小时后自动上架
+// OffShelfLiveRoomWithAutoOnShelf CMS 下架主播并在指定分钟后自动上架
 func OffShelfLiveRoomWithAutoOnShelf(ctx context.Context, req *accountdto.OffShelfLiveRoomWithAutoOnShelfReq) (*accountdto.OffShelfLiveRoomWithAutoOnShelfRes, error) {
 	if req.AnchorId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	hours := req.AutoOnShelfHours
-	if hours < anchorAutoOnShelfMinHours || hours > anchorAutoOnShelfMaxHours {
+	minutes := req.AutoOnShelfMinutes
+	if minutes < anchorAutoOnShelfMinMinutes || minutes > anchorAutoOnShelfMaxMinutes {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
@@ -65,13 +65,13 @@ func OffShelfLiveRoomWithAutoOnShelf(ctx context.Context, req *accountdto.OffShe
 	}
 	RefreshRoomListCache(ctx)
 
-	restoreAt := now.Add(time.Duration(hours) * time.Hour)
+	restoreAt := now.Add(time.Duration(minutes) * time.Minute)
 	task := &entity.AnchorAutoOnShelfTask{}
 	task.ID = snowflake.GetId()
 	task.CreatedAt = now
 	task.UpdatedAt = now
 	task.AnchorId = req.AnchorId
-	task.OffShelfHours = hours
+	task.OffShelfMinutes = minutes
 	task.OffShelfAt = now
 	task.RestoreAt = restoreAt
 	task.Status = entity.AnchorAutoOnShelfTaskStatusPending

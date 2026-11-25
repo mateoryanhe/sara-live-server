@@ -313,7 +313,7 @@
                       v-if="offShelfAutoRestore && can('offShelfAutoRestore') && Number(row.status) === 1"
                       command="offShelfAutoRestore"
                   >
-                    {{ t('pages.anchorList.offShelfAutoRestore') }}
+                    {{ t('pages.oneToOneRoomList.offShelfAutoRestore') }}
                   </el-dropdown-item>
                   <el-dropdown-item
                       :divided="can('uploadRoomCover') || can('offShelf') || (offShelfAutoRestore && can('offShelfAutoRestore'))"
@@ -453,7 +453,7 @@
         v-model="offShelfAutoRestoreDialogVisible"
         :close-on-click-modal="false"
         destroy-on-close
-        :title="t('pages.anchorList.offShelfAutoRestoreDialogTitle')"
+        :title="t('pages.oneToOneRoomList.offShelfAutoRestoreDialogTitle')"
         width="480px"
         @closed="resetOffShelfAutoRestoreForm"
     >
@@ -461,7 +461,7 @@
           ref="offShelfAutoRestoreFormRef"
           :model="offShelfAutoRestoreForm"
           :rules="offShelfAutoRestoreRules"
-          label-width="120px"
+          label-width="140px"
       >
         <el-form-item :label="t('pages.anchorList.anchorId')">
           <el-input v-model="offShelfAutoRestoreForm.anchorId" disabled/>
@@ -469,19 +469,19 @@
         <el-form-item :label="t('common.nickname')">
           <el-input v-model="offShelfAutoRestoreForm.nickname" disabled/>
         </el-form-item>
-        <el-form-item :label="t('pages.anchorList.offShelfAutoRestoreHoursLabel')" prop="autoOnShelfHours">
+        <el-form-item :label="t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesLabel')" prop="autoOnShelfMinutes">
           <el-input-number
-              v-model="offShelfAutoRestoreForm.autoOnShelfHours"
-              :max="720"
+              v-model="offShelfAutoRestoreForm.autoOnShelfMinutes"
+              :max="43200"
               :min="1"
               :step="1"
-              style="width: 180px"
+              style="width: 160px"
           />
         </el-form-item>
         <el-alert
             :closable="false"
             show-icon
-            :title="t('pages.anchorList.offShelfAutoRestoreHoursHint')"
+            :title="t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesHint')"
             type="info"
         />
       </el-form>
@@ -1204,16 +1204,16 @@ const offShelfAutoRestoreFormRef = ref<InstanceType<typeof ElForm>>()
 const offShelfAutoRestoreForm = reactive({
   anchorId: '',
   nickname: '',
-  autoOnShelfHours: 1,
+  autoOnShelfMinutes: 60,
 })
 const offShelfAutoRestoreRules: FormRules = {
-  autoOnShelfHours: [
-    {required: true, message: () => t('pages.anchorList.offShelfAutoRestoreHoursRule'), trigger: 'blur'},
+  autoOnShelfMinutes: [
+    {required: true, message: () => t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesRule'), trigger: 'blur'},
     {
       validator: (_rule, value, callback) => {
         const n = Number(value)
-        if (!Number.isFinite(n) || n < 1 || n > 720) {
-          callback(new Error(t('pages.anchorList.offShelfAutoRestoreHoursRule')))
+        if (!Number.isFinite(n) || n < 1 || n > 43200) {
+          callback(new Error(t('pages.oneToOneRoomList.offShelfAutoRestoreMinutesRule')))
           return
         }
         callback()
@@ -1226,13 +1226,17 @@ const offShelfAutoRestoreRules: FormRules = {
 const resetOffShelfAutoRestoreForm = () => {
   offShelfAutoRestoreForm.anchorId = ''
   offShelfAutoRestoreForm.nickname = ''
-  offShelfAutoRestoreForm.autoOnShelfHours = 1
+  offShelfAutoRestoreForm.autoOnShelfMinutes = 60
 }
 
 const openOffShelfAutoRestoreDialog = (row: AnchorListItem) => {
+  if (Number(row.status) !== 1) {
+    ElMessage.warning(t('pages.oneToOneRoomList.liveRoomNotOnShelf'))
+    return
+  }
   offShelfAutoRestoreForm.anchorId = String(row.id)
   offShelfAutoRestoreForm.nickname = row.nickname || ''
-  offShelfAutoRestoreForm.autoOnShelfHours = 1
+  offShelfAutoRestoreForm.autoOnShelfMinutes = 60
   offShelfAutoRestoreDialogVisible.value = true
 }
 
@@ -1245,19 +1249,19 @@ const submitOffShelfAutoRestore = async () => {
   } catch {
     return
   }
-  const hours = Number(offShelfAutoRestoreForm.autoOnShelfHours)
+  const minutes = Number(offShelfAutoRestoreForm.autoOnShelfMinutes)
   try {
     await ElMessageBox.confirm(
-      t('pages.anchorList.offShelfAutoRestoreConfirm', {
-        id: offShelfAutoRestoreForm.anchorId,
-        hours,
-      }),
-      t('pages.anchorList.offShelfAutoRestoreDialogTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning',
-      },
+        t('pages.oneToOneRoomList.offShelfAutoRestoreConfirm', {
+          id: offShelfAutoRestoreForm.anchorId,
+          minutes,
+        }),
+        t('pages.oneToOneRoomList.offShelfAutoRestoreDialogTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
     )
   } catch {
     return
@@ -1266,15 +1270,15 @@ const submitOffShelfAutoRestore = async () => {
   try {
     const res = await accountApi.offShelfLiveRoomWithAutoOnShelf({
       anchorId: offShelfAutoRestoreForm.anchorId,
-      autoOnShelfHours: hours,
+      autoOnShelfMinutes: minutes,
     })
     const restoreLabel = res?.restoreAt ? formatDate(res.restoreAt) : ''
-    ElMessage.success(t('pages.anchorList.offShelfAutoRestoreSuccess', {time: restoreLabel}))
+    ElMessage.success(t('pages.oneToOneRoomList.offShelfAutoRestoreSuccess', {time: restoreLabel}))
     offShelfAutoRestoreDialogVisible.value = false
     await fetchList()
   } catch (error) {
     console.error('off shelf auto restore failed:', error)
-    ElMessage.error(t('pages.anchorList.offShelfAutoRestoreFailed'))
+    ElMessage.error(t('pages.oneToOneRoomList.offShelfAutoRestoreFailed'))
   } finally {
     offShelfAutoRestoreSubmitting.value = false
   }

@@ -342,8 +342,8 @@ export interface SetLiveRoomStatusRes {
 
 export interface OffShelfLiveRoomWithAutoOnShelfReq {
     anchorId: string
-    /** 1–720 小时后自动上架 */
-    autoOnShelfHours: number
+    /** 1–43200 分钟后自动上架 */
+    autoOnShelfMinutes: number
 }
 
 export interface OffShelfLiveRoomWithAutoOnShelfRes {

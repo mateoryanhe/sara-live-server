@@ -29,6 +29,15 @@ const zh = {
   onShelfSuccess: '上架成功',
   offShelfSuccess: '下架成功',
   statusFailed: '更新状态失败',
+  offShelfAutoRestore: '直播间定时下架',
+  offShelfAutoRestoreDialogTitle: '直播间定时下架',
+  offShelfAutoRestoreMinutesLabel: '自动上架时间（分钟）',
+  offShelfAutoRestoreMinutesHint: '下架直播间后，将在指定分钟数后自动重新上架（1–43200 分钟）。',
+  offShelfAutoRestoreMinutesRule: '请输入 1 到 43200 之间的分钟数',
+  offShelfAutoRestoreConfirm: '确定下架主播 {id} 的直播间，并在 {minutes} 分钟后自动上架吗？',
+  offShelfAutoRestoreSuccess: '直播间已下架，计划于 {time} 自动上架',
+  offShelfAutoRestoreFailed: '直播间定时下架失败',
+  liveRoomNotOnShelf: '直播间已下架，无需重复操作',
 } as const
 
 const en: Record<keyof typeof zh, string> = {
@@ -60,6 +69,15 @@ const en: Record<keyof typeof zh, string> = {
   onShelfSuccess: 'Published successfully',
   offShelfSuccess: 'Unpublished successfully',
   statusFailed: 'Failed to update status',
+  offShelfAutoRestore: 'Timed live-room unpublish',
+  offShelfAutoRestoreDialogTitle: 'Timed live-room unpublish',
+  offShelfAutoRestoreMinutesLabel: 'Auto restore after (minutes)',
+  offShelfAutoRestoreMinutesHint: 'Unpublishes the live room and restores it after the given minutes (1–43200).',
+  offShelfAutoRestoreMinutesRule: 'Enter minutes between 1 and 43200',
+  offShelfAutoRestoreConfirm: 'Unpublish live room for anchor {id} and auto restore after {minutes} minute(s)?',
+  offShelfAutoRestoreSuccess: 'Live room unpublished. Scheduled restore at {time}',
+  offShelfAutoRestoreFailed: 'Timed live-room unpublish failed',
+  liveRoomNotOnShelf: 'Live room is already unpublished',
 }
 
 export const oneToOneRoomListMessages = definePageMessagesFromEn(zh, en)

@@ -19,7 +19,7 @@ const (
 
 const (
 	AnchorAutoOnShelfTaskAnchorId      db.TbCol = "anchor_id"
-	AnchorAutoOnShelfTaskOffShelfHours db.TbCol = "off_shelf_hours"
+	AnchorAutoOnShelfTaskOffShelfMinutes db.TbCol = "off_shelf_minutes"
 	AnchorAutoOnShelfTaskOffShelfAt    db.TbCol = "off_shelf_at"
 	AnchorAutoOnShelfTaskRestoreAt     db.TbCol = "restore_at"
 	AnchorAutoOnShelfTaskStatus        db.TbCol = "status"
@@ -31,7 +31,7 @@ const (
 type AnchorAutoOnShelfTask struct {
 	migrate.OneModel
 	AnchorId      uint64     `gorm:"index:idx_anchor_auto_on_shelf_anchor_status,priority:1;default:0;comment:主播用户ID" json:"anchorId"`
-	OffShelfHours uint32     `gorm:"default:0;comment:计划下架时长(小时)" json:"offShelfHours"`
+	OffShelfMinutes uint32   `gorm:"default:0;comment:计划下架时长(分钟)" json:"offShelfMinutes"`
 	OffShelfAt    time.Time  `gorm:"comment:下架时间" json:"offShelfAt"`
 	RestoreAt     time.Time  `gorm:"index;comment:计划自动上架时间" json:"restoreAt"`
 	Status        uint8      `gorm:"index:idx_anchor_auto_on_shelf_anchor_status,priority:2;default:0;comment:状态(0待执行,1已完成,2已取消)" json:"status"`
