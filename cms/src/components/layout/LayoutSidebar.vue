@@ -605,7 +605,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement') || hasMenuPermission('ApkPromotionChannelListManagement') || hasMenuPermission('ApkPromotionChannelDailyStatManagement') || hasMenuPermission('H5AppPromotionDailyStatManagement') || hasMenuPermission('PromotionInviteLogListManagement') || hasMenuPermission('PromotionShareAppDownloadCfgManagement')"
+            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement') || hasMenuPermission('ApkPromotionChannelListManagement') || hasMenuPermission('ApkPromotionChannelDailyStatManagement') || hasMenuPermission('H5AppPromotionDailyStatManagement') || hasMenuPermission('PromotionInviteLogListManagement') || hasMenuPermission('PromotionShareAppDownloadCfgManagement') || hasMenuPermission('PromotionSofieShareAppDownloadCfgManagement')"
             index="/promotion">
           <template #title>
             <el-icon>
@@ -654,6 +654,12 @@ const hasMenuPermission = (moduleName: string) => {
               <Link/>
             </el-icon>
             <span>{{ t('menu.PromotionShareAppDownloadCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PromotionSofieShareAppDownloadCfgManagement')" index="/promotion/sofie-share-app-download-cfg">
+            <el-icon>
+              <Link/>
+            </el-icon>
+            <span>{{ t('menu.PromotionSofieShareAppDownloadCfgManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

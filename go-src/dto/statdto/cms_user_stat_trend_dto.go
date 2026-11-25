@@ -18,6 +18,8 @@ type CMSUserStatTrendPoint struct {
 	RegisterUserCount       uint64            `json:"registerUserCount"       dc:"新注册用户数"`
 	AppDeviceRechargeAmount float64           `json:"appDeviceRechargeAmount" dc:"App用户充值(USD;注册X-Platform=android/ios)"`
 	H5DeviceRechargeAmount  float64           `json:"h5DeviceRechargeAmount"  dc:"H5用户充值(USD;注册X-Platform=web)"`
+	GoogleRechargeAmount    float64           `json:"googleRechargeAmount"    dc:"Google Play充值入账(USD)"`
+	HaiPayRechargeAmount    float64           `json:"haiPayRechargeAmount"    dc:"HaiPay渠道代收充值入账(USD)"`
 	AppDeviceLoginCount     uint64            `json:"appDeviceLoginCount"     dc:"App用户登录人数(去重;注册X-Platform=android/ios)"`
 	H5DeviceLoginCount      uint64            `json:"h5DeviceLoginCount"      dc:"H5用户登录人数(去重;注册X-Platform=web)"`
 	BarMetrics              map[string]uint64 `json:"barMetrics"              dc:"柱形图指标(见 UserStatBarMetric*)"`

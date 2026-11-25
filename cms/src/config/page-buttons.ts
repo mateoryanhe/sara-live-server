@@ -133,6 +133,7 @@ const CONFIG_PAGES = new Set([
     'FirstRechargeActivityManagement',
     'InviteRechargeRewardManagement',
     'PromotionShareAppDownloadCfgManagement',
+    'PromotionSofieShareAppDownloadCfgManagement',
 ])
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
@@ -290,7 +291,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'batchResetUnsettledIncome', label: '批量重置未结算收益'},
     ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
-    OneToOneRoomManagement: [BTN.view, BTN.search, BTN.create, BTN.edit, {key: 'onShelf', label: '上架'}, {key: 'offShelf', label: '下架'}],
+    OneToOneRoomManagement: [BTN.view, BTN.search, BTN.create, BTN.edit, {key: 'onShelf', label: '上架'}, {key: 'offShelf', label: '下架'}, {key: 'offShelfAutoRestore', label: '定时恢复下架'}],
     BotAnchorManagement: [
         BTN.view,
         BTN.search,

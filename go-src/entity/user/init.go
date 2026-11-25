@@ -22,6 +22,7 @@ func Init() {
 	initPrivacyPolicyCfg()
 	initSofiePrivacyPolicyCfg()
 	initShareAppDownloadCfg()
+	initSofieShareAppDownloadCfg()
 	initAppToken()
 	initUserMaxId()
 	initUserPayoutInfo()

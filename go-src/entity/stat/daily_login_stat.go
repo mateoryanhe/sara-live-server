@@ -20,6 +20,8 @@ const (
 	DailyLoginStatCoinMerchantRechargeAmount db.TbCol = "coin_merchant_recharge_amount"
 	DailyLoginStatAppDeviceRechargeAmount    db.TbCol = "app_device_recharge_amount"
 	DailyLoginStatH5DeviceRechargeAmount     db.TbCol = "h5_device_recharge_amount"
+	DailyLoginStatGoogleRechargeAmount       db.TbCol = "google_recharge_amount"
+	DailyLoginStatHaiPayRechargeAmount       db.TbCol = "haipay_recharge_amount"
 	DailyLoginStatAppDeviceLoginCount        db.TbCol = "app_device_login_count"
 	DailyLoginStatH5DeviceLoginCount         db.TbCol = "h5_device_login_count"
 	DailyLoginStatGoldConsumeAmount          db.TbCol = "gold_consume_amount"
@@ -38,6 +40,8 @@ type DailyLoginStat struct {
 	CoinMerchantRechargeAmount float64 `gorm:"type:decimal(10,4);default:0;comment:币商真实美金入账(USD)" json:"coinMerchantRechargeAmount"`
 	AppDeviceRechargeAmount    float64 `gorm:"type:decimal(10,4);default:0;comment:App设备码用户真实美金入账(USD)" json:"appDeviceRechargeAmount"`
 	H5DeviceRechargeAmount     float64 `gorm:"type:decimal(10,4);default:0;comment:H5设备码用户真实美金入账(USD)" json:"h5DeviceRechargeAmount"`
+	GoogleRechargeAmount       float64 `gorm:"type:decimal(10,4);default:0;comment:Google Play真实美金入账(USD)" json:"googleRechargeAmount"`
+	HaiPayRechargeAmount       float64 `gorm:"type:decimal(10,4);default:0;comment:HaiPay渠道代收真实美金入账(USD)" json:"haiPayRechargeAmount"`
 	AppDeviceLoginCount        uint64  `gorm:"default:0;comment:App设备码用户登录人数(去重)" json:"appDeviceLoginCount"`
 	H5DeviceLoginCount         uint64  `gorm:"default:0;comment:H5设备码用户登录人数(去重)" json:"h5DeviceLoginCount"`
 	GoldConsumeAmount          float64 `gorm:"default:0;comment:金币消费金额" json:"goldConsumeAmount"`
@@ -61,6 +65,8 @@ func NewDailyLoginStat(date string) *DailyLoginStat {
 		CoinMerchantRechargeAmount: 0,
 		AppDeviceRechargeAmount:    0,
 		H5DeviceRechargeAmount:     0,
+		GoogleRechargeAmount:       0,
+		HaiPayRechargeAmount:       0,
 		AppDeviceLoginCount:        0,
 		H5DeviceLoginCount:         0,
 		GoldConsumeAmount:          0,
@@ -123,6 +129,22 @@ func (receiver *DailyLoginStat) AddH5DeviceRechargeAmount(val float64) {
 	syndb.AddData(TbDailyLoginStat, DailyLoginStatH5DeviceRechargeAmount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.H5DeviceRechargeAmount,
+	})
+}
+
+func (receiver *DailyLoginStat) AddGoogleRechargeAmount(val float64) {
+	receiver.GoogleRechargeAmount = math.AddFloat64(receiver.GoogleRechargeAmount, val)
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatGoogleRechargeAmount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.GoogleRechargeAmount,
+	})
+}
+
+func (receiver *DailyLoginStat) AddHaiPayRechargeAmount(val float64) {
+	receiver.HaiPayRechargeAmount = math.AddFloat64(receiver.HaiPayRechargeAmount, val)
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatHaiPayRechargeAmount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.HaiPayRechargeAmount,
 	})
 }
 
@@ -210,6 +232,8 @@ func initDailyLoginStat() {
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatCoinMerchantRechargeAmount)
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatAppDeviceRechargeAmount)
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatH5DeviceRechargeAmount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatGoogleRechargeAmount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatHaiPayRechargeAmount)
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatAppDeviceLoginCount)
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatH5DeviceLoginCount)
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount)

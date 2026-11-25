@@ -323,6 +323,21 @@
           </el-tabs>
           </div>
         </el-tab-pane>
+
+        <el-tab-pane :label="t('pages.dashboard.rechargeType')" name="rechargeType">
+          <div v-loading="trendLoading" class="dashboard-tab-pane-body">
+            <div class="tab-toolbar">
+              <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
+              <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
+            </div>
+            <p class="game-bet-event-hint">{{ t('pages.dashboard.rechargeTypeHint') }}</p>
+            <RechargeTypeTrendChart
+                ref="rechargeTypeDailyChartRef"
+                :data="userStatTrend.daily"
+                :title="rechargeTypeChartTitle"
+            />
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-card>
   </div>
@@ -362,6 +377,7 @@ import {
   buildDashboardBasicCsvContent,
   buildDashboardClientLoginCsvContent,
   buildDashboardClientRechargeCsvContent,
+  buildDashboardRechargeTypeCsvContent,
   buildDashboardExportFilename,
   buildDashboardExportStamp,
   buildDashboardGameStatsCsvContent,
@@ -373,6 +389,7 @@ import {
   exportDashboardBasicCsv,
   exportDashboardClientLoginCsv,
   exportDashboardClientRechargeCsv,
+  exportDashboardRechargeTypeCsv,
   exportDashboardGameStatsCsv,
   exportDashboardOnlineCsv,
   exportDashboardRechargeUserBarCsv,
@@ -392,6 +409,7 @@ import {
 const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-chart.vue'))
 const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
 const ClientRechargeTrendChart = defineAsyncComponent(() => import('./components/client-recharge-trend-chart.vue'))
+const RechargeTypeTrendChart = defineAsyncComponent(() => import('./components/recharge-type-trend-chart.vue'))
 const ClientLoginTrendChart = defineAsyncComponent(() => import('./components/client-login-trend-chart.vue'))
 const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/components/resource-metric-chart.vue'))
 const GameStatsTrendChart = defineAsyncComponent(() => import('./components/game-stats-trend-chart.vue'))
@@ -502,6 +520,13 @@ const clientRechargeChartTitle = computed(() =>
     }),
 )
 
+const rechargeTypeChartTitle = computed(() =>
+    t('pages.dashboard.chartTitleWithPeriod', {
+      label: t('pages.dashboard.rechargeType'),
+      period: t('pages.dashboard.last30Days'),
+    }),
+)
+
 const clientLoginChartPeriodSuffix = computed(() => {
   if (activeClientLoginPeriod.value === 'weekly') {
     return t('pages.dashboard.last12Weeks')
@@ -577,6 +602,7 @@ const rechargeMonthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const clientRechargeDailyChartRef = ref<InstanceType<typeof ClientRechargeTrendChart>>()
 const clientRechargeWeeklyChartRef = ref<InstanceType<typeof ClientRechargeTrendChart>>()
 const clientRechargeMonthlyChartRef = ref<InstanceType<typeof ClientRechargeTrendChart>>()
+const rechargeTypeDailyChartRef = ref<InstanceType<typeof RechargeTypeTrendChart>>()
 const clientLoginDailyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>>()
 const clientLoginWeeklyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>>()
 const clientLoginMonthlyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>>()
@@ -780,6 +806,8 @@ const dashboardExportLabels = computed((): DashboardExportLabels => ({
   rechargeUser: t('pages.dashboard.barMetricRechargeUser'),
   appRecharge: t('pages.dashboard.clientRechargeApp'),
   h5Recharge: t('pages.dashboard.clientRechargeH5'),
+  googleRecharge: t('pages.dashboard.rechargeTypeGoogle'),
+  haiPayRecharge: t('pages.dashboard.rechargeTypeHaiPay'),
   appLogin: t('pages.dashboard.clientLoginApp'),
   h5Login: t('pages.dashboard.clientLoginH5'),
   join: t('pages.trackingMinuteLiveActivity.join'),
@@ -861,6 +889,12 @@ const handleExportDashboard = () => {
         pickUserTrendPoints(activeClientLoginPeriod.value),
         labels,
     )
+  } else if (tab === 'rechargeType') {
+    ok = exportDashboardRechargeTypeCsv(
+        buildDashboardExportFilename('recharge-type', 'daily'),
+        userStatTrend.daily,
+        labels,
+    )
   }
   if (ok) {
     ElMessage.success(t('common.exportSuccess'))
@@ -930,6 +964,10 @@ const handleExportAllDashboard = async () => {
         filename: buildDashboardExportFilename('client-login', period, stamp),
         content: buildDashboardClientLoginCsvContent(trendByPeriod[period], labels),
       })),
+      {
+        filename: buildDashboardExportFilename('recharge-type', 'daily', stamp),
+        content: buildDashboardRechargeTypeCsvContent(trendByPeriod.daily, labels),
+      },
       ...buildDashboardTrackingExportCsvFiles(
           t,
           stamp,
@@ -1026,7 +1064,7 @@ const refreshActiveMainTab = async (silent = false, force = false) => {
       }
       return
     }
-    if (tab === 'user' || tab === 'rechargeUser' || tab === 'clientRecharge' || tab === 'clientLogin') {
+    if (tab === 'user' || tab === 'rechargeUser' || tab === 'clientRecharge' || tab === 'clientLogin' || tab === 'rechargeType') {
       if (force || !tabDataLoaded.userTrend) {
         const ok = await fetchUserStatTrend(silent)
         if (ok) {
@@ -1389,6 +1427,10 @@ const handleMainTabChange = async () => {
   }
   if (activeMainTab.value === 'clientLogin') {
     resizeClientLoginCharts()
+    return
+  }
+  if (activeMainTab.value === 'rechargeType') {
+    rechargeTypeDailyChartRef.value?.resize()
     return
   }
   if (activeMainTab.value === 'gameStats') {

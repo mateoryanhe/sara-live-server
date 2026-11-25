@@ -29,6 +29,7 @@ import {oneToOneRoomApi} from './modules/oneToOneRoom'
 import {textModerationApi} from './modules/text-moderation'
 import {privacyPolicyApi} from './modules/privacy-policy'
 import {shareAppDownloadApi} from './modules/share-app-download'
+import {sofieShareAppDownloadApi} from './modules/sofie-share-app-download'
 import {customerServiceApi} from './modules/customer-service'
 import {walletApi} from './modules/wallet'
 import {uploadResourceApi} from './modules/upload-resource'
@@ -82,6 +83,7 @@ export {
     textModerationApi,
     privacyPolicyApi,
     shareAppDownloadApi,
+    sofieShareAppDownloadApi,
     customerServiceApi,
     walletApi,
     uploadResourceApi,
@@ -137,6 +139,7 @@ export default {
     textModerationApi,
     privacyPolicyApi,
     shareAppDownloadApi,
+    sofieShareAppDownloadApi,
     customerServiceApi,
     walletApi,
     uploadResourceApi,

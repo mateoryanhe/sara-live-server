@@ -307,6 +307,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('H5AppPromotionDailyStatManagement'),
             page('PromotionInviteLogListManagement'),
             page('PromotionShareAppDownloadCfgManagement'),
+            page('PromotionSofieShareAppDownloadCfgManagement'),
         ],
     },
     {

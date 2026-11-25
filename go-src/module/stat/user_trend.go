@@ -138,6 +138,8 @@ func toDailyTrendPoints(rows []*entity.DailyLoginStat) []*statdto.CMSUserStatTre
 			RegisterUserCount:       row.RegisterCount,
 			AppDeviceRechargeAmount: row.AppDeviceRechargeAmount,
 			H5DeviceRechargeAmount:  row.H5DeviceRechargeAmount,
+			GoogleRechargeAmount:    row.GoogleRechargeAmount,
+			HaiPayRechargeAmount:    row.HaiPayRechargeAmount,
 			AppDeviceLoginCount:     row.AppDeviceLoginCount,
 			H5DeviceLoginCount:      row.H5DeviceLoginCount,
 			BarMetrics:              statdto.BuildUserStatBarMetrics(row.RechargeUserCount),

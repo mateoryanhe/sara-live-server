@@ -61,6 +61,10 @@ export interface UserStatTrendPoint {
     appDeviceRechargeAmount?: number
     /** H5 用户充值(USD;注册 X-Platform=web) */
     h5DeviceRechargeAmount?: number
+    /** Google Play 充值入账(USD) */
+    googleRechargeAmount?: number
+    /** HaiPay 渠道代收充值入账(USD) */
+    haiPayRechargeAmount?: number
     /** App 用户登录人数(去重;注册 X-Platform=android/ios) */
     appDeviceLoginCount?: number
     /** H5 用户登录人数(去重;注册 X-Platform=web) */
@@ -2406,6 +2410,33 @@ export interface SaveShareAppDownloadCfgReq {
 }
 
 export interface SaveShareAppDownloadCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface SofieShareAppDownloadCfgItem {
+    id: string
+    packageName: string
+    googlePlayUrl: string
+    shortUrl: string
+    shareText: string
+    previewShareCode: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetSofieShareAppDownloadCfgRes {
+    cfg: SofieShareAppDownloadCfgItem | null
+}
+
+export interface SaveSofieShareAppDownloadCfgReq {
+    id?: number
+    packageName?: string
+    googlePlayUrl: string
+    shareText?: string
+}
+
+export interface SaveSofieShareAppDownloadCfgRes {
     success: boolean
     id: string
 }

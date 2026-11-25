@@ -178,6 +178,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'OneToOneRoomManagement:edit': '/oneToOneRoom/update',
     'OneToOneRoomManagement:onShelf': '/oneToOneRoom/setStatus',
     'OneToOneRoomManagement:offShelf': '/oneToOneRoom/setStatus',
+    'OneToOneRoomManagement:offShelfAutoRestore': '/account/offShelfLiveRoomWithAutoOnShelf',
 
     BotAnchorManagement: '/botAnchor/getBotAnchorList',
     'BotAnchorManagement:view': '/botAnchor/getBotAnchorList',
@@ -667,6 +668,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     PromotionShareAppDownloadCfgManagement: '/shareAppDownload/getShareAppDownloadCfg',
     'PromotionShareAppDownloadCfgManagement:view': '/shareAppDownload/getShareAppDownloadCfg',
     'PromotionShareAppDownloadCfgManagement:save': '/shareAppDownload/saveShareAppDownloadCfg',
+    PromotionSofieShareAppDownloadCfgManagement: '/sofieShareAppDownload/getSofieShareAppDownloadCfg',
+    'PromotionSofieShareAppDownloadCfgManagement:view': '/sofieShareAppDownload/getSofieShareAppDownloadCfg',
+    'PromotionSofieShareAppDownloadCfgManagement:save': '/sofieShareAppDownload/saveSofieShareAppDownloadCfg',
 
     SimulatorCpuKeywordManagement: '/simulatorCpuKeyword/simulatorCpuKeywordList',
     'SimulatorCpuKeywordManagement:view': '/simulatorCpuKeyword/simulatorCpuKeywordList',

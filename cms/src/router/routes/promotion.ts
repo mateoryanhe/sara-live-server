@@ -48,5 +48,11 @@ export const promotionRoutes: RouteRecordRaw = {
             component: () => import('@/views/promotion/share-app-download-cfg.vue'),
             meta: {title: '分享下载文案'},
         },
+        {
+            path: 'sofie-share-app-download-cfg',
+            name: 'PromotionSofieShareAppDownloadCfgManagement',
+            component: () => import('@/views/promotion/sofie-share-app-download-cfg.vue'),
+            meta: {title: 'Sofie分享下载'},
+        },
     ],
 }

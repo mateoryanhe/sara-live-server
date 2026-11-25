@@ -113,6 +113,7 @@ const menu = {
   H5AppPromotionDailyStatManagement: 'H5下载App推广日志报表',
   PromotionInviteLogListManagement: '邀请列表',
   PromotionShareAppDownloadCfgManagement: '分享下载文案',
+  PromotionSofieShareAppDownloadCfgManagement: 'Sofie分享下载',
   ConfigManagement: '系统配置',
   ConfigBasicGroup: '基础配置',
   ConfigSecurityGroup: '安全合规',

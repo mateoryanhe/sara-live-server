@@ -23,6 +23,9 @@ func initShareAppDownloadAppController() {
 	httpserver.RegNonAuthAPI(ShareAppDownloadAppUrl, &ShareAppDownloadAppController{})
 	// 短链: 点击后 302 到官网 assets 当前最大 APK
 	httpserver.RegNonAuthGETHandler(shareappdownload.ApkShortPath, handleApkShortRedirect)
+	// Sofie: Google Play 短链(默认 /dl/sofie; 按包名 /dl/p/{packageName})
+	httpserver.RegNonAuthGETHandler(shareappdownload.SofieDefaultShortPath, handleSofieDefaultShortRedirect)
+	httpserver.RegNonAuthGETHandler(shareappdownload.SofiePackageShortPathPattern, handleSofiePackageShortRedirect)
 }
 
 // GetApkDownloadUrl 查询当前 APK 下载链接(可选 ch 匹配推广渠道包)
@@ -31,7 +34,7 @@ func (c *ShareAppDownloadAppController) GetApkDownloadUrl(ctx context.Context, r
 	if err != nil {
 		return nil, err
 	}
-	if code := shareappdownload.LookupApkDownloadStatChannelCode(req); code > 0 {
+	if code := shareappdownload.LookupApkDownloadStatChannelCode(ctx, req); code > 0 {
 		stat.EnqueuePromotionChannelH5DownloadApk(code, time.Now())
 	}
 	return res, nil
@@ -44,6 +47,27 @@ func handleApkShortRedirect(r *ghttp.Request) {
 		return
 	}
 	// 成功 302 前计数(分享短链点击量)
+	tracking.TrackShareShortLinkClick()
+	r.Response.RedirectTo(target, http.StatusFound)
+}
+
+func handleSofieDefaultShortRedirect(r *ghttp.Request) {
+	target := shareappdownload.ResolveSofieGooglePlayUrl("")
+	if target == "" {
+		r.Response.WriteStatus(http.StatusNotFound, "not available")
+		return
+	}
+	tracking.TrackShareShortLinkClick()
+	r.Response.RedirectTo(target, http.StatusFound)
+}
+
+func handleSofiePackageShortRedirect(r *ghttp.Request) {
+	pkg := shareappdownload.ParseSofiePackageFromShortPath(r.Get("packageName").String())
+	target := shareappdownload.ResolveSofieGooglePlayUrl(pkg)
+	if target == "" {
+		r.Response.WriteStatus(http.StatusNotFound, "not available")
+		return
+	}
 	tracking.TrackShareShortLinkClick()
 	r.Response.RedirectTo(target, http.StatusFound)
 }

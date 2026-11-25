@@ -65,6 +65,7 @@ func consumeRechargeJob(job *statJob) {
 		statAt = time.Now()
 	}
 	recordPeriodRecharge(statAt, amount, isCoinMerchant)
+	recordPeriodRechargePayType(statAt, order.PayChannel, amount)
 	recordPeriodClientRecharge(statAt, order.UserId, amount)
 	recordDailyPromotionChannelRechargeSuccess(statAt, order.UserId, amount)
 	recordDailyApkPromotionChannelRechargeSuccess(statAt, order.UserId, amount)
@@ -109,6 +110,21 @@ func recordPeriodRecharge(statAt time.Time, amount float64, isCoinMerchant bool)
 		monthly.AddCoinMerchantRechargeAmount(amount)
 	} else {
 		monthly.AddNormalUserRechargeAmount(amount)
+	}
+}
+
+// recordPeriodRechargePayType 按支付渠道累计日充值(USD): Google Play / HaiPay 渠道代收.
+func recordPeriodRechargePayType(statAt time.Time, payChannel uint8, amount float64) {
+	if amount <= 0 {
+		return
+	}
+	switch payChannel {
+	case rechargeentity.RechargeCfgTypeGoogle:
+		statdao.GetDailyLoginStatByDate(statentity.FormatDailyLoginStatDate(statAt)).AddGoogleRechargeAmount(amount)
+	case rechargeentity.RechargeCfgTypeChannel:
+		statdao.GetDailyLoginStatByDate(statentity.FormatDailyLoginStatDate(statAt)).AddHaiPayRechargeAmount(amount)
+	default:
+		return
 	}
 }
 

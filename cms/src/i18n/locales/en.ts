@@ -117,6 +117,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   H5AppPromotionDailyStatManagement: 'H5 App Promotion Daily Report',
   PromotionInviteLogListManagement: 'Invite List',
   PromotionShareAppDownloadCfgManagement: 'Share download copy',
+  PromotionSofieShareAppDownloadCfgManagement: 'Sofie share download',
   ConfigManagement: 'System Config',
   ConfigBasicGroup: 'Basic',
   ConfigSecurityGroup: 'Security',

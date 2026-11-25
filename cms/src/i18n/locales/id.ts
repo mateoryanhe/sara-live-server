@@ -113,6 +113,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   PromotionChannelDailyStatManagement: 'Statistik harian promosi H5',
   PromotionInviteLogListManagement: 'Daftar Undangan',
   PromotionShareAppDownloadCfgManagement: 'Teks unduhan',
+  PromotionSofieShareAppDownloadCfgManagement: 'Unduhan bagikan Sofie',
   ConfigManagement: 'Konfigurasi Sistem',
   ConfigDeployGroup: 'Manajemen Frontend',
   FrontendConfigGroup: 'Konfigurasi Frontend',

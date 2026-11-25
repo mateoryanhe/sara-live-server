@@ -49,7 +49,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		Remark:        data.Remark,
 		Gold:          data.Gold,
 		Diamond:       data.Diamond,
-		ShareCode:     shareappdownload.BuildAppShareCode(data.ShareCode),
+		ShareCode:     shareappdownload.BuildAppShareCodeForApp(ctx, data.ShareCode),
 		VipLevel:      data.VipLevel,
 		IsAnchor:      data.IsAnchor(),
 		UserType:      data.UserType,

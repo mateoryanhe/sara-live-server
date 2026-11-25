@@ -20,6 +20,8 @@ export type DashboardExportLabels = {
   rechargeUser: string
   appRecharge: string
   h5Recharge: string
+  googleRecharge: string
+  haiPayRecharge: string
   appLogin: string
   h5Login: string
   join: string
@@ -323,6 +325,40 @@ export function exportDashboardClientRechargeCsv(
   labels: DashboardExportLabels,
 ): boolean {
   const content = buildDashboardClientRechargeCsvContent(points, labels)
+  if (!content) {
+    return false
+  }
+  downloadCsvFile(filename, content)
+  return true
+}
+
+export function buildDashboardRechargeTypeCsvContent(
+  points: UserStatTrendPoint[],
+  labels: DashboardExportLabels,
+): string | null {
+  if (points.length === 0) {
+    return null
+  }
+  type Row = {time: string; google: number; haiPay: number}
+  const rows: Row[] = points.map((p) => ({
+    time: p.time,
+    google: Number(p.googleRechargeAmount || 0),
+    haiPay: Number(p.haiPayRechargeAmount || 0),
+  }))
+  const columns: CsvColumn<Row>[] = [
+    {header: labels.time, value: (r) => r.time},
+    {header: labels.googleRecharge, value: (r) => r.google},
+    {header: labels.haiPayRecharge, value: (r) => r.haiPay},
+  ]
+  return buildCsvContent(columns, rows)
+}
+
+export function exportDashboardRechargeTypeCsv(
+  filename: string,
+  points: UserStatTrendPoint[],
+  labels: DashboardExportLabels,
+): boolean {
+  const content = buildDashboardRechargeTypeCsvContent(points, labels)
   if (!content) {
     return false
   }
