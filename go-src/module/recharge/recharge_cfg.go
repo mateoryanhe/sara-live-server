@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/userinfodao"
@@ -122,9 +123,12 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 // 缓存在服务启动时加载,CMS 端创建/修改/删除/上下架时重新从 DB 加载。
 func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
 	_ = req
-	return &rechargecfgdto.AppRechargeCfgListRes{
-		List: buildAppRechargeCfgList(ctx, httpserver.GetAuthId(ctx)),
-	}, nil
+	userId := httpserver.GetAuthId(ctx)
+	list := buildAppRechargeCfgList(ctx, userId)
+	if appRechargeCfgListCfgType(ctx) == entity.RechargeCfgTypeGoogle {
+		pubGoogleRechargeListTracking(userId, time.Now())
+	}
+	return &rechargecfgdto.AppRechargeCfgListRes{List: list}, nil
 }
 
 // GetAppListByUserId App端按上报用户ID查询(无需鉴权,仅返回已上架,走内存缓存)
@@ -136,9 +140,11 @@ func GetAppListByUserId(ctx context.Context, req *rechargecfgdto.AppRechargeCfgL
 	if userinfodao.GetUserInfoByUserId(userId) == nil {
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
-	return &rechargecfgdto.AppRechargeCfgListRes{
-		List: buildAppRechargeCfgList(ctx, userId),
-	}, nil
+	list := buildAppRechargeCfgList(ctx, userId)
+	if appRechargeCfgListCfgType(ctx) == entity.RechargeCfgTypeGoogle {
+		pubGoogleRechargeListTracking(userId, time.Now())
+	}
+	return &rechargecfgdto.AppRechargeCfgListRes{List: list}, nil
 }
 
 func appRechargeCfgListCfgType(ctx context.Context) uint8 {

@@ -158,6 +158,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('TrackingShortVideoManagement'),
             page('TrackingVoiceChatRoomManagement'),
             page('TrackingRechargeManagement'),
+            page('TrackingGoogleRechargeManagement'),
             page('TrackingDownloadManagement'),
             page('TrackingEmailAccountManagement'),
         ],
@@ -308,6 +309,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('PromotionInviteLogListManagement'),
             page('PromotionShareAppDownloadCfgManagement'),
             page('PromotionSofieShareAppDownloadCfgManagement'),
+            page('PromotionLiveRoomShareCfgManagement'),
         ],
     },
     {

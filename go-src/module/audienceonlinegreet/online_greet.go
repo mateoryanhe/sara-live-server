@@ -19,6 +19,7 @@ import (
 	messageentity "xr-game-server/entity/message"
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/liveroom"
 	"xr-game-server/module/message"
 )
 
@@ -69,6 +70,9 @@ func trySendAudienceOnlineAnchorGreets(ctx context.Context, audienceId uint64, c
 			continue
 		}
 		if !push.IsOnline(anchorId) {
+			continue
+		}
+		if liveroom.IsRoomOffShelf(liveroomdao.GetRoomByAnchor(anchorId)) {
 			continue
 		}
 		plain := pickRandomGreetContent(contents)
@@ -158,6 +162,10 @@ func listOnlineHumanAnchorIds() []uint64 {
 		}
 		user := userinfodao.FindUserInfoByUserId(userId)
 		if user == nil || !isHumanAnchorUserType(user.UserType) {
+			continue
+		}
+		room := liveroomdao.GetRoomByAnchor(userId)
+		if liveroom.IsRoomOffShelf(room) {
 			continue
 		}
 		out = append(out, userId)

@@ -1,6 +1,7 @@
 import request from '../request'
 import type {
     EmailAccountTrendRes,
+    GoogleRechargeDailyTrendRes,
     HotLiveRoomJoinTrendRes,
     MinuteLiveActivityTrendQuery,
     MinuteLiveActivityTrendRes,
@@ -105,6 +106,15 @@ export const trackingEventApi = {
     },
     getEmailAccountTrend: () => {
         return request.post<EmailAccountTrendRes>('/trackingEvent/getEmailAccountTrend', {})
+    },
+    getGoogleRechargeListTrend: () => {
+        return request.post<GoogleRechargeDailyTrendRes>('/trackingEvent/getGoogleRechargeListTrend', {})
+    },
+    getGoogleRechargeOrderTrend: () => {
+        return request.post<GoogleRechargeDailyTrendRes>('/trackingEvent/getGoogleRechargeOrderTrend', {})
+    },
+    getGoogleRechargeResultTrend: () => {
+        return request.post<GoogleRechargeDailyTrendRes>('/trackingEvent/getGoogleRechargeResultTrend', {})
     },
 }
 

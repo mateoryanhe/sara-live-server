@@ -275,6 +275,67 @@
                   </div>
                 </div>
               </el-tab-pane>
+
+              <el-tab-pane :label="t('pages.userList.basicSubTabAppsFlyerAttribution')" name="appsFlyerAttribution">
+                <el-empty
+                    v-if="!hasAppsFlyerAttributionReports"
+                    :description="t('pages.userList.appsFlyerAttributionEmpty')"
+                />
+                <el-table
+                    v-else
+                    :data="detail.appsFlyerAttributionReports"
+                    border
+                    stripe
+                    style="width: 100%"
+                >
+                  <el-table-column :label="t('common.createdAt')" min-width="168">
+                    <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+                  </el-table-column>
+                  <el-table-column
+                      :label="t('pages.userList.packageName')"
+                      min-width="140"
+                      prop="packageName"
+                      show-overflow-tooltip
+                  />
+                  <el-table-column :label="t('pages.userList.appsFlyerAttributionEnabled')" width="100">
+                    <template #default="{ row }">
+                      <el-tag :type="row.attributionEnabled ? 'success' : 'info'" size="small">
+                        {{ row.attributionEnabled ? t('common.yes') : t('common.no') }}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                      :label="t('pages.userList.appsFlyerAttributionSource')"
+                      min-width="88"
+                      prop="source"
+                      show-overflow-tooltip
+                  />
+                  <el-table-column
+                      :label="t('pages.userList.appsFlyerAttributionMediaSource')"
+                      min-width="140"
+                      prop="mediaSource"
+                      show-overflow-tooltip
+                  />
+                  <el-table-column
+                      :label="t('pages.userList.appsFlyerAttributionCampaign')"
+                      min-width="140"
+                      prop="campaign"
+                      show-overflow-tooltip
+                  />
+                  <el-table-column
+                      :label="t('pages.userList.appsFlyerAttributionCreativeId')"
+                      min-width="120"
+                      prop="creativeId"
+                      show-overflow-tooltip
+                  />
+                  <el-table-column
+                      :label="t('pages.userList.appsFlyerAttributionDevKey')"
+                      min-width="160"
+                      prop="appsFlyerDevKey"
+                      show-overflow-tooltip
+                  />
+                </el-table>
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
 
@@ -549,6 +610,10 @@ const hasRegisterUrlAttr = computed(() => {
     || (row.tjuserid ?? '').trim(),
   )
 })
+
+const hasAppsFlyerAttributionReports = computed(
+  () => (detail.value?.appsFlyerAttributionReports?.length ?? 0) > 0,
+)
 
 const hasPromotionAttribution = computed(() => {
   const row = detail.value?.promotionAttribution

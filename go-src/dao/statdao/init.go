@@ -124,4 +124,7 @@ func Init() {
 	initMonthlyGameOnlinePeakStatDao()
 	initMinuteLiveActivityStatDao()
 	initDailyEmailAccountStatDao()
+	initDailyGoogleRechargeListStatDao()
+	initDailyGoogleRechargeOrderStatDao()
+	initDailyGoogleRechargeResultStatDao()
 }

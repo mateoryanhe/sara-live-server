@@ -39,7 +39,13 @@ export const trackingRoutes: RouteRecordRaw = {
             path: 'recharge',
             name: 'TrackingRechargeManagement',
             component: () => import('@/views/tracking/recharge.vue'),
-            meta: {title: '充值'},
+            meta: {title: 'haiPay充值'},
+        },
+        {
+            path: 'google-recharge',
+            name: 'TrackingGoogleRechargeManagement',
+            component: () => import('@/views/tracking/google-recharge.vue'),
+            meta: {title: 'google充值'},
         },
         {
             path: 'download',

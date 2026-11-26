@@ -57,6 +57,12 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingRechargeManagement:chargeResultTrend': '/trackingEvent/getChargeResultServerTrend',
     'TrackingRechargeManagement:export': '/trackingEvent/getChargePanelEnterTrend',
 
+    TrackingGoogleRechargeManagement: '/trackingEvent/getGoogleRechargeListTrend',
+    'TrackingGoogleRechargeManagement:view': '/trackingEvent/getGoogleRechargeListTrend',
+    'TrackingGoogleRechargeManagement:orderTrend': '/trackingEvent/getGoogleRechargeOrderTrend',
+    'TrackingGoogleRechargeManagement:resultTrend': '/trackingEvent/getGoogleRechargeResultTrend',
+    'TrackingGoogleRechargeManagement:export': '/trackingEvent/getGoogleRechargeListTrend',
+
     TrackingDownloadManagement: '/trackingEvent/getH5DownloadTrend',
     TrackingEmailAccountManagement: '/trackingEvent/getEmailAccountTrend',
     'TrackingEmailAccountManagement:view': '/trackingEvent/getEmailAccountTrend',
@@ -671,6 +677,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     PromotionSofieShareAppDownloadCfgManagement: '/sofieShareAppDownload/getSofieShareAppDownloadCfg',
     'PromotionSofieShareAppDownloadCfgManagement:view': '/sofieShareAppDownload/getSofieShareAppDownloadCfg',
     'PromotionSofieShareAppDownloadCfgManagement:save': '/sofieShareAppDownload/saveSofieShareAppDownloadCfg',
+    PromotionLiveRoomShareCfgManagement: '/liveRoomShare/getLiveRoomShareCfg',
+    'PromotionLiveRoomShareCfgManagement:view': '/liveRoomShare/getLiveRoomShareCfg',
+    'PromotionLiveRoomShareCfgManagement:save': '/liveRoomShare/saveLiveRoomShareCfg',
 
     SimulatorCpuKeywordManagement: '/simulatorCpuKeyword/simulatorCpuKeywordList',
     'SimulatorCpuKeywordManagement:view': '/simulatorCpuKeyword/simulatorCpuKeywordList',

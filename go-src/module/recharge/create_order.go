@@ -62,6 +62,9 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 	pubChargeClickTracking(userId, time.Now())
+	if isGooglePlayPayChannel(order.PayChannel) {
+		pubGoogleRechargeOrderTracking(userId, time.Now())
+	}
 
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedFromCtx(ctx, order.ID, gameevent.RechargeCheckoutHint{}))
 

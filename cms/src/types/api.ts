@@ -107,6 +107,11 @@ export interface EmailAccountTrendRes {
     daily: TrackingEventTrendPoint[]
 }
 
+export interface GoogleRechargeDailyTrendRes {
+    todayCount: number
+    daily: TrackingEventTrendPoint[]
+}
+
 export interface MinuteLiveActivityTrendQuery {
     startTime?: number
     endTime?: number
@@ -829,6 +834,18 @@ export interface CMSInviteLogItem {
     createdAt?: string | null
 }
 
+export interface UserAppsFlyerAttributionReportItem {
+    id: string
+    packageName?: string
+    attributionEnabled?: boolean
+    appsFlyerDevKey?: string
+    source?: string
+    mediaSource?: string
+    campaign?: string
+    creativeId?: string
+    createdAt?: string | null
+}
+
 export interface UserDetail {
     account?: UserAccountDetailItem | null
     profile?: UserProfileDetailItem | null
@@ -840,6 +857,7 @@ export interface UserDetail {
     withdrawPayout?: UserWithdrawPayoutDetailItem | null
     promotionAttribution?: UserPromotionAttributionDetailItem | null
     registerUrlAttr?: UserRegisterUrlAttrDetailItem | null
+    appsFlyerAttributionReports?: UserAppsFlyerAttributionReportItem[] | null
 }
 
 export interface QueryBotAnchorListReq extends PageQuery {
@@ -2437,6 +2455,46 @@ export interface SaveSofieShareAppDownloadCfgReq {
 }
 
 export interface SaveSofieShareAppDownloadCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface LiveRoomShareCfgItem {
+    id: string
+    shareTextZhCN: string
+    shareTextZhTW: string
+    shareTextEn: string
+    shareTextEs: string
+    shareTextPt: string
+    shareTextHi: string
+    shareTextId: string
+    afLink: string
+    createdAt: string
+    updatedAt: string
+    builtinShareTextEn?: string
+    builtinShareTextEs?: string
+    builtinShareTextPt?: string
+    builtinShareTextHi?: string
+    builtinShareTextId?: string
+}
+
+export interface GetLiveRoomShareCfgRes {
+    cfg: LiveRoomShareCfgItem | null
+}
+
+export interface SaveLiveRoomShareCfgReq {
+    id?: number
+    shareTextZhCN?: string
+    shareTextZhTW?: string
+    shareTextEn?: string
+    shareTextEs?: string
+    shareTextPt?: string
+    shareTextHi?: string
+    shareTextId?: string
+    afLink: string
+}
+
+export interface SaveLiveRoomShareCfgRes {
     success: boolean
     id: string
 }

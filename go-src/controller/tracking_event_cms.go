@@ -145,6 +145,18 @@ func (c *TrackingEventCMSController) GetEmailAccountTrend(ctx context.Context, r
 	return tracking.GetCMSEmailAccountTrend(ctx, req)
 }
 
+func (c *TrackingEventCMSController) GetGoogleRechargeListTrend(ctx context.Context, req *trackingdto.CMSGoogleRechargeListTrendReq) (*trackingdto.CMSGoogleRechargeDailyTrendRes, error) {
+	return tracking.GetCMSGoogleRechargeListTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetGoogleRechargeOrderTrend(ctx context.Context, req *trackingdto.CMSGoogleRechargeOrderTrendReq) (*trackingdto.CMSGoogleRechargeDailyTrendRes, error) {
+	return tracking.GetCMSGoogleRechargeOrderTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetGoogleRechargeResultTrend(ctx context.Context, req *trackingdto.CMSGoogleRechargeResultTrendReq) (*trackingdto.CMSGoogleRechargeDailyTrendRes, error) {
+	return tracking.GetCMSGoogleRechargeResultTrend(ctx, req)
+}
+
 func (c *TrackingEventCMSController) GetMinuteLiveActivityTrend(ctx context.Context, req *trackingdto.CMSMinuteLiveActivityTrendReq) (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
 	return minuteactivity.GetCMSMinuteLiveActivityTrend(ctx, req)
 }

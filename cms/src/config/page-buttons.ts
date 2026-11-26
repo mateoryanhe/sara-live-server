@@ -134,6 +134,7 @@ const CONFIG_PAGES = new Set([
     'InviteRechargeRewardManagement',
     'PromotionShareAppDownloadCfgManagement',
     'PromotionSofieShareAppDownloadCfgManagement',
+    'PromotionLiveRoomShareCfgManagement',
 ])
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
@@ -227,6 +228,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     TrackingShortVideoManagement: TRACKING_TREND_PAGE_BUTTONS,
     TrackingVoiceChatRoomManagement: TRACKING_TREND_PAGE_BUTTONS,
     TrackingRechargeManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingGoogleRechargeManagement: TRACKING_TREND_PAGE_BUTTONS,
     TrackingDownloadManagement: TRACKING_TREND_PAGE_BUTTONS,
     TrackingEmailAccountManagement: TRACKING_TREND_PAGE_BUTTONS,
     UserList: [

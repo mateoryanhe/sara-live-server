@@ -125,4 +125,7 @@ func Init() {
 	initSystemTotalStat()
 	initMinuteLiveActivityStat()
 	initDailyEmailAccountStat()
+	initDailyGoogleRechargeListStat()
+	initDailyGoogleRechargeOrderStat()
+	initDailyGoogleRechargeResultStat()
 }

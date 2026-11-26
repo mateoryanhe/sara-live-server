@@ -184,13 +184,15 @@ type AppReportRes struct {
 	Success bool `json:"success"`
 }
 
-// ReportAttributionReq App端上报归因配置/结果
+// ReportAttributionReq App 端上报 AppsFlyer 归因结果(与 Sofie submitAttribution Body 一致)
 type ReportAttributionReq struct {
-	g.Meta              `path:"/reportAttribution" method:"post" summary:"上报归因信息" tags:"用户信息"`
-	AttributionEnabled  *bool  `json:"attributionEnabled" dc:"是否启用归因"`
-	AttributionProvider string `json:"attributionProvider" dc:"归因渠道"`
-	AppsFlyerDevKey     string `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
-	AppsFlyerAppId      string `json:"appsFlyerAppId" dc:"AppsFlyer App ID"`
+	g.Meta             `path:"/reportAttribution" method:"post" summary:"上报归因信息" tags:"用户信息"`
+	AttributionEnabled *bool  `json:"attributionEnabled" dc:"是否启用归因"`
+	AppsFlyerDevKey    string `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
+	Source             string `json:"source" dc:"AF source,如 paid/organic"`
+	MediaSource        string `json:"mediaSource" dc:"AF media_source"`
+	Campaign           string `json:"campaign" dc:"AF campaign"`
+	CreativeId         string `json:"creativeId" dc:"AF creative_id"`
 }
 
 type ReportAttributionRes struct {

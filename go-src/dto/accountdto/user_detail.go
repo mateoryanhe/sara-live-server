@@ -90,6 +90,19 @@ type UserPromotionAttributionDetailItem struct {
 	ApkChannelApkDownloadUrl   string `json:"apkChannelApkDownloadUrl" dc:"APK推广渠道列表-专用APK下载地址"`
 }
 
+// UserAppsFlyerAttributionReportItem CMS 用户详情：App submitAttribution / reportAttribution 上报记录
+type UserAppsFlyerAttributionReportItem struct {
+	ID                 uint64     `json:"id,string"`
+	PackageName        string     `json:"packageName"`
+	AttributionEnabled bool       `json:"attributionEnabled"`
+	AppsFlyerDevKey    string     `json:"appsFlyerDevKey"`
+	Source             string     `json:"source"`
+	MediaSource        string     `json:"mediaSource"`
+	Campaign           string     `json:"campaign"`
+	CreativeId         string     `json:"creativeId"`
+	CreatedAt          *time.Time `json:"createdAt"`
+}
+
 // UserRegisterUrlAttrDetailItem CMS 用户详情：注册 URL 归因(user_register_url_attrs, accept 上报用)
 type UserRegisterUrlAttrDetailItem struct {
 	Type      string     `json:"type" dc:"pwa/h5/apk"`
@@ -156,6 +169,7 @@ type GetUserDetailRes struct {
 	LoginDevice      *UserLoginDeviceDetailItem      `json:"loginDevice"`
 	ChannelPayProfile *UserChannelPayProfileDetailItem `json:"channelPayProfile"`
 	WithdrawPayout        *UserWithdrawPayoutDetailItem        `json:"withdrawPayout"`
-	PromotionAttribution  *UserPromotionAttributionDetailItem  `json:"promotionAttribution"`
-	RegisterUrlAttr       *UserRegisterUrlAttrDetailItem       `json:"registerUrlAttr"`
+	PromotionAttribution         *UserPromotionAttributionDetailItem    `json:"promotionAttribution"`
+	RegisterUrlAttr              *UserRegisterUrlAttrDetailItem         `json:"registerUrlAttr"`
+	AppsFlyerAttributionReports  []UserAppsFlyerAttributionReportItem   `json:"appsFlyerAttributionReports"`
 }

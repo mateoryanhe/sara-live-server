@@ -44,6 +44,13 @@
             <el-option :value="4" :label="t('pages.rechargeOrderList.statusFailed')"/>
           </el-select>
         </el-form-item>
+        <el-form-item :label="t('pages.rechargeOrderList.source')">
+          <el-select v-model="searchForm.sourceFilter" :placeholder="t('common.all')" style="width: 140px">
+            <el-option :value="0" :label="t('common.all')"/>
+            <el-option :value="1" :label="t('pages.rechargeOrderList.sourceAndroid')"/>
+            <el-option :value="3" :label="t('pages.rechargeOrderList.sourceH5')"/>
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
@@ -98,9 +105,6 @@
         </el-table-column>
         <el-table-column :label="t('pages.rechargeOrderList.thirdOrderId')" min-width="160" prop="thirdOrderId" show-overflow-tooltip>
           <template #default="{ row }">{{ row.thirdOrderId || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('common.remark')" min-width="160" prop="remark" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.remark || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('common.createdAt')" width="170">
           <template #default="{ row }">{{ formatUnixTime(row.createdAt) }}</template>
@@ -233,6 +237,7 @@ interface SearchForm {
   userId: string
   dateRange: string[]
   statusFilter: number
+  sourceFilter: number
 }
 
 const {t} = useI18n()
@@ -262,6 +267,7 @@ const searchForm = reactive<SearchForm>({
   userId: '',
   dateRange: [],
   statusFilter: 0,
+  sourceFilter: 0,
 })
 
 const createOrderForm = reactive({
@@ -290,6 +296,7 @@ const buildFilterParams = () => {
     orderId: searchForm.orderId.trim(),
     userId: searchForm.userId.trim(),
     statusFilter: searchForm.statusFilter,
+    source: searchForm.sourceFilter,
     startTime: startDate ? toServerDayStartUnix(startDate) : 0,
     endTime: endDate ? toServerDayEndUnix(endDate) : 0,
   }
@@ -338,6 +345,7 @@ const handleReset = () => {
   searchForm.userId = ''
   searchForm.dateRange = []
   searchForm.statusFilter = 0
+  searchForm.sourceFilter = 0
   currentPage.value = 1
   fetchOrderList()
 }

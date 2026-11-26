@@ -46,6 +46,9 @@ var (
 	officialSiteDownloadTrackingQueue     = gqueue.NewTQueue[*gameevent.OfficialSiteDownloadTrackingEventData]()
 	shareShortLinkClickTrackingQueue      = gqueue.NewTQueue[*gameevent.ShareShortLinkClickTrackingEventData]()
 	emailAccountTrackingQueue             = gqueue.NewTQueue[*gameevent.EmailAccountTrackingEventData]()
+	googleRechargeListTrackingQueue       = gqueue.NewTQueue[*gameevent.GoogleRechargeListTrackingEventData]()
+	googleRechargeOrderTrackingQueue      = gqueue.NewTQueue[*gameevent.GoogleRechargeOrderTrackingEventData]()
+	googleRechargeResultTrackingQueue     = gqueue.NewTQueue[*gameevent.GoogleRechargeResultTrackingEventData]()
 )
 
 func initTrackingQueue() {
@@ -83,6 +86,9 @@ func initTrackingQueue() {
 	event.Sub(gameevent.OfficialSiteDownloadTrackingEvent, onOfficialSiteDownloadTrackingEvent)
 	event.Sub(gameevent.ShareShortLinkClickTrackingEvent, onShareShortLinkClickTrackingEvent)
 	event.Sub(gameevent.EmailAccountTrackingEvent, onEmailAccountTrackingEvent)
+	event.Sub(gameevent.GoogleRechargeListTrackingEvent, onGoogleRechargeListTrackingEvent)
+	event.Sub(gameevent.GoogleRechargeOrderTrackingEvent, onGoogleRechargeOrderTrackingEvent)
+	event.Sub(gameevent.GoogleRechargeResultTrackingEvent, onGoogleRechargeResultTrackingEvent)
 }
 
 func onShowcaseLiveRoomJoinTrackingEvent(data any) {
@@ -325,6 +331,30 @@ func onEmailAccountTrackingEvent(data any) {
 	emailAccountTrackingQueue.Push(ev)
 }
 
+func onGoogleRechargeListTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.GoogleRechargeListTrackingEventData)
+	if !ok || ev == nil {
+		return
+	}
+	googleRechargeListTrackingQueue.Push(ev)
+}
+
+func onGoogleRechargeOrderTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.GoogleRechargeOrderTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	googleRechargeOrderTrackingQueue.Push(ev)
+}
+
+func onGoogleRechargeResultTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.GoogleRechargeResultTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	googleRechargeResultTrackingQueue.Push(ev)
+}
+
 func onOfflineGameRoomPlayTrackingEvent(data any) {
 	ev, ok := data.(*gameevent.OfflineGameRoomPlayTrackingEventData)
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 {
@@ -374,7 +404,10 @@ func trackingQueueIdle() bool {
 		officialSiteDownloadTrackingQueue.Len() == 0 &&
 		shareShortLinkClickTrackingQueue.Len() == 0 &&
 		offlineGameRoomPlayTrackingQueue.Len() == 0 &&
-		emailAccountTrackingQueue.Len() == 0
+		emailAccountTrackingQueue.Len() == 0 &&
+		googleRechargeListTrackingQueue.Len() == 0 &&
+		googleRechargeOrderTrackingQueue.Len() == 0 &&
+		googleRechargeResultTrackingQueue.Len() == 0
 }
 
 func drainTrackingTQueue[T any](q *gqueue.TQueue[T], handle func(T)) {
@@ -482,5 +515,14 @@ func drainTrackingQueue() {
 	})
 	drainTrackingTQueue(emailAccountTrackingQueue, func(ev *gameevent.EmailAccountTrackingEventData) {
 		recordEmailAccount(ev.StatAt)
+	})
+	drainTrackingTQueue(googleRechargeListTrackingQueue, func(ev *gameevent.GoogleRechargeListTrackingEventData) {
+		recordGoogleRechargeList(ev.StatAt)
+	})
+	drainTrackingTQueue(googleRechargeOrderTrackingQueue, func(ev *gameevent.GoogleRechargeOrderTrackingEventData) {
+		recordGoogleRechargeOrder(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(googleRechargeResultTrackingQueue, func(ev *gameevent.GoogleRechargeResultTrackingEventData) {
+		recordGoogleRechargeResult(ev.UserId, ev.StatAt)
 	})
 }

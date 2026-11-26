@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/dto/trackingdto"
 	"xr-game-server/module/liveroom"
+	"xr-game-server/module/shareappdownload"
 	"xr-game-server/module/tracking"
 	"xr-game-server/module/upload"
 )
@@ -326,4 +327,9 @@ func (c *LiveRoomAppController) GameRecommendList(ctx context.Context, req *live
 // ReportAnchorCode 上报主播码成为普通主播
 func (c *LiveRoomAppController) ReportAnchorCode(ctx context.Context, req *liveroomdto.ReportAnchorCodeReq) (*liveroomdto.ReportAnchorCodeRes, error) {
 	return liveroom.ReportAnchorCode(ctx, req)
+}
+
+// GetLiveRoomShareText 直播间分享文案(多语言文案 + AF 链接)
+func (c *LiveRoomAppController) GetLiveRoomShareText(ctx context.Context, req *liveroomdto.GetLiveRoomShareTextReq) (*liveroomdto.GetLiveRoomShareTextRes, error) {
+	return shareappdownload.GetLiveRoomShareText(ctx, req)
 }

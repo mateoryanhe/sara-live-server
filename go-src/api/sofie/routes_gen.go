@@ -271,6 +271,7 @@ func Init() {
 		{Path: "/reportBroadcastState", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportLiveStartStatus)},
 		{Path: "/browseGamePicks", Handler: jsonHandler((&controller.LiveRoomAppController{}).GameRecommendList)},
 		{Path: "/submitHostCode", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportAnchorCode)},
+		{Path: "/fetchBoothShareCopy", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetLiveRoomShareText)},
 	})
 	httpserver.RegAppRouteGroup("/sofie/topup", []httpserver.AppRoute{
 		{Path: "/notifyChargePanelEnter", Handler: jsonHandler((&controller.RechargeOrderAppController{}).ReportChargePanelEnter)},

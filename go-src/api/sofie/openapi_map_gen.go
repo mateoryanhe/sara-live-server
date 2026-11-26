@@ -103,6 +103,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/liveRoom/reportLiveStartStatus", NewPath: "/sofie/studio/reportBroadcastState", Tag: "studio", Summary: "上报开播状态"},
 	{OldMethod: "post", OldPath: "/liveRoom/gameRecommendList", NewPath: "/sofie/studio/browseGamePicks", Tag: "studio", Summary: "推荐游戏列表"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportAnchorCode", NewPath: "/sofie/studio/submitHostCode", Tag: "studio", Summary: "上报主播码"},
+	{OldMethod: "post", OldPath: "/liveRoom/getLiveRoomShareText", NewPath: "/sofie/studio/fetchBoothShareCopy", Tag: "studio", Summary: "直播间分享文案"},
 	{OldMethod: "post", OldPath: "/activity/getRoomActivity", NewPath: "/sofie/campaign/fetchRoomActivity", Tag: "campaign", Summary: "房间活动配置"},
 	{OldMethod: "post", OldPath: "/call/liveRoomCall", NewPath: "/sofie/session/inviteFromHall", Tag: "session", Summary: "直播间发起通话"},
 	{OldMethod: "post", OldPath: "/call/oneToOneRoomCall", NewPath: "/sofie/session/inviteDirectVideo", Tag: "session", Summary: "1v1房间发起通话"},

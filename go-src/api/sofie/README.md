@@ -96,6 +96,7 @@
 | `studio` | 上报开播状态 | 需要登录 | `POST /liveRoom/reportLiveStartStatus` | `POST /sofie/studio/reportBroadcastState` |
 | `studio` | 推荐游戏列表 | 需要登录 | `POST /liveRoom/gameRecommendList` | `POST /sofie/studio/browseGamePicks` |
 | `studio` | 上报主播码 | 需要登录 | `POST /liveRoom/reportAnchorCode` | `POST /sofie/studio/submitHostCode` |
+| `studio` | 直播间分享文案 | 需要登录 | `POST /liveRoom/getLiveRoomShareText` | `POST /sofie/studio/fetchBoothShareCopy` |
 | `campaign` | 房间活动配置 | 需要登录 | `POST /activity/getRoomActivity` | `POST /sofie/campaign/fetchRoomActivity` |
 | `session` | 直播间发起通话 | 需要登录 | `POST /call/liveRoomCall` | `POST /sofie/session/inviteFromHall` |
 | `session` | 1v1房间发起通话 | 需要登录 | `POST /call/oneToOneRoomCall` | `POST /sofie/session/inviteDirectVideo` |

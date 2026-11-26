@@ -270,6 +270,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return downloadTrackingTrendAliasPaths()
 	case "/trackingEvent/getEmailAccountTrend":
 		return emailAccountTrackingTrendAliasPaths()
+	case "/trackingEvent/getGoogleRechargeListTrend",
+		"/trackingEvent/getGoogleRechargeOrderTrend",
+		"/trackingEvent/getGoogleRechargeResultTrend":
+		return googleRechargeTrackingTrendAliasPaths()
 	default:
 		return nil
 	}
@@ -354,6 +358,14 @@ func downloadTrackingTrendAliasPaths() []string {
 
 func emailAccountTrackingTrendAliasPaths() []string {
 	return []string{"/trackingEvent/getEmailAccountTrend"}
+}
+
+func googleRechargeTrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getGoogleRechargeListTrend",
+		"/trackingEvent/getGoogleRechargeOrderTrend",
+		"/trackingEvent/getGoogleRechargeResultTrend",
+	}
 }
 
 func SavePermissions(data []*entity.Permission) {

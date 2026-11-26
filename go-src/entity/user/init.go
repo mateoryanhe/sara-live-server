@@ -23,6 +23,7 @@ func Init() {
 	initSofiePrivacyPolicyCfg()
 	initShareAppDownloadCfg()
 	initSofieShareAppDownloadCfg()
+	initLiveRoomShareCfg()
 	initAppToken()
 	initUserMaxId()
 	initUserPayoutInfo()

@@ -27,9 +27,11 @@ func ReportAttribution(ctx context.Context, req *userinfodto.ReportAttributionRe
 		userId,
 		httpserver.GetPackageNameFromContext(ctx),
 		enabled,
-		strings.TrimSpace(req.AttributionProvider),
 		strings.TrimSpace(req.AppsFlyerDevKey),
-		strings.TrimSpace(req.AppsFlyerAppId),
+		strings.TrimSpace(req.Source),
+		strings.TrimSpace(req.MediaSource),
+		strings.TrimSpace(req.Campaign),
+		strings.TrimSpace(req.CreativeId),
 	)
 	return &userinfodto.ReportAttributionRes{Success: true}, nil
 }

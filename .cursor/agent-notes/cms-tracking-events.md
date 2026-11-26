@@ -146,9 +146,17 @@ App 礼物面板：`POST /liveRoom/reportVoiceRoomGiftClick`（Sofie `POST /sofi
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
-| `TrackingRechargeManagement`（充值） | `charge_panel_enter` | 登录用户 `reportChargePanelEnter` 成功 +1（暂不要求 body） | `POST /trackingEvent/getChargePanelEnterTrend` |
+| `TrackingRechargeManagement`（haiPay充值） | `charge_panel_enter` | 登录用户 `reportChargePanelEnter` 成功 +1（暂不要求 body） | `POST /trackingEvent/getChargePanelEnterTrend` |
 | 同上 **Tab「充值档位点击」** | `charge_click` | App/渠道/币商建单成功（`createRechargeOrder` 等）+1 | `POST /trackingEvent/getChargeClickTrend` |
 | 同上 **Tab「充值到账成功」** | `charge_result_server` | 支付回调 `completeOrder` 首次发放金币成功 +1 | `POST /trackingEvent/getChargeResultServerTrend` |
+
+| 页面 | event | 口径 | CMS API |
+|------|-------|------|---------|
+| `TrackingGoogleRechargeManagement`（google充值，**仅日维度**） Tab「面板点击」 | `google_recharge_list` | `X-Platform=android` 等解析为 Google 档位时，`rechargeCfgListForApp` / `browsePackages` 成功 +1 | `POST /trackingEvent/getGoogleRechargeListTrend` |
+| 同上 **Tab「档位点击」** | `google_recharge_order` | `createRechargeOrder` 且 `payChannel=Google(2)` 成功 +1 | `POST /trackingEvent/getGoogleRechargeOrderTrend` |
+| 同上 **Tab「充值到账」** | `google_recharge_result` | Google 订单 `completeOrder` 首次发币成功 +1 | `POST /trackingEvent/getGoogleRechargeResultTrend` |
+
+表：`daily_google_recharge_list_stats` / `daily_google_recharge_order_stats` / `daily_google_recharge_result_stats`（仅日表）。
 
 App 面板曝光：`POST /rechargeOrder/reportChargePanelEnter`（Sofie `POST /sofie/topup/notifyChargePanelEnter`）。
 

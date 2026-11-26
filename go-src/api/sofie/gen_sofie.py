@@ -99,6 +99,7 @@ APIS = [
     ("/liveRoom/reportLiveStartStatus", "yes", "(&controller.LiveRoomAppController{}).ReportLiveStartStatus", "上报开播状态", "studio", "reportBroadcastState"),
     ("/liveRoom/gameRecommendList", "yes", "(&controller.LiveRoomAppController{}).GameRecommendList", "推荐游戏列表", "studio", "browseGamePicks"),
     ("/liveRoom/reportAnchorCode", "yes", "(&controller.LiveRoomAppController{}).ReportAnchorCode", "上报主播码", "studio", "submitHostCode"),
+    ("/liveRoom/getLiveRoomShareText", "yes", "(&controller.LiveRoomAppController{}).GetLiveRoomShareText", "直播间分享文案", "studio", "fetchBoothShareCopy"),
     ("/activity/getRoomActivity", "yes", "(&controller.ActivityAppController{}).GetRoomActivity", "房间活动配置", "campaign", "fetchRoomActivity"),
     ("/call/liveRoomCall", "yes", "(&controller.CallAppController{}).LiveRoomCall", "直播间发起通话", "session", "inviteFromHall"),
     ("/call/oneToOneRoomCall", "yes", "(&controller.CallAppController{}).OneToOneRoomCall", "1v1房间发起通话", "session", "inviteDirectVideo"),

@@ -52,6 +52,9 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	CancelRechargeOrderTimeout(order.ID)
 	rechargeorderdao.FlushOrderCache(order)
 	pubChargeResultServerTracking(order.UserId, time.Now())
+	if isGooglePlayPayChannel(order.PayChannel) {
+		pubGoogleRechargeResultTracking(order.UserId, time.Now())
+	}
 	pushRechargeSuccessToApp(order.UserId, order, usdData.GoldBalance)
 	return usdData.GoldBalance, nil
 }

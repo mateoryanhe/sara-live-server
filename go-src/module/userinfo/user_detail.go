@@ -6,6 +6,7 @@ import (
 
 	"xr-game-server/constants/country"
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/userattributionreportdao"
 	"xr-game-server/dao/apkpromotionchanneldao"
 	"xr-game-server/dao/channelpaydao"
 	"xr-game-server/dao/promotionchannelurldao"
@@ -38,7 +39,8 @@ func QueryUserDetail(_ context.Context, req *accountdto.GetUserDetailReq) (*acco
 		Wallet:         toUserWalletDetailItem(userInfo),
 		UserExt:        toUserExtDetailItem(userExt),
 		PromotionAttribution: toUserPromotionAttributionDetailItem(userExt),
-		RegisterUrlAttr:      toUserRegisterUrlAttrDetailItem(userinfodao.FindUserRegisterUrlAttrByUserId(req.UserId)),
+		RegisterUrlAttr:             toUserRegisterUrlAttrDetailItem(userinfodao.FindUserRegisterUrlAttrByUserId(req.UserId)),
+		AppsFlyerAttributionReports: toUserAppsFlyerAttributionReportItems(userattributionreportdao.ListByUserId(req.UserId)),
 		CumulativeStat: toUserCumulativeStatDetailItem(userinfodao.GetUserCumulativeStatFromDB(req.UserId)),
 		LoginDevice:       toUserLoginDeviceDetailItem(userlogindevicedao.GetUserLoginDeviceFromDB(req.UserId)),
 		ChannelPayProfile: toUserChannelPayProfileDetailItem(channelpaydao.GetExisting(req.UserId)),
@@ -300,6 +302,37 @@ func toUserCumulativeStatDetailItem(stat *userentity.UserCumulativeStat) *accoun
 		item.UpdatedAt = &updatedAt
 	}
 	return item
+}
+
+func toUserAppsFlyerAttributionReportItems(rows []*userentity.UserAttributionReport) []accountdto.UserAppsFlyerAttributionReportItem {
+	if len(rows) == 0 {
+		return nil
+	}
+	out := make([]accountdto.UserAppsFlyerAttributionReportItem, 0, len(rows))
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		item := accountdto.UserAppsFlyerAttributionReportItem{
+			ID:                 row.ID,
+			PackageName:        strings.TrimSpace(row.PackageName),
+			AttributionEnabled: row.AttributionEnabled,
+			AppsFlyerDevKey:    strings.TrimSpace(row.AppsFlyerDevKey),
+			Source:             strings.TrimSpace(row.Source),
+			MediaSource:        strings.TrimSpace(row.MediaSource),
+			Campaign:           strings.TrimSpace(row.Campaign),
+			CreativeId:         strings.TrimSpace(row.CreativeId),
+		}
+		if !row.CreatedAt.IsZero() {
+			createdAt := row.CreatedAt
+			item.CreatedAt = &createdAt
+		}
+		out = append(out, item)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 func toUserLoginDeviceDetailItem(device *userentity.UserLoginDevice) *accountdto.UserLoginDeviceDetailItem {

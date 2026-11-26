@@ -51,6 +51,7 @@ func Init() {
 	initAuditCodeCMSController()                     // 审核码生成(CMS)
 	initShareAppDownloadCMSController()              // 分享App下载文案(CMS)
 	initSofieShareAppDownloadCMSController()       // Sofie 分享下载(Google Play, CMS)
+	initLiveRoomShareCMSController()                 // 直播间分享(CMS)
 	initShareAppDownloadAppController()              // APK下载链接(App,免登录)
 	initGooglePlayCMSController()                    // Google Play 配置(CMS)
 	initHaiPayCMSController()                        // HaiPay渠道支付配置(CMS)

@@ -71,7 +71,7 @@ const hasMenuPermission = (moduleName: string) => {
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement') || hasMenuPermission('TrackingShortVideoManagement') || hasMenuPermission('TrackingVoiceChatRoomManagement') || hasMenuPermission('TrackingRechargeManagement') || hasMenuPermission('TrackingDownloadManagement') || hasMenuPermission('TrackingEmailAccountManagement')"
+            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement') || hasMenuPermission('TrackingShortVideoManagement') || hasMenuPermission('TrackingVoiceChatRoomManagement') || hasMenuPermission('TrackingRechargeManagement') || hasMenuPermission('TrackingGoogleRechargeManagement') || hasMenuPermission('TrackingDownloadManagement') || hasMenuPermission('TrackingEmailAccountManagement')"
             index="/tracking">
           <template #title>
             <el-icon>
@@ -114,6 +114,12 @@ const hasMenuPermission = (moduleName: string) => {
               <DataLine/>
             </el-icon>
             <span>{{ t('menu.TrackingRechargeManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TrackingGoogleRechargeManagement')" index="/tracking/google-recharge">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.TrackingGoogleRechargeManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('TrackingDownloadManagement')" index="/tracking/download">
             <el-icon>
@@ -605,7 +611,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement') || hasMenuPermission('ApkPromotionChannelListManagement') || hasMenuPermission('ApkPromotionChannelDailyStatManagement') || hasMenuPermission('H5AppPromotionDailyStatManagement') || hasMenuPermission('PromotionInviteLogListManagement') || hasMenuPermission('PromotionShareAppDownloadCfgManagement') || hasMenuPermission('PromotionSofieShareAppDownloadCfgManagement')"
+            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement') || hasMenuPermission('ApkPromotionChannelListManagement') || hasMenuPermission('ApkPromotionChannelDailyStatManagement') || hasMenuPermission('H5AppPromotionDailyStatManagement') || hasMenuPermission('PromotionInviteLogListManagement') || hasMenuPermission('PromotionShareAppDownloadCfgManagement') || hasMenuPermission('PromotionSofieShareAppDownloadCfgManagement') || hasMenuPermission('PromotionLiveRoomShareCfgManagement')"
             index="/promotion">
           <template #title>
             <el-icon>
@@ -660,6 +666,12 @@ const hasMenuPermission = (moduleName: string) => {
               <Link/>
             </el-icon>
             <span>{{ t('menu.PromotionSofieShareAppDownloadCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PromotionLiveRoomShareCfgManagement')" index="/promotion/live-room-share-cfg">
+            <el-icon>
+              <Link/>
+            </el-icon>
+            <span>{{ t('menu.PromotionLiveRoomShareCfgManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

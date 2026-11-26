@@ -139,11 +139,13 @@ import {trackingMiniGameRoundStartMessages} from './tracking-mini-game-round-sta
 import {trackingShortVideoMessages} from './tracking-short-video'
 import {trackingVoiceChatRoomMessages} from './tracking-voice-chat-room'
 import {trackingRechargeMessages} from './tracking-recharge'
+import {trackingGoogleRechargeMessages} from './tracking-google-recharge'
 import {trackingDownloadMessages} from './tracking-download'
 import {trackingEmailAccountMessages} from './tracking-email-account'
 import {trackingMinuteLiveActivityMessages} from './tracking-minute-live-activity'
 import {shareAppDownloadMessages} from './share-app-download'
 import {sofieShareAppDownloadMessages} from './sofie-share-app-download'
+import {liveRoomShareMessages} from './live-room-share'
 
 const pageMessageBuilders = [
   ['userList', userListMessages],
@@ -284,11 +286,13 @@ const pageMessageBuilders = [
   ['trackingShortVideo', trackingShortVideoMessages],
   ['trackingVoiceChatRoom', trackingVoiceChatRoomMessages],
   ['trackingRecharge', trackingRechargeMessages],
+  ['trackingGoogleRecharge', trackingGoogleRechargeMessages],
   ['trackingDownload', trackingDownloadMessages],
   ['trackingEmailAccount', trackingEmailAccountMessages],
   ['trackingMinuteLiveActivity', trackingMinuteLiveActivityMessages],
   ['shareAppDownload', shareAppDownloadMessages],
   ['sofieShareAppDownload', sofieShareAppDownloadMessages],
+  ['liveRoomShare', liveRoomShareMessages],
 ] as const
 
 export type PageNamespace = typeof pageMessageBuilders[number][0]
